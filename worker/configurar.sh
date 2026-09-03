@@ -1,9 +1,9 @@
 #!/bin/bash
-# Pide los dos tokens y los guarda en ~/.cierto-secrets.
+# Pide los dos tokens y los guarda en ~/.certia-secrets.
 # No se muestran al escribirlos ni quedan en el historial de la terminal.
 
 set -u
-DESTINO="$HOME/.cierto-secrets"
+DESTINO="$HOME/.certia-secrets"
 
 pedir() {
   local etiqueta="$1" pista="$2" valor=""
@@ -19,7 +19,7 @@ pedir() {
 }
 
 echo "─────────────────────────────────────────────"
-echo " Configuración de Cierto"
+echo " Configuración de Certia"
 echo " Pega cada token y presiona Enter."
 echo " No vas a ver lo que escribes: es a propósito."
 echo "─────────────────────────────────────────────"

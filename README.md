@@ -1,8 +1,8 @@
-# Cierto
+# Certia
 
 **Detecta señales de estafa en un mensaje y explica por qué.**
 
-Cierto recibe un texto — un SMS, un correo, un mensaje de WhatsApp — y devuelve las señales de fraude que encuentra, cada una con una explicación en español llano. No da un veredicto seco: da indicios, para que la persona decida.
+Certia recibe un texto — un SMS, un correo, un mensaje de WhatsApp — y devuelve las señales de fraude que encuentra, cada una con una explicación en español llano. No da un veredicto seco: da indicios, para que la persona decida.
 
 🔎 **[Probar la demostración](https://luisfernandomedh.github.io/certia/)** — corre entera en tu navegador.
 
@@ -10,7 +10,7 @@ Cierto recibe un texto — un SMS, un correo, un mensaje de WhatsApp — y devue
 
 En Latinoamérica la estafa por mensaje es cotidiana y la gente no tiene forma de verificar nada. Las herramientas que existen son de pago, están en inglés, o son cajas negras que dicen "peligroso" sin explicar nada.
 
-Cierto es gratis, abierto, y sobre todo **explicable**: si le dices a alguien que un mensaje es una estafa, tienes que poder decirle por qué. Esa explicación no es un adorno, es el producto — porque enseña a reconocer el patrón la próxima vez.
+Certia es gratis, abierto, y sobre todo **explicable**: si le dices a alguien que un mensaje es una estafa, tienes que poder decirle por qué. Esa explicación no es un adorno, es el producto — porque enseña a reconocer el patrón la próxima vez.
 
 ## Principios
 

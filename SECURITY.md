@@ -1,6 +1,6 @@
 # Modelo de amenazas
 
-Cierto recibe mensajes de estafa aportados por desconocidos y los publica. Eso, si se hace mal, convierte al proyecto en un problema en vez de una solución. Este documento existe para que las decisiones de diseño sean explícitas y revisables, no supuestos en la cabeza de alguien.
+Certia recibe mensajes de estafa aportados por desconocidos y los publica. Eso, si se hace mal, convierte al proyecto en un problema en vez de una solución. Este documento existe para que las decisiones de diseño sean explícitas y revisables, no supuestos en la cabeza de alguien.
 
 ## Principio rector
 

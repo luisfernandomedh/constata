@@ -59,7 +59,7 @@ npm run deploy
 En `docs/index.html`, poner la URL que devolvió el despliegue:
 
 ```js
-const ENDPOINT = "https://cierto-aportes.TU-SUBDOMINIO.workers.dev";
+const ENDPOINT = "https://certia-aportes.TU-SUBDOMINIO.workers.dev";
 ```
 
 Mientras `ENDPOINT` esté vacío, la web cae de vuelta al formulario de GitHub. Nada se rompe.
