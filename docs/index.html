@@ -113,6 +113,22 @@
     padding: 10px 12px; background: var(--medio-fondo);
     border-left: 3px solid var(--medio); border-radius: 0 8px 8px 0;
   }
+  .campos { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 14px; }
+  .campos label { font-size: 13.5px; color: var(--tenue); display: flex; flex-direction: column; gap: 5px; }
+  .campos select {
+    font: inherit; font-size: 14.5px; color: var(--texto); background: var(--papel);
+    border: 1px solid var(--borde); border-radius: 8px; padding: 7px 10px;
+  }
+  .exito {
+    margin-top: 14px; padding: 12px 14px; border-radius: 8px;
+    background: var(--bajo-fondo); border-left: 3px solid var(--acento);
+    font-size: 14.5px; line-height: 1.55;
+  }
+  .fallo {
+    margin-top: 14px; padding: 12px 14px; border-radius: 8px;
+    background: var(--alto-fondo); border-left: 3px solid var(--alto);
+    font-size: 14.5px; line-height: 1.55; color: var(--texto);
+  }
   .como { font-size: 15px; line-height: 1.65; color: var(--texto); }
   .como p { margin: 0 0 14px; }
   .como strong { color: var(--acento); }
@@ -155,30 +171,47 @@
       <p>
         No existe un conjunto público de mensajes de estafa en español latinoamericano.
         Por eso ninguna herramienta extranjera reconoce al Banco Pichincha ni al SRI.
-        Si donas este ejemplo, ayudas a llenar ese vacío.
+        Donar este ejemplo ayuda a llenar ese vacío — sin cuenta y sin registrarte.
       </p>
-      <button id="preparar" class="secundario">Preparar este mensaje para contribuir</button>
 
-      <div id="revision" hidden style="margin-top:18px">
-        <label class="etiqueta" for="limpio">
-          Esto es exactamente lo que se enviaría. Puedes editarlo.
+      <label class="etiqueta" for="limpio">
+        Esto es exactamente lo que se enviaría. Puedes editarlo.
+      </label>
+      <textarea id="limpio" spellcheck="false"></textarea>
+      <p class="cambios" id="cambios"></p>
+
+      <div class="campos">
+        <label>Qué es
+          <select id="etiqueta">
+            <option value="estafa">Una estafa</option>
+            <option value="legitimo">Un mensaje legítimo</option>
+          </select>
         </label>
-        <textarea id="limpio" spellcheck="false"></textarea>
-        <p class="cambios" id="cambios"></p>
-        <p class="ojo">
-          <strong>Revísalo con tus ojos.</strong> La limpieza automática quita correos,
-          teléfonos, montos, números largos y las rutas de los enlaces. <strong>No detecta
-          nombres propios.</strong> Si aparece el tuyo o el de alguien más, bórralo ahora.
-        </p>
-        <div class="fila">
-          <button id="enviar">Continuar en GitHub</button>
-          <button id="cancelar" class="secundario">Cancelar</button>
-        </div>
-        <p class="remate" style="margin-top:10px">
-          Se abre un formulario con el texto ya puesto. Nada se publica hasta que tú lo envíes
-          y alguien lo revise.
-        </p>
+        <label>Por dónde llegó
+          <select id="canal">
+            <option value="sms">SMS</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="correo">Correo</option>
+            <option value="llamada">Llamada</option>
+            <option value="red-social">Red social</option>
+            <option value="otro">Otro</option>
+          </select>
+        </label>
       </div>
+
+      <p class="ojo">
+        <strong>Revísalo con tus ojos.</strong> La limpieza automática quita correos,
+        teléfonos, montos, números largos y las rutas de los enlaces. <strong>No detecta
+        nombres propios.</strong> Si aparece el tuyo o el de alguien más, bórralo ahora.
+      </p>
+
+      <div class="fila">
+        <button id="enviar">Enviar al corpus</button>
+        <button id="cancelar" class="secundario">Ahora no</button>
+      </div>
+      <p class="remate" id="estadoEnvio">
+        Se publica como propuesta pendiente. Una persona lo revisa antes de que entre al corpus.
+      </p>
     </div>
   </div>
 
@@ -216,6 +249,9 @@
 <script type="module">
 import { analizar, anonimizar } from "./lib/index.js";
 
+// URL del Worker que crea el issue con un solo clic (ver worker/README.md).
+// Mientras esté vacía, la web usa el formulario de GitHub como respaldo.
+const ENDPOINT = "";
 const REPO = "luisfernandomedh/certia";
 
 const EJEMPLOS = [
@@ -243,7 +279,7 @@ const REMATE = {
 
 const $ = (id) => document.getElementById(id);
 const $mensaje = $("mensaje"), $resultado = $("resultado"), $contribuir = $("contribuir");
-const $revision = $("revision"), $limpio = $("limpio"), $cambios = $("cambios");
+const $limpio = $("limpio"), $cambios = $("cambios"), $estado = $("estadoEnvio");
 
 // Todo contenido que provenga del mensaje se escapa antes de tocar el documento.
 // Ver SECURITY.md, amenaza A2.
@@ -274,17 +310,38 @@ function pintar({ riesgo, puntaje, hallazgos, avisos }) {
     <p class="remate">${REMATE[riesgo]}</p>`;
 }
 
-function revisar() {
-  const texto = $mensaje.value.trim();
-  if (!texto) { $resultado.innerHTML = ""; ocultarContribucion(); return; }
-  pintar(analizar(texto));
-  $contribuir.hidden = false;
-  $revision.hidden = true;
+const AVISO_PENDIENTE =
+  "Se publica como propuesta pendiente. Una persona lo revisa antes de que entre al corpus.";
+
+function reiniciarEstado() {
+  $estado.className = "remate";
+  $estado.textContent = AVISO_PENDIENTE;
+  $("enviar").disabled = false;
+  $("enviar").textContent = "Enviar al corpus";
 }
 
-function ocultarContribucion() {
-  $contribuir.hidden = true;
-  $revision.hidden = true;
+/**
+ * Prepara la contribución en el mismo momento del análisis: el texto ya sale
+ * limpio y visible, para que enviarlo sea un solo clic.
+ */
+function prepararContribucion(texto, riesgo) {
+  const { texto: limpio, reemplazos } = anonimizar(texto);
+  $limpio.value = limpio;
+  $cambios.textContent = reemplazos.length
+    ? `Se reemplazó automáticamente: ${reemplazos.join(", ")}.`
+    : "No se encontró ningún dato personal que reemplazar. Revísalo igual.";
+  // La etiqueta se propone según el veredicto, pero la persona puede cambiarla.
+  $("etiqueta").value = riesgo === "bajo" ? "legitimo" : "estafa";
+  reiniciarEstado();
+}
+
+function revisar() {
+  const texto = $mensaje.value.trim();
+  if (!texto) { $resultado.innerHTML = ""; $contribuir.hidden = true; return; }
+  const resultado = analizar(texto);
+  pintar(resultado);
+  prepararContribucion(texto, resultado.riesgo);
+  $contribuir.hidden = false;
 }
 
 $("analizar").addEventListener("click", revisar);
@@ -292,7 +349,7 @@ $("analizar").addEventListener("click", revisar);
 $("limpiar").addEventListener("click", () => {
   $mensaje.value = "";
   $resultado.innerHTML = "";
-  ocultarContribucion();
+  $contribuir.hidden = true;
   $mensaje.focus();
 });
 
@@ -300,26 +357,68 @@ $mensaje.addEventListener("keydown", (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") revisar();
 });
 
-$("preparar").addEventListener("click", () => {
-  const { texto, reemplazos } = anonimizar($mensaje.value.trim());
-  $limpio.value = texto;
-  $cambios.textContent = reemplazos.length
-    ? `Se reemplazó automáticamente: ${reemplazos.join(", ")}.`
-    : "No se encontró ningún dato personal que reemplazar. Revísalo igual.";
-  $revision.hidden = false;
-  $limpio.focus();
-});
+$("cancelar").addEventListener("click", () => { $contribuir.hidden = true; });
 
-$("cancelar").addEventListener("click", () => { $revision.hidden = true; });
-
-$("enviar").addEventListener("click", () => {
-  const cuerpo = $limpio.value.trim();
-  if (!cuerpo) return;
+/** Sin endpoint configurado, se cae de vuelta al formulario de GitHub. Nada se rompe. */
+function enviarPorGitHub(cuerpo) {
   const url = new URL(`https://github.com/${REPO}/issues/new`);
   url.searchParams.set("template", "aportar-mensaje.yml");
   url.searchParams.set("title", "[corpus] ");
   url.searchParams.set("texto", cuerpo);
   window.open(url.toString(), "_blank", "noopener");
+  $estado.className = "exito";
+  $estado.textContent = "Se abrió el formulario de GitHub con tu mensaje ya puesto.";
+}
+
+$("enviar").addEventListener("click", async () => {
+  const cuerpo = $limpio.value.trim();
+  if (cuerpo.length < 10) {
+    $estado.className = "fallo";
+    $estado.textContent = "El mensaje es demasiado corto para aportarlo.";
+    return;
+  }
+
+  if (!ENDPOINT) return enviarPorGitHub(cuerpo);
+
+  const boton = $("enviar");
+  boton.disabled = true;
+  boton.textContent = "Enviando…";
+  $estado.className = "remate";
+  $estado.textContent = "Enviando…";
+
+  try {
+    const r = await fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        texto: cuerpo,
+        etiqueta: $("etiqueta").value,
+        canal: $("canal").value,
+      }),
+    });
+    const datos = await r.json().catch(() => ({}));
+
+    if (r.ok && datos.ok) {
+      $estado.className = "exito";
+      $estado.innerHTML =
+        "Gracias. Tu ejemplo quedó registrado como propuesta " +
+        `<a href="${escapar(datos.url)}" target="_blank" rel="noopener">#${escapar(datos.numero)}</a>. ` +
+        "Una persona lo revisa antes de que entre al corpus.";
+      boton.textContent = "Enviado";
+      return;
+    }
+
+    $estado.className = "fallo";
+    $estado.textContent = datos.error || "No se pudo enviar ahora mismo. Inténtalo más tarde.";
+  } catch {
+    $estado.className = "fallo";
+    $estado.textContent = "No se pudo conectar. Revisa tu internet e inténtalo de nuevo.";
+  } finally {
+    if (boton.textContent === "Enviando…") {
+      boton.disabled = false;
+      boton.textContent = "Enviar al corpus";
+    }
+  }
 });
 
 const $ejemplos = $("ejemplos");

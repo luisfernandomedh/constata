@@ -50,13 +50,17 @@ Remitente, número de teléfono, dirección de correo, nombres propios, montos e
 
 ## Cómo se aporta
 
-1. Analizas tu mensaje en [la herramienta](https://luisfernandomedh.github.io/certia/). Eso ocurre entero en tu navegador.
-2. Tocas **Contribuir este ejemplo**.
-3. El navegador lo limpia y te muestra el resultado, **editable**. Revísalo: los nombres propios no se detectan de forma automática.
-4. Confirmas. Se abre un *issue* prellenado en GitHub con la entrada ya formateada.
-5. Alguien lo revisa antes de que entre al corpus.
+Desde [la herramienta](https://luisfernandomedh.github.io/certia/):
 
-El paso 5 no es burocracia. Es la única defensa real contra que alguien envenene el conjunto o publique sin querer datos de un tercero. Ver [SECURITY.md](SECURITY.md).
+1. Analizas tu mensaje. Eso ocurre entero en tu navegador, sin enviar nada.
+2. Con el resultado en pantalla aparece el texto **ya limpio y editable**, listo para aportar.
+3. Lo revisas —los nombres propios no se detectan solos— y tocas **Enviar al corpus**.
+
+Un clic. Sin cuenta, sin registro, sin salir de la página.
+
+Ese envío no escribe en el corpus: crea una **propuesta pendiente** que una persona revisa. Ese paso no es burocracia, es la única defensa real contra que alguien envenene el conjunto o publique sin querer datos de un tercero. Ver [SECURITY.md](SECURITY.md).
+
+Si prefieres hacerlo tú mismo en GitHub, hay [plantillas de issue](https://github.com/luisfernandomedh/certia/issues/new/choose) para aportar un mensaje o para agregar una institución al registro.
 
 ## Licencia
 

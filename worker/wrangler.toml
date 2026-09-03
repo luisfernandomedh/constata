@@ -1,0 +1,19 @@
+name = "cierto-aportes"
+main = "index.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+# Repositorio donde aterrizan los issues. Separado del código a propósito:
+# si el corpus recibe una queja o una marca de seguridad, la biblioteca sigue viva.
+REPO_CORPUS = "luisfernandomedh/certia-corpus"
+
+# Contador del límite por origen. Crear con:
+#   npx wrangler kv namespace create LIMITES
+# y pegar el id que devuelve.
+# [[kv_namespaces]]
+# binding = "LIMITES"
+# id = "PEGAR_AQUI"
+
+# Secretos — NO van en este archivo. Se cargan con:
+#   npx wrangler secret put GITHUB_TOKEN
+#   npx wrangler secret put TURNSTILE_SECRET   (opcional)
