@@ -64,3 +64,41 @@ test("el resultado nunca contiene una URL clicable", () => {
     assert.doesNotMatch(texto, /https?:\/\//, `quedó clicable: ${texto}`);
   }
 });
+
+// Estas dos pruebas nacen de la primera contribución real recibida:
+// el mensaje traía una marca de tiempo exacta, y la limpieza destruía
+// la señal que el corpus necesita para servir como suite de pruebas.
+
+test("borra fechas y horas exactas", () => {
+  const casos = [
+    "Su codigo es 483920. 2026-09-02 09:36",
+    "Vence el 02/09/2026",
+    "Le llamamos a las 14:30 pm",
+  ];
+  for (const c of casos) {
+    const { texto } = anonimizar(c);
+    assert.doesNotMatch(texto, /\d{4}[-/]\d{1,2}[-/]\d{1,2}/, `fecha sobrevivió: ${texto}`);
+    assert.doesNotMatch(texto, /\d{1,2}:\d{2}/, `hora sobrevivió: ${texto}`);
+  }
+});
+
+test("el código se reemplaza por uno sintético que conserva la forma", async () => {
+  const { analizar } = await import("../dist/index.js");
+  const original = "Su codigo de verificacion de Google es 483920. No lo comparta.";
+  const { texto } = anonimizar(original);
+
+  assert.ok(!texto.includes("483920"), "el código real no debe quedar");
+  assert.match(texto, /\b\d{6}\b/, "debe quedar un número de la misma longitud");
+
+  // Lo importante: la entrada del corpus sigue disparando la señal.
+  const avisos = analizar(texto).avisos.map((a) => a.id);
+  assert.ok(
+    avisos.includes("codigo-recibido"),
+    "anonimizar no debe destruir la señal, o la entrada no sirve como prueba",
+  );
+});
+
+test("los centinelas internos nunca salen al texto final", () => {
+  const { texto } = anonimizar("Tu codigo es 483920 y tu clave 1234");
+  assert.doesNotMatch(texto, /[\u{E000}-\u{F8FF}]/u, "se filtró un carácter de uso privado");
+});

@@ -28,6 +28,7 @@ export interface ResultadoAnonimizacion {
 
 const RE_URL_GLOBAL = /\b(?:https?:\/\/|www\.)[^\s<>"'()]+/gi;
 const RE_DIVIDIR_URL = /(\b(?:https?:\/\/|www\.)[^\s<>"'()]+)/gi;
+const RE_ES_URL = /^(?:https?:\/\/|www\.)/i;
 
 interface Regla {
   nombre: string;
@@ -35,8 +36,28 @@ interface Regla {
   reemplazo: string;
 }
 
+/**
+ * Los códigos de un solo uso son una señal de detección, no un dato personal:
+ * expiran en minutos y sin la cuenta no sirven de nada. Pero borrarlos del
+ * todo rompe el corpus como suite de pruebas, porque el detector necesita ver
+ * un número junto a la palabra "código" para disparar su aviso.
+ *
+ * La salida es reemplazarlos por uno sintético **de la misma longitud**:
+ * conserva la forma, y no filtra nada porque el original ya no existe.
+ */
+function codigoSintetico(largo: number): string {
+  return "0123456789".repeat(Math.ceil(largo / 10)).slice(0, largo);
+}
+
 const REGLAS: Regla[] = [
   { nombre: "correos electrónicos", patron: /\b[\w.+-]+@[\w-]+\.[\w.-]+\b/g, reemplazo: "[correo]" },
+  {
+    // Una fecha con hora exacta, junto al contenido, puede reidentificar a la
+    // persona. El corpus guarda el mes, nunca el día. Ver CORPUS.md.
+    nombre: "fechas y horas exactas",
+    patron: /\b\d{4}[-/]\d{1,2}[-/]\d{1,2}(?:[\sT]+\d{1,2}:\d{2}(?::\d{2})?)?\b|\b\d{1,2}[-/]\d{1,2}[-/]\d{2,4}(?:\s+\d{1,2}:\d{2})?\b|\b\d{1,2}:\d{2}(?::\d{2})?\s?(?:am|pm|AM|PM)?\b/g,
+    reemplazo: "[fecha]",
+  },
   {
     // Formatos de Ecuador y genéricos: +593 9 8765 4321, 0987654321, (02) 234-5678
     nombre: "números de teléfono",
@@ -102,12 +123,30 @@ export function anonimizar(texto: string): ResultadoAnonimizacion {
   });
   if (huboEnlaces) reemplazos.push("enlaces desactivados y sin su ruta");
 
+  // Los códigos de un solo uso se sustituyen por uno sintético de la misma
+  // longitud, y se envuelven en un centinela para que la regla genérica de
+  // números largos no se los trague después. El centinela se quita al final.
+  const CENTINELA = "\u{E000}";
+  const conCodigos = resultado.replace(
+    /((?:c[oó]digo|clave|pin|otp)\w*[^.!?\n]{0,80}?)(\d{4,8})\b/giu,
+    (_todo, antes: string, digitos: string) =>
+      `${antes}${CENTINELA}${codigoSintetico(digitos.length)}${CENTINELA}`,
+  );
+  if (conCodigos !== resultado) {
+    reemplazos.push("códigos de verificación");
+    resultado = conCodigos;
+  }
+
   // El resto se aplica solo fuera de los enlaces ya procesados.
+  const protegido = new RegExp(`(${CENTINELA}[^${CENTINELA}]*${CENTINELA})`, "u");
   for (const regla of REGLAS) {
-    const partes = resultado.split(RE_DIVIDIR_URL);
+    // Se trocea por URL y por códigos protegidos; solo se toca lo de en medio.
+    const partes = resultado.split(RE_DIVIDIR_URL).flatMap((tramo, i) =>
+      i % 2 === 1 ? [tramo] : tramo.split(protegido),
+    );
     let cambio = false;
-    const nuevas = partes.map((parte, i) => {
-      if (i % 2 === 1) return parte; // los impares son URL intactas
+    const nuevas = partes.map((parte) => {
+      if (parte.startsWith(CENTINELA) || RE_ES_URL.test(parte)) return parte;
       const sustituida = parte.replace(regla.patron, regla.reemplazo);
       if (sustituida !== parte) cambio = true;
       return sustituida;
@@ -118,5 +157,6 @@ export function anonimizar(texto: string): ResultadoAnonimizacion {
     }
   }
 
-  return { texto: resultado.trim(), reemplazos };
+  const limpio = resultado.split(CENTINELA).join("").trim();
+  return { texto: limpio, reemplazos };
 }
