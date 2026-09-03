@@ -4,7 +4,7 @@ export { DETECTORES } from "./signals/index.js";
 export { construirContexto, dominioDe, normalizar } from "./contexto.js";
 export { MARCAS, ACORTADORES, ALOJAMIENTO_GENERICO, esDominioConocido, esDominioDe } from "./marcas.js";
 export type { Marca } from "./marcas.js";
-export { anonimizar, desactivarEnlace, tieneEnlaces } from "./anonimizar.js";
+export { anonimizar, desactivarEnlace, reactivarEnlaces, tieneEnlaces } from "./anonimizar.js";
 export type { ResultadoAnonimizacion } from "./anonimizar.js";
 /**
  * Analiza un mensaje y devuelve las señales de estafa que encuentra.

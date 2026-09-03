@@ -102,3 +102,24 @@ test("los centinelas internos nunca salen al texto final", () => {
   const { texto } = anonimizar("Tu codigo es 483920 y tu clave 1234");
   assert.doesNotMatch(texto, /[\u{E000}-\u{F8FF}]/u, "se filtró un carácter de uso privado");
 });
+
+test("reactivarEnlaces devuelve la señal que el corpus había perdido", async () => {
+  const { analizar, reactivarEnlaces } = await import("../dist/index.js");
+  const original = "SRI: usted tiene una devolucion de impuestos de $187.40 pendiente. Ingrese sus datos: https://sri-devoluciones.info";
+  const guardado = anonimizar(original).texto;
+
+  const sinReactivar = analizar(guardado);
+  const reactivado = analizar(reactivarEnlaces(guardado));
+
+  assert.ok(
+    reactivado.puntaje > sinReactivar.puntaje,
+    "reactivar debe recuperar señales de enlace que el texto desactivado esconde",
+  );
+  assert.equal(reactivado.riesgo, analizar(original).riesgo, "debe coincidir con el veredicto del original");
+});
+
+test("reactivarEnlaces es solo para analizar, nunca para guardar", () => {
+  // Prueba de contrato: lo que se guarda sigue siendo la forma desactivada.
+  const { texto } = anonimizar("Entra a https://malo.com/x");
+  assert.doesNotMatch(texto, /https?:\/\//, "anonimizar nunca debe devolver un enlace vivo");
+});

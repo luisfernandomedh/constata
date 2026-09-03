@@ -160,3 +160,22 @@ export function anonimizar(texto: string): ResultadoAnonimizacion {
   const limpio = resultado.split(CENTINELA).join("").trim();
   return { texto: limpio, reemplazos };
 }
+
+/**
+ * Revierte la desactivación de enlaces. **Solo en memoria y solo para analizar.**
+ *
+ * El corpus guarda siempre la forma desactivada, y así debe quedarse. Pero el
+ * motor necesita ver una URL de verdad para que sus señales de enlace —las más
+ * fuertes que tiene— funcionen. Sin esto, una entrada del corpus se analiza
+ * como si no tuviera enlaces y saca un puntaje mucho más bajo del real.
+ *
+ * El resultado de esta función NUNCA debe escribirse a ningún lado.
+ */
+export function reactivarEnlaces(texto: string): string {
+  if (typeof texto !== "string") return "";
+  return texto
+    .replace(/\bhxxps:\/\//gi, "https://")
+    .replace(/\bhxxp:\/\//gi, "http://")
+    .replace(/\[\.\]/g, ".")
+    .replace(/\/\[ruta\]/g, "/x");
+}
