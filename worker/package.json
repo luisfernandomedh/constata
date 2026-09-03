@@ -1,0 +1,13 @@
+{
+  "name": "cierto-aportes",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "login": "wrangler login",
+    "kv": "wrangler kv namespace create LIMITES",
+    "secreto": "wrangler secret put GITHUB_TOKEN",
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "devDependencies": { "wrangler": "^4.0.0" }
+}

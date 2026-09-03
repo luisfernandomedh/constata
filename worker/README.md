@@ -31,14 +31,10 @@ La revalidación del enlace desactivado se hace **de nuevo** aquí, aunque el cl
 
 ## Desplegar
 
-**1. Crear el repositorio del corpus**
+El repositorio del corpus ya existe: [certia-corpus](https://github.com/luisfernandomedh/certia-corpus).
+`wrangler` ya está instalado aquí, así que no hace falta `npx`.
 
-```bash
-gh repo create certia-corpus --public \
-  --description "Corpus abierto de mensajes de estafa en español latinoamericano"
-```
-
-**2. Crear el token de GitHub**
+**1. Crear el token de GitHub**
 
 En Settings → Developer settings → Personal access tokens → **Fine-grained tokens**:
 
@@ -48,17 +44,17 @@ En Settings → Developer settings → Personal access tokens → **Fine-grained
 
 Si ese token se filtra, lo peor que puede hacer alguien es abrir issues en un repositorio de mensajes públicos. Eso es todo, y es a propósito.
 
-**3. Desplegar**
+**2. Desplegar**
 
 ```bash
 cd worker
-npx wrangler kv namespace create LIMITES     # pega el id en wrangler.toml
-npx wrangler secret put GITHUB_TOKEN
-npx wrangler secret put TURNSTILE_SECRET     # opcional
-npx wrangler deploy
+npm run login                    # abre el navegador, entra a Cloudflare
+npm run kv                       # pega el id que devuelve en wrangler.toml
+npm run secreto                  # pega el token de GitHub
+npm run deploy
 ```
 
-**4. Conectar la web**
+**3. Conectar la web**
 
 En `docs/index.html`, poner la URL que devolvió el despliegue:
 
