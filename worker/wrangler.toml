@@ -2,17 +2,18 @@ name = "cierto-aportes"
 main = "index.js"
 compatibility_date = "2026-09-01"
 
+# Sin URL de vista previa: un solo punto de entrada público, más fácil de vigilar.
+preview_urls = false
+
 [vars]
 # Repositorio donde aterrizan los issues. Separado del código a propósito:
 # si el corpus recibe una queja o una marca de seguridad, la biblioteca sigue viva.
 REPO_CORPUS = "luisfernandomedh/certia-corpus"
 
-# Contador del límite por origen. Crear con:
-#   npx wrangler kv namespace create LIMITES
-# y pegar el id que devuelve.
-# [[kv_namespaces]]
-# binding = "LIMITES"
-# id = "PEGAR_AQUI"
+# Contador del límite por origen (5 aportes por hora).
+[[kv_namespaces]]
+binding = "LIMITES"
+id = "cfe0c3561c724f0d852286b869e2ff8d"
 
 # Secretos — NO van en este archivo. Se cargan con:
 #   npx wrangler secret put GITHUB_TOKEN
