@@ -1,7 +1,9 @@
 import type { Resultado } from "./types.js";
-export type { Contexto, Detector, Hallazgo, Resultado, Riesgo } from "./types.js";
+export type { Contexto, Detector, Hallazgo, Resultado, Riesgo, TipoHallazgo } from "./types.js";
 export { DETECTORES } from "./signals/index.js";
 export { construirContexto, dominioDe, normalizar } from "./contexto.js";
+export { MARCAS, ACORTADORES, ALOJAMIENTO_GENERICO, esDominioConocido, esDominioDe } from "./marcas.js";
+export type { Marca } from "./marcas.js";
 /**
  * Analiza un mensaje y devuelve las señales de estafa que encuentra.
  *
@@ -9,8 +11,8 @@ export { construirContexto, dominioDe, normalizar } from "./contexto.js";
  * mensaje siempre devuelve el mismo resultado. El texto nunca sale de
  * donde se ejecuta esta función.
  *
- * No devuelve certezas: devuelve indicios y su explicación, para que
- * la persona decida. Un riesgo "bajo" no significa que el mensaje sea
- * seguro, solo que no encontramos señales conocidas.
+ * No devuelve certezas: devuelve indicios y su explicación, para que la
+ * persona decida. Un riesgo "bajo" no significa que el mensaje sea seguro,
+ * solo que no encontramos señales conocidas.
  */
 export declare function analizar(texto: string): Resultado;

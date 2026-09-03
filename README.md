@@ -47,13 +47,24 @@ for (const h of resultado.hallazgos) {
 
 | Señal | Qué detecta |
 |---|---|
-| `pide-credenciales` | Pide un código, clave, PIN o datos de tarjeta |
+| `pide-credenciales` | Te pide un código, clave, PIN o datos de tarjeta |
+| `codigo-recibido` | *(aviso)* Te entrega un código: normal si lo pediste, alarma si no |
 | `desajuste-marca-enlace` | Dice ser de una marca, pero el enlace va a otro lado |
 | `dominio-imitador` | El dominio incluye el nombre de una marca sin pertenecerle |
+| `dominio-generico-financiero` | Dominio con palabras sueltas como "banco" o "pagos" en vez de una marca real |
 | `caracteres-enganosos` | Letras de otro alfabeto disfrazadas de latinas (punycode, cirílico) |
+| `formulario-en-sitio-generico` | Trámites de cuenta en Google Forms y similares |
+| `enlace-desconocido-accion-sensible` | Te pide entrar o verificar en un sitio no reconocido |
 | `enlace-acortado` | Acortadores que ocultan el destino real |
+| `familiar-numero-nuevo` | «Hola mamá, este es mi número nuevo» y pide dinero |
+| `suplantacion-de-jefe` | Alguien dice ser tu jefe, evita hablar, y pide comprar algo |
+| `oferta-laboral-irreal` | Mucho dinero por poco trabajo, sin proceso |
 | `premio-inesperado` | Premios, bonos, paquetes o devoluciones que nadie pidió |
 | `urgencia-artificial` | Plazos y amenazas para impedir que pienses |
+
+Los hallazgos vienen en dos clases. Los de tipo `riesgo` suman al puntaje y acusan al mensaje. Los de tipo `aviso` no suman nada, pero se muestran siempre: son cosas que necesitas saber para decidir, sin que el mensaje sea necesariamente malo.
+
+El registro de marcas en [`src/marcas.ts`](src/marcas.ts) cubre bancos, entidades del Estado y operadoras de Ecuador y la región, además de plataformas globales. **Agregar una institución local es la contribución más útil y más fácil**: es una línea, y mejora la detección sin tocar el motor.
 
 ## Hacia dónde va
 

@@ -1,3 +1,3 @@
 import type { Detector } from "../types.js";
-/** Todos los detectores de la versión 1, en orden de evaluación. */
+/** Todos los detectores, en el orden en que se evalúan. */
 export declare const DETECTORES: Detector[];

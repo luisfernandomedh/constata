@@ -99,6 +99,15 @@
     color: var(--tenue); display: block; margin-top: 8px; word-break: break-all;
   }
   .aviso { margin-top: 20px; font-size: 14px; color: var(--tenue); line-height: 1.55; }
+  ul.avisos { list-style: none; padding: 0; margin: 18px 0 0; }
+  ul.avisos li {
+    background: var(--medio-fondo); border: 1px solid var(--medio); border-left-width: 4px;
+    border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; color: var(--texto);
+  }
+  ul.avisos .titulo {
+    font-size: 12px; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--medio); font-weight: 700; display: block; margin-bottom: 6px;
+  }
   footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--borde); font-size: 14px; color: var(--tenue); }
   footer a { color: var(--acento); }
 </style>
@@ -141,11 +150,15 @@
 import { analizar } from "./lib/index.js";
 
 const EJEMPLOS = [
-  ["Suplantación de marca", "URGENTE: Su cuenta de Netflix sera suspendida hoy. Confirme su contrasena aqui: http://netflix-pagos.info/verificar"],
+  ["Banco falso", "Banco Pichincha: detectamos un consumo de $340 en Quito. Si no lo reconoce, bloquee aqui: http://pichincha-seguro.net/bloqueo"],
+  ["SRI falso", "SRI: usted tiene una devolucion de impuestos de $187.40 pendiente. Ingrese sus datos: https://sri-devoluciones.info"],
   ["Robo de código", "Somos WhatsApp. Envianos el codigo de verificacion que te llego por SMS para restaurar tu cuenta."],
-  ["Premio falso", "Felicidades! Has ganado un bono de $500. Reclama tu premio hoy en bit.ly/3xKq2a"],
-  ["Paquete retenido", "Su paquete esta retenido en aduana. Pague la tasa de $2.30 aqui: https://dhl-envios-ec.com/pago"],
-  ["Mensaje normal", "Hola, te confirmo la reunion de manana a las 10. El link es https://meet.google.com/abc-defg-hij"],
+  ["\u00abHola mamá\u00bb", "Hola mama, se me daño el telefono, este es mi numero nuevo. Necesito que me hagas una transferencia urgente, luego te explico."],
+  ["Falso jefe", "Soy el gerente. Estoy en una reunion y no puedo hablar. Necesito que compres tarjetas de regalo y me envies los codigos."],
+  ["Empleo irreal", "Buenas, le escribo de Recursos Humanos. Tenemos una vacante de trabajo remoto, $80 diarios por 2 horas. Interesado responda SI."],
+  ["Letras falsas", "Verifique su cuenta en \u0440\u0430ypal.com ahora mismo"],
+  ["Caso ambiguo", "Su codigo de verificacion de Google es 483920. No lo comparta con nadie."],
+  ["Mensaje normal", "Banco Pichincha: consumo aprobado por $45.20 en SUPERMAXI. Si no lo reconoce llame al 1700 100 100."],
 ];
 
 const $mensaje = document.getElementById("mensaje");
@@ -168,7 +181,7 @@ function escapar(s) {
 }
 
 function pintar(resultado) {
-  const { riesgo, puntaje, hallazgos } = resultado;
+  const { riesgo, puntaje, hallazgos, avisos } = resultado;
   const senales = hallazgos.map((h) => `
     <li>
       <span class="id">${escapar(h.id)}</span>
@@ -176,11 +189,18 @@ function pintar(resultado) {
       ${h.evidencia ? `<span class="evidencia">${escapar(h.evidencia)}</span>` : ""}
     </li>`).join("");
 
+  const listaAvisos = (avisos ?? []).map((a) => `
+    <li>
+      <span class="titulo">Algo que debes saber</span>
+      ${escapar(a.explicacion)}
+    </li>`).join("");
+
   $resultado.innerHTML = `
     <div class="veredicto ${riesgo}">
       <strong>${ETIQUETA[riesgo]}</strong>
       <span class="puntaje">${puntaje} / 100</span>
     </div>
+    ${listaAvisos ? `<ul class="avisos">${listaAvisos}</ul>` : ""}
     ${senales ? `<ul class="senales">${senales}</ul>` : ""}
     <p class="aviso">${REMATE[riesgo]}</p>`;
 }
