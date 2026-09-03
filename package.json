@@ -16,7 +16,8 @@
   ],
   "scripts": {
     "build": "tsc && rm -rf docs/lib && cp -R dist docs/lib",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "medir": "node scripts/medir.mjs"
   },
   "keywords": [
     "phishing",
