@@ -1,0 +1,32 @@
+name: Agregar una institución al registro
+description: Un banco, entidad pública u operadora que Cierto todavía no conoce
+title: "[marca] "
+labels: ["marca"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Esta es la contribución más útil y más fácil del proyecto. Cada
+        institución añadida mejora la detección sin tocar el motor.
+  - type: input
+    id: nombre
+    attributes:
+      label: Nombre de la institución
+      placeholder: Banco del Austro
+    validations: { required: true }
+  - type: input
+    id: dominios
+    attributes:
+      label: Dominios que sí le pertenecen
+      placeholder: bancodelaustro.com, bancoaustro.com
+    validations: { required: true }
+  - type: input
+    id: alias
+    attributes:
+      label: Cómo la nombra la gente en un mensaje
+      placeholder: banco del austro, austro
+  - type: input
+    id: pais
+    attributes:
+      label: País
+      placeholder: EC

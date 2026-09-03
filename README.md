@@ -72,11 +72,24 @@ El registro de marcas en [`src/marcas.ts`](src/marcas.ts) cubre bancos, entidade
 2. **Versión 2 — capa de modelo opcional** para los casos que las reglas no resuelven, detrás de una interfaz que permita cambiar de proveedor. La clave la pone quien incrusta la biblioteca, nunca el proyecto.
 3. **Versión 3 — ciclo de mejora:** lo que el modelo resuelve bien se convierte en reglas nuevas del núcleo. El sistema se abarata al crecer en vez de encarecerse.
 
+## Privacidad, en concreto
+
+No es una promesa, es una propiedad de la arquitectura:
+
+- `analizar()` es una función pura. No usa la red, no guarda estado, no registra nada.
+- La demo web corre entera en el navegador. **Puedes desconectar el internet y sigue funcionando.**
+- Sin cuenta, sin cookies, sin almacenamiento, sin telemetría, sin publicidad.
+- Si decides contribuir un ejemplo, es un acto aparte y explícito, y **ves exactamente el texto que se va a enviar antes de enviarlo**.
+
 ## Cómo contribuir
 
-Lo más valioso que puedes aportar hoy son **mensajes de estafa reales**, sobre todo en español y de Latinoamérica. No existe un corpus público de eso, y esa ausencia es justamente lo que este proyecto quiere llenar.
+**Lo más valioso son mensajes de estafa reales**, en español y de Latinoamérica. No existe un corpus público de eso, y llenar esa ausencia es el aporte principal de este proyecto. Ver [CORPUS.md](CORPUS.md).
 
-Si envías un mensaje, **quítale antes tus datos personales**: nombres, montos, números de cuenta y teléfonos.
+Desde la [herramienta](https://luisfernandomedh.github.io/certia/): analiza tu mensaje, toca **Contribuir este ejemplo**, revisa el texto ya limpio —y edítalo, porque los nombres propios no se detectan solos— y confirma. Se abre un formulario de GitHub con todo puesto.
+
+**La segunda contribución más útil, y la más fácil: agregar una institución** al registro de [`src/marcas.ts`](src/marcas.ts). Es una línea, y mejora la detección sin tocar el motor. Hay una [plantilla de issue](https://github.com/luisfernandomedh/certia/issues/new?template=agregar-marca.yml) para eso.
+
+Antes de aportar mensajes o código, lee [SECURITY.md](SECURITY.md). Aceptar contenido de desconocidos y publicarlo tiene riesgos concretos —enlaces de phishing vivos, inyección, datos personales irreversibles, envenenamiento del corpus— y el diseño los enfrenta de forma explícita.
 
 ## Desarrollo
 
@@ -89,3 +102,8 @@ npm test
 ## Licencia
 
 MIT
+
+## Documentos
+
+- [SECURITY.md](SECURITY.md) — modelo de amenazas y decisiones de diseño
+- [CORPUS.md](CORPUS.md) — formato del corpus abierto y cómo se aporta

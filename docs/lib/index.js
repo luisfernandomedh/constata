@@ -3,6 +3,7 @@ import { DETECTORES } from "./signals/index.js";
 export { DETECTORES } from "./signals/index.js";
 export { construirContexto, dominioDe, normalizar } from "./contexto.js";
 export { MARCAS, ACORTADORES, ALOJAMIENTO_GENERICO, esDominioConocido, esDominioDe } from "./marcas.js";
+export { anonimizar, desactivarEnlace, tieneEnlaces } from "./anonimizar.js";
 function nivel(puntaje) {
     if (puntaje >= 60)
         return "alto";

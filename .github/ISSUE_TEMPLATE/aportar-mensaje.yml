@@ -1,0 +1,67 @@
+name: Aportar un mensaje al corpus
+description: Comparte un mensaje de estafa (o uno legítimo) para mejorar la detección
+title: "[corpus] "
+labels: ["corpus", "pendiente-de-revision"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por aportar. Antes de enviar, **revisa el texto con tus ojos**:
+        la limpieza automática quita correos, teléfonos, montos y números largos,
+        pero **no detecta nombres propios**. Si aparece el tuyo o el de alguien
+        más, bórralo ahora.
+
+        No adjuntes capturas ni archivos. Solo texto.
+
+  - type: textarea
+    id: texto
+    attributes:
+      label: El mensaje, ya anonimizado
+      description: Con los enlaces desactivados (hxxp:// y dominio[.]com)
+      render: text
+    validations:
+      required: true
+
+  - type: dropdown
+    id: etiqueta
+    attributes:
+      label: ¿Qué es?
+      options:
+        - Estafa
+        - Mensaje legítimo (sirve para medir falsos positivos)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: canal
+    attributes:
+      label: ¿Por dónde llegó?
+      options: [SMS, Correo, WhatsApp, Llamada, Red social, Otro]
+    validations:
+      required: true
+
+  - type: input
+    id: pais
+    attributes:
+      label: País donde circuló
+      placeholder: Ecuador
+  - type: input
+    id: suplanta
+    attributes:
+      label: ¿A quién dice ser?
+      placeholder: Banco Pichincha, SRI, Claro…
+  - type: textarea
+    id: notas
+    attributes:
+      label: Contexto
+      description: Cualquier cosa útil para quien lea esto después
+
+  - type: checkboxes
+    id: confirmaciones
+    attributes:
+      label: Confirma antes de enviar
+      options:
+        - label: Revisé el texto y no contiene nombres ni datos de ninguna persona
+          required: true
+        - label: Entiendo que esto se publicará en un corpus abierto de dominio público
+          required: true

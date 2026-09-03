@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Reportar un problema de seguridad
+    url: https://github.com/luisfernandomedh/certia/blob/main/SECURITY.md
+    about: Lee primero el modelo de amenazas. No publiques exploits funcionales.

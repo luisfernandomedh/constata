@@ -4,62 +4,53 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cierto — ¿este mensaje es una estafa?</title>
-<meta name="description" content="Pega un mensaje sospechoso y Cierto te dice qué señales de estafa encuentra, y por qué. Todo ocurre en tu navegador: el mensaje nunca se envía a ningún servidor.">
+<meta name="description" content="Pega un mensaje sospechoso y Cierto te dice qué señales de estafa encuentra, y por qué. Todo ocurre en tu navegador: el mensaje nunca se envía a ningún servidor. Gratis y de código abierto.">
+<meta property="og:title" content="Cierto — ¿este mensaje es una estafa?">
+<meta property="og:description" content="Análisis de mensajes sospechosos que ocurre entero en tu navegador. Tu mensaje nunca sale de tu dispositivo. Gratis, abierto y sin cuenta.">
+<meta property="og:type" content="website">
 <style>
   :root {
     color-scheme: light dark;
-    --fondo: #fbfaf8;
-    --papel: #ffffff;
-    --texto: #1a1a1a;
-    --tenue: #6b6b6b;
-    --borde: #e2e0dc;
-    --acento: #1f5f4f;
-    --alto: #b3261e;
-    --alto-fondo: #fdeceb;
-    --medio: #8a5a00;
-    --medio-fondo: #fdf3e0;
-    --bajo: #1f5f4f;
-    --bajo-fondo: #e9f3ef;
+    --fondo: #fbfaf8; --papel: #ffffff; --texto: #1a1a1a; --tenue: #6b6b6b;
+    --borde: #e2e0dc; --acento: #1f5f4f;
+    --alto: #b3261e; --alto-fondo: #fdeceb;
+    --medio: #8a5a00; --medio-fondo: #fdf3e0;
+    --bajo: #1f5f4f; --bajo-fondo: #e9f3ef;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --fondo: #16181a;
-      --papel: #1e2124;
-      --texto: #eceae6;
-      --tenue: #9a9894;
-      --borde: #33373b;
-      --acento: #6fd1b4;
-      --alto: #ff8a80;
-      --alto-fondo: #35211f;
-      --medio: #f0bf6a;
-      --medio-fondo: #322717;
-      --bajo: #6fd1b4;
-      --bajo-fondo: #172b26;
+      --fondo: #16181a; --papel: #1e2124; --texto: #eceae6; --tenue: #9a9894;
+      --borde: #33373b; --acento: #6fd1b4;
+      --alto: #ff8a80; --alto-fondo: #35211f;
+      --medio: #f0bf6a; --medio-fondo: #322717;
+      --bajo: #6fd1b4; --bajo-fondo: #172b26;
     }
   }
   * { box-sizing: border-box; }
   body {
-    margin: 0;
-    background: var(--fondo);
-    color: var(--texto);
+    margin: 0; background: var(--fondo); color: var(--texto);
     font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   }
-  .envoltura { max-width: 680px; margin: 0 auto; padding: 48px 20px 80px; }
-  header { margin-bottom: 32px; }
-  h1 { font-size: 34px; letter-spacing: -0.02em; margin: 0 0 6px; }
+  .envoltura { max-width: 700px; margin: 0 auto; padding: 48px 20px 80px; }
+  header { margin-bottom: 30px; }
+  h1 { font-size: 36px; letter-spacing: -0.025em; margin: 0 0 8px; }
   h1 span { color: var(--acento); }
   .lema { color: var(--tenue); margin: 0; font-size: 17px; }
-  .privacidad {
-    margin-top: 18px; padding: 10px 14px; font-size: 14px; line-height: 1.5;
+  h2 { font-size: 19px; letter-spacing: -0.01em; margin: 44px 0 12px; }
+  .promesa {
+    margin-top: 20px; padding: 14px 16px; font-size: 14.5px; line-height: 1.55;
     background: var(--bajo-fondo); border-left: 3px solid var(--acento);
-    border-radius: 0 6px 6px 0; color: var(--texto);
+    border-radius: 0 8px 8px 0;
   }
+  .promesa strong { color: var(--acento); }
   textarea {
-    width: 100%; min-height: 150px; padding: 14px; font: inherit; font-size: 15px;
+    width: 100%; padding: 14px; font: inherit; font-size: 15px;
     background: var(--papel); color: var(--texto);
     border: 1px solid var(--borde); border-radius: 10px; resize: vertical;
   }
+  #mensaje { min-height: 148px; }
   textarea:focus { outline: 2px solid var(--acento); outline-offset: 1px; }
+  .etiqueta { display: block; font-size: 13.5px; color: var(--tenue); margin-bottom: 8px; }
   .fila { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
   button {
     font: inherit; font-weight: 600; padding: 10px 20px; border-radius: 8px;
@@ -69,7 +60,7 @@
   button.secundario { background: transparent; color: var(--acento); font-weight: 500; }
   button:hover { opacity: .88; }
   .ejemplos { margin-top: 26px; }
-  .ejemplos p { font-size: 13px; color: var(--tenue); margin: 0 0 8px; text-transform: uppercase; letter-spacing: .06em; }
+  .ejemplos p { font-size: 12.5px; color: var(--tenue); margin: 0 0 8px; text-transform: uppercase; letter-spacing: .07em; }
   .ejemplos button {
     background: var(--papel); color: var(--texto); border: 1px solid var(--borde);
     font-weight: 400; font-size: 14px; padding: 7px 13px; margin: 0 6px 6px 0; border-radius: 20px;
@@ -84,32 +75,50 @@
   .alto  { background: var(--alto-fondo);  border-color: var(--alto);  color: var(--alto); }
   .medio { background: var(--medio-fondo); border-color: var(--medio); color: var(--medio); }
   .bajo  { background: var(--bajo-fondo);  border-color: var(--bajo);  color: var(--bajo); }
-  ul.senales { list-style: none; padding: 0; margin: 18px 0 0; }
+  ul.senales, ul.avisos { list-style: none; padding: 0; margin: 16px 0 0; }
   ul.senales li {
-    background: var(--papel); border: 1px solid var(--borde); border-radius: 10px;
-    padding: 14px 16px; margin-bottom: 10px;
+    background: var(--papel); border: 1px solid var(--borde);
+    border-radius: 10px; padding: 14px 16px; margin-bottom: 10px;
   }
-  ul.senales .id {
-    font: 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
-    color: var(--tenue); text-transform: uppercase; letter-spacing: .04em;
-    display: block; margin-bottom: 6px;
-  }
-  ul.senales .evidencia {
-    font: 13px ui-monospace, SFMono-Regular, Menlo, monospace;
-    color: var(--tenue); display: block; margin-top: 8px; word-break: break-all;
-  }
-  .aviso { margin-top: 20px; font-size: 14px; color: var(--tenue); line-height: 1.55; }
-  ul.avisos { list-style: none; padding: 0; margin: 18px 0 0; }
   ul.avisos li {
     background: var(--medio-fondo); border: 1px solid var(--medio); border-left-width: 4px;
     border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; color: var(--texto);
   }
-  ul.avisos .titulo {
-    font-size: 12px; text-transform: uppercase; letter-spacing: .06em;
-    color: var(--medio); font-weight: 700; display: block; margin-bottom: 6px;
+  .id, .titulo {
+    font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em;
+    display: block; margin-bottom: 6px;
   }
-  footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--borde); font-size: 14px; color: var(--tenue); }
+  .id { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--tenue); }
+  .titulo { color: var(--medio); font-weight: 700; }
+  .evidencia {
+    font: 13px ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--tenue); display: block; margin-top: 8px; word-break: break-all;
+  }
+  .remate { margin-top: 18px; font-size: 14.5px; color: var(--tenue); line-height: 1.55; }
+  /* Contribución */
+  #contribuir { margin-top: 28px; }
+  .caja {
+    background: var(--papel); border: 1px solid var(--borde);
+    border-radius: 12px; padding: 18px 20px;
+  }
+  .caja h3 { margin: 0 0 6px; font-size: 16px; }
+  .caja p { margin: 0 0 14px; font-size: 14.5px; color: var(--tenue); line-height: 1.55; }
+  #limpio { min-height: 110px; font: 14px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .cambios {
+    font-size: 13.5px; color: var(--tenue); margin: 10px 0 0;
+    padding: 10px 12px; background: var(--bajo-fondo); border-radius: 8px;
+  }
+  .ojo {
+    font-size: 13.5px; line-height: 1.55; margin: 12px 0 0;
+    padding: 10px 12px; background: var(--medio-fondo);
+    border-left: 3px solid var(--medio); border-radius: 0 8px 8px 0;
+  }
+  .como { font-size: 15px; line-height: 1.65; color: var(--texto); }
+  .como p { margin: 0 0 14px; }
+  .como strong { color: var(--acento); }
+  footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--borde); font-size: 14px; color: var(--tenue); line-height: 1.8; }
   footer a { color: var(--acento); }
+  [hidden] { display: none !important; }
 </style>
 </head>
 <body>
@@ -118,13 +127,14 @@
   <header>
     <h1>¿Es <span>cierto</span>?</h1>
     <p class="lema">Pega un mensaje sospechoso y te digo qué señales de estafa tiene, y por qué.</p>
-    <p class="privacidad">
-      <strong>Tu mensaje no sale de aquí.</strong> Todo el análisis ocurre dentro de tu navegador.
-      No hay servidor, no se guarda nada, no se envía nada. Puedes desconectar el internet y sigue funcionando.
+    <p class="promesa">
+      <strong>Tu mensaje no sale de tu dispositivo.</strong> Todo el análisis ocurre dentro de
+      tu navegador. No hay servidor, no hay cuenta, no se guarda nada, no se envía nada, no hay
+      cookies. Puedes desconectar el internet y sigue funcionando — pruébalo.
     </p>
   </header>
 
-  <label for="mensaje" style="display:block;font-size:14px;color:var(--tenue);margin-bottom:8px">Mensaje a revisar</label>
+  <label class="etiqueta" for="mensaje">Mensaje a revisar</label>
   <textarea id="mensaje" placeholder="Pega aquí el SMS, el correo o el mensaje de WhatsApp…"></textarea>
 
   <div class="fila">
@@ -133,55 +143,114 @@
   </div>
 
   <div class="ejemplos">
-    <p>O prueba con un ejemplo</p>
+    <p>O prueba con un ejemplo real</p>
     <div id="ejemplos"></div>
   </div>
 
   <div id="resultado" aria-live="polite"></div>
 
+  <div id="contribuir" hidden>
+    <div class="caja">
+      <h3>¿Nos ayudas a mejorar esto?</h3>
+      <p>
+        No existe un conjunto público de mensajes de estafa en español latinoamericano.
+        Por eso ninguna herramienta extranjera reconoce al Banco Pichincha ni al SRI.
+        Si donas este ejemplo, ayudas a llenar ese vacío.
+      </p>
+      <button id="preparar" class="secundario">Preparar este mensaje para contribuir</button>
+
+      <div id="revision" hidden style="margin-top:18px">
+        <label class="etiqueta" for="limpio">
+          Esto es exactamente lo que se enviaría. Puedes editarlo.
+        </label>
+        <textarea id="limpio" spellcheck="false"></textarea>
+        <p class="cambios" id="cambios"></p>
+        <p class="ojo">
+          <strong>Revísalo con tus ojos.</strong> La limpieza automática quita correos,
+          teléfonos, montos, números largos y las rutas de los enlaces. <strong>No detecta
+          nombres propios.</strong> Si aparece el tuyo o el de alguien más, bórralo ahora.
+        </p>
+        <div class="fila">
+          <button id="enviar">Continuar en GitHub</button>
+          <button id="cancelar" class="secundario">Cancelar</button>
+        </div>
+        <p class="remate" style="margin-top:10px">
+          Se abre un formulario con el texto ya puesto. Nada se publica hasta que tú lo envíes
+          y alguien lo revise.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <h2>Cómo funciona</h2>
+  <div class="como">
+    <p>
+      Cierto busca <strong>señales conocidas</strong> de fraude: que el enlace no coincida con
+      la marca que dice ser, dominios que imitan a un banco, letras de otro alfabeto disfrazadas
+      de latinas, acortadores que esconden el destino, peticiones de códigos o claves, y los
+      guiones de siempre — el familiar con número nuevo, el jefe que no puede hablar, el premio
+      que nadie pidió.
+    </p>
+    <p>
+      Conoce instituciones de Ecuador y de la región: Pichincha, Guayaquil, Produbanco, Pacífico,
+      Diners, el SRI, el IESS, Claro, Movistar, y bancos de Colombia, Perú y México. Esa es la
+      diferencia con las herramientas hechas afuera.
+    </p>
+    <p>
+      <strong>No te da un veredicto, te da indicios explicados.</strong> Porque el objetivo no es
+      solo salvarte hoy: es que reconozcas el patrón la próxima vez. Y porque decirle a alguien
+      «esto es seguro» cuando no lo es sería peor que no haber dicho nada. Riesgo bajo significa
+      <em>no encontré señales conocidas</em>, nunca <em>esto es seguro</em>.
+    </p>
+  </div>
+
   <footer>
-    Cierto es software libre, gratuito y de código abierto.
-    <a href="https://github.com/luisfernandomedh/certia">Ver el código en GitHub</a>.
+    Cierto es software libre, gratuito y de código abierto. Sin cuenta, sin publicidad, sin rastreo.<br>
+    <a href="https://github.com/luisfernandomedh/certia">Código en GitHub</a> ·
+    <a href="https://github.com/luisfernandomedh/certia/blob/main/SECURITY.md">Modelo de amenazas</a> ·
+    <a href="https://github.com/luisfernandomedh/certia/blob/main/CORPUS.md">El corpus abierto</a>
   </footer>
 
 </div>
 
 <script type="module">
-import { analizar } from "./lib/index.js";
+import { analizar, anonimizar } from "./lib/index.js";
+
+const REPO = "luisfernandomedh/certia";
 
 const EJEMPLOS = [
   ["Banco falso", "Banco Pichincha: detectamos un consumo de $340 en Quito. Si no lo reconoce, bloquee aqui: http://pichincha-seguro.net/bloqueo"],
   ["SRI falso", "SRI: usted tiene una devolucion de impuestos de $187.40 pendiente. Ingrese sus datos: https://sri-devoluciones.info"],
   ["Robo de código", "Somos WhatsApp. Envianos el codigo de verificacion que te llego por SMS para restaurar tu cuenta."],
-  ["\u00abHola mamá\u00bb", "Hola mama, se me daño el telefono, este es mi numero nuevo. Necesito que me hagas una transferencia urgente, luego te explico."],
+  ["«Hola mamá»", "Hola mama, se me daño el telefono, este es mi numero nuevo. Necesito que me hagas una transferencia urgente, luego te explico."],
   ["Falso jefe", "Soy el gerente. Estoy en una reunion y no puedo hablar. Necesito que compres tarjetas de regalo y me envies los codigos."],
   ["Empleo irreal", "Buenas, le escribo de Recursos Humanos. Tenemos una vacante de trabajo remoto, $80 diarios por 2 horas. Interesado responda SI."],
-  ["Letras falsas", "Verifique su cuenta en \u0440\u0430ypal.com ahora mismo"],
+  ["Letras falsas", "Verifique su cuenta en раypal.com ahora mismo"],
   ["Caso ambiguo", "Su codigo de verificacion de Google es 483920. No lo comparta con nadie."],
   ["Mensaje normal", "Banco Pichincha: consumo aprobado por $45.20 en SUPERMAXI. Si no lo reconoce llame al 1700 100 100."],
 ];
-
-const $mensaje = document.getElementById("mensaje");
-const $resultado = document.getElementById("resultado");
 
 const ETIQUETA = {
   alto: "Riesgo alto",
   medio: "Riesgo medio",
   bajo: "No encontré señales conocidas",
 };
-
 const REMATE = {
-  alto: "Tiene varias marcas típicas de una estafa. No abras los enlaces ni respondas.",
+  alto: "Tiene varias marcas típicas de una estafa. No abras los enlaces, no respondas, y si dice ser tu banco, llama tú al número que está en tu tarjeta.",
   medio: "Tiene algo sospechoso. Verifica por un canal oficial antes de hacer nada.",
-  bajo: "Eso no garantiza que sea seguro: solo significa que no reconocí ninguna de las señales que sé buscar.",
+  bajo: "Eso no garantiza que sea seguro: solo significa que no reconocí ninguna de las señales que sé buscar. Desconfía igual si algo te pide dinero o datos.",
 };
 
-function escapar(s) {
-  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
+const $ = (id) => document.getElementById(id);
+const $mensaje = $("mensaje"), $resultado = $("resultado"), $contribuir = $("contribuir");
+const $revision = $("revision"), $limpio = $("limpio"), $cambios = $("cambios");
 
-function pintar(resultado) {
-  const { riesgo, puntaje, hallazgos, avisos } = resultado;
+// Todo contenido que provenga del mensaje se escapa antes de tocar el documento.
+// Ver SECURITY.md, amenaza A2.
+const escapar = (s) => String(s).replace(/[&<>"']/g, (c) =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+function pintar({ riesgo, puntaje, hallazgos, avisos }) {
   const senales = hallazgos.map((h) => `
     <li>
       <span class="id">${escapar(h.id)}</span>
@@ -202,30 +271,62 @@ function pintar(resultado) {
     </div>
     ${listaAvisos ? `<ul class="avisos">${listaAvisos}</ul>` : ""}
     ${senales ? `<ul class="senales">${senales}</ul>` : ""}
-    <p class="aviso">${REMATE[riesgo]}</p>`;
+    <p class="remate">${REMATE[riesgo]}</p>`;
 }
 
-document.getElementById("analizar").addEventListener("click", () => {
+function revisar() {
   const texto = $mensaje.value.trim();
-  if (!texto) { $resultado.innerHTML = ""; return; }
+  if (!texto) { $resultado.innerHTML = ""; ocultarContribucion(); return; }
   pintar(analizar(texto));
-});
+  $contribuir.hidden = false;
+  $revision.hidden = true;
+}
 
-document.getElementById("limpiar").addEventListener("click", () => {
+function ocultarContribucion() {
+  $contribuir.hidden = true;
+  $revision.hidden = true;
+}
+
+$("analizar").addEventListener("click", revisar);
+
+$("limpiar").addEventListener("click", () => {
   $mensaje.value = "";
   $resultado.innerHTML = "";
+  ocultarContribucion();
   $mensaje.focus();
 });
 
 $mensaje.addEventListener("keydown", (e) => {
-  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") document.getElementById("analizar").click();
+  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") revisar();
 });
 
-const $ejemplos = document.getElementById("ejemplos");
+$("preparar").addEventListener("click", () => {
+  const { texto, reemplazos } = anonimizar($mensaje.value.trim());
+  $limpio.value = texto;
+  $cambios.textContent = reemplazos.length
+    ? `Se reemplazó automáticamente: ${reemplazos.join(", ")}.`
+    : "No se encontró ningún dato personal que reemplazar. Revísalo igual.";
+  $revision.hidden = false;
+  $limpio.focus();
+});
+
+$("cancelar").addEventListener("click", () => { $revision.hidden = true; });
+
+$("enviar").addEventListener("click", () => {
+  const cuerpo = $limpio.value.trim();
+  if (!cuerpo) return;
+  const url = new URL(`https://github.com/${REPO}/issues/new`);
+  url.searchParams.set("template", "aportar-mensaje.yml");
+  url.searchParams.set("title", "[corpus] ");
+  url.searchParams.set("texto", cuerpo);
+  window.open(url.toString(), "_blank", "noopener");
+});
+
+const $ejemplos = $("ejemplos");
 for (const [nombre, texto] of EJEMPLOS) {
   const b = document.createElement("button");
   b.textContent = nombre;
-  b.addEventListener("click", () => { $mensaje.value = texto; pintar(analizar(texto)); });
+  b.addEventListener("click", () => { $mensaje.value = texto; revisar(); });
   $ejemplos.appendChild(b);
 }
 </script>
