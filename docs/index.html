@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cierto — ¿este mensaje es una estafa?</title>
+<meta name="description" content="Pega un mensaje sospechoso y Cierto te dice qué señales de estafa encuentra, y por qué. Todo ocurre en tu navegador: el mensaje nunca se envía a ningún servidor.">
+<style>
+  :root {
+    color-scheme: light dark;
+    --fondo: #fbfaf8;
+    --papel: #ffffff;
+    --texto: #1a1a1a;
+    --tenue: #6b6b6b;
+    --borde: #e2e0dc;
+    --acento: #1f5f4f;
+    --alto: #b3261e;
+    --alto-fondo: #fdeceb;
+    --medio: #8a5a00;
+    --medio-fondo: #fdf3e0;
+    --bajo: #1f5f4f;
+    --bajo-fondo: #e9f3ef;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fondo: #16181a;
+      --papel: #1e2124;
+      --texto: #eceae6;
+      --tenue: #9a9894;
+      --borde: #33373b;
+      --acento: #6fd1b4;
+      --alto: #ff8a80;
+      --alto-fondo: #35211f;
+      --medio: #f0bf6a;
+      --medio-fondo: #322717;
+      --bajo: #6fd1b4;
+      --bajo-fondo: #172b26;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--fondo);
+    color: var(--texto);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  .envoltura { max-width: 680px; margin: 0 auto; padding: 48px 20px 80px; }
+  header { margin-bottom: 32px; }
+  h1 { font-size: 34px; letter-spacing: -0.02em; margin: 0 0 6px; }
+  h1 span { color: var(--acento); }
+  .lema { color: var(--tenue); margin: 0; font-size: 17px; }
+  .privacidad {
+    margin-top: 18px; padding: 10px 14px; font-size: 14px; line-height: 1.5;
+    background: var(--bajo-fondo); border-left: 3px solid var(--acento);
+    border-radius: 0 6px 6px 0; color: var(--texto);
+  }
+  textarea {
+    width: 100%; min-height: 150px; padding: 14px; font: inherit; font-size: 15px;
+    background: var(--papel); color: var(--texto);
+    border: 1px solid var(--borde); border-radius: 10px; resize: vertical;
+  }
+  textarea:focus { outline: 2px solid var(--acento); outline-offset: 1px; }
+  .fila { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+  button {
+    font: inherit; font-weight: 600; padding: 10px 20px; border-radius: 8px;
+    border: 1px solid var(--acento); background: var(--acento); color: var(--fondo);
+    cursor: pointer;
+  }
+  button.secundario { background: transparent; color: var(--acento); font-weight: 500; }
+  button:hover { opacity: .88; }
+  .ejemplos { margin-top: 26px; }
+  .ejemplos p { font-size: 13px; color: var(--tenue); margin: 0 0 8px; text-transform: uppercase; letter-spacing: .06em; }
+  .ejemplos button {
+    background: var(--papel); color: var(--texto); border: 1px solid var(--borde);
+    font-weight: 400; font-size: 14px; padding: 7px 13px; margin: 0 6px 6px 0; border-radius: 20px;
+  }
+  #resultado { margin-top: 32px; }
+  .veredicto {
+    padding: 16px 18px; border-radius: 10px; border: 1px solid transparent;
+    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  }
+  .veredicto strong { font-size: 20px; letter-spacing: -0.01em; }
+  .veredicto .puntaje { font-size: 14px; color: var(--tenue); margin-left: auto; }
+  .alto  { background: var(--alto-fondo);  border-color: var(--alto);  color: var(--alto); }
+  .medio { background: var(--medio-fondo); border-color: var(--medio); color: var(--medio); }
+  .bajo  { background: var(--bajo-fondo);  border-color: var(--bajo);  color: var(--bajo); }
+  ul.senales { list-style: none; padding: 0; margin: 18px 0 0; }
+  ul.senales li {
+    background: var(--papel); border: 1px solid var(--borde); border-radius: 10px;
+    padding: 14px 16px; margin-bottom: 10px;
+  }
+  ul.senales .id {
+    font: 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--tenue); text-transform: uppercase; letter-spacing: .04em;
+    display: block; margin-bottom: 6px;
+  }
+  ul.senales .evidencia {
+    font: 13px ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--tenue); display: block; margin-top: 8px; word-break: break-all;
+  }
+  .aviso { margin-top: 20px; font-size: 14px; color: var(--tenue); line-height: 1.55; }
+  footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--borde); font-size: 14px; color: var(--tenue); }
+  footer a { color: var(--acento); }
+</style>
+</head>
+<body>
+<div class="envoltura">
+
+  <header>
+    <h1>¿Es <span>cierto</span>?</h1>
+    <p class="lema">Pega un mensaje sospechoso y te digo qué señales de estafa tiene, y por qué.</p>
+    <p class="privacidad">
+      <strong>Tu mensaje no sale de aquí.</strong> Todo el análisis ocurre dentro de tu navegador.
+      No hay servidor, no se guarda nada, no se envía nada. Puedes desconectar el internet y sigue funcionando.
+    </p>
+  </header>
+
+  <label for="mensaje" style="display:block;font-size:14px;color:var(--tenue);margin-bottom:8px">Mensaje a revisar</label>
+  <textarea id="mensaje" placeholder="Pega aquí el SMS, el correo o el mensaje de WhatsApp…"></textarea>
+
+  <div class="fila">
+    <button id="analizar">Revisar mensaje</button>
+    <button id="limpiar" class="secundario">Limpiar</button>
+  </div>
+
+  <div class="ejemplos">
+    <p>O prueba con un ejemplo</p>
+    <div id="ejemplos"></div>
+  </div>
+
+  <div id="resultado" aria-live="polite"></div>
+
+  <footer>
+    Cierto es software libre, gratuito y de código abierto.
+    <a href="https://github.com/luisfernandomedh/certia">Ver el código en GitHub</a>.
+  </footer>
+
+</div>
+
+<script type="module">
+import { analizar } from "./lib/index.js";
+
+const EJEMPLOS = [
+  ["Suplantación de marca", "URGENTE: Su cuenta de Netflix sera suspendida hoy. Confirme su contrasena aqui: http://netflix-pagos.info/verificar"],
+  ["Robo de código", "Somos WhatsApp. Envianos el codigo de verificacion que te llego por SMS para restaurar tu cuenta."],
+  ["Premio falso", "Felicidades! Has ganado un bono de $500. Reclama tu premio hoy en bit.ly/3xKq2a"],
+  ["Paquete retenido", "Su paquete esta retenido en aduana. Pague la tasa de $2.30 aqui: https://dhl-envios-ec.com/pago"],
+  ["Mensaje normal", "Hola, te confirmo la reunion de manana a las 10. El link es https://meet.google.com/abc-defg-hij"],
+];
+
+const $mensaje = document.getElementById("mensaje");
+const $resultado = document.getElementById("resultado");
+
+const ETIQUETA = {
+  alto: "Riesgo alto",
+  medio: "Riesgo medio",
+  bajo: "No encontré señales conocidas",
+};
+
+const REMATE = {
+  alto: "Tiene varias marcas típicas de una estafa. No abras los enlaces ni respondas.",
+  medio: "Tiene algo sospechoso. Verifica por un canal oficial antes de hacer nada.",
+  bajo: "Eso no garantiza que sea seguro: solo significa que no reconocí ninguna de las señales que sé buscar.",
+};
+
+function escapar(s) {
+  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function pintar(resultado) {
+  const { riesgo, puntaje, hallazgos } = resultado;
+  const senales = hallazgos.map((h) => `
+    <li>
+      <span class="id">${escapar(h.id)}</span>
+      ${escapar(h.explicacion)}
+      ${h.evidencia ? `<span class="evidencia">${escapar(h.evidencia)}</span>` : ""}
+    </li>`).join("");
+
+  $resultado.innerHTML = `
+    <div class="veredicto ${riesgo}">
+      <strong>${ETIQUETA[riesgo]}</strong>
+      <span class="puntaje">${puntaje} / 100</span>
+    </div>
+    ${senales ? `<ul class="senales">${senales}</ul>` : ""}
+    <p class="aviso">${REMATE[riesgo]}</p>`;
+}
+
+document.getElementById("analizar").addEventListener("click", () => {
+  const texto = $mensaje.value.trim();
+  if (!texto) { $resultado.innerHTML = ""; return; }
+  pintar(analizar(texto));
+});
+
+document.getElementById("limpiar").addEventListener("click", () => {
+  $mensaje.value = "";
+  $resultado.innerHTML = "";
+  $mensaje.focus();
+});
+
+$mensaje.addEventListener("keydown", (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") document.getElementById("analizar").click();
+});
+
+const $ejemplos = document.getElementById("ejemplos");
+for (const [nombre, texto] of EJEMPLOS) {
+  const b = document.createElement("button");
+  b.textContent = nombre;
+  b.addEventListener("click", () => { $mensaje.value = texto; pintar(analizar(texto)); });
+  $ejemplos.appendChild(b);
+}
+</script>
+</body>
+</html>

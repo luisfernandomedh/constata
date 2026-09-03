@@ -1,0 +1,34 @@
+{
+  "name": "certia",
+  "version": "0.1.0",
+  "description": "Detecta señales de estafa en mensajes y explica por qué. Núcleo determinista, sin dependencias, corre en navegador y en Node.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc && rm -rf docs/lib && cp -R dist docs/lib",
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": [
+    "phishing",
+    "smishing",
+    "scam",
+    "fraude",
+    "estafa",
+    "seguridad"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^22.10.0"
+  }
+}
