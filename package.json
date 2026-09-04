@@ -1,5 +1,5 @@
 {
-  "name": "certia",
+  "name": "constata",
   "version": "0.1.0",
   "description": "Detecta señales de estafa en mensajes y explica por qué. Núcleo determinista, sin dependencias, corre en navegador y en Node.",
   "type": "module",

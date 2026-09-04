@@ -20,11 +20,11 @@ import { analizar, reactivarEnlaces } from "../dist/index.js";
 
 const args = process.argv.slice(2);
 const soloFallos = args.includes("--fallos");
-const ruta = args.find((a) => !a.startsWith("--")) ?? "../certia-corpus/entradas";
+const ruta = args.find((a) => !a.startsWith("--")) ?? "../constata-corpus/entradas";
 
 if (!existsSync(ruta)) {
   console.error(`No encuentro el corpus en ${ruta}`);
-  console.error("Clónalo:  git clone https://github.com/luisfernandomedh/certia-corpus ../certia-corpus");
+  console.error("Clónalo:  git clone https://github.com/luisfernandomedh/constata-corpus ../constata-corpus");
   process.exit(1);
 }
 
@@ -52,7 +52,7 @@ const sinteticas = entradas.filter((e) => e.procedencia === "sintetico").length;
 const proporcionSintetica = sinteticas / entradas.length;
 
 if (!soloFallos) {
-  console.log("\n═══ Certia contra el corpus ═══\n");
+  console.log("\n═══ Constata contra el corpus ═══\n");
   console.log(`Entradas: ${entradas.length}  ·  ${estafas.length} estafas, ${legitimos.length} legítimos`);
   if (proporcionSintetica > 0.5) {
     console.log(`\n⚠  ${sinteticas} de ${entradas.length} entradas son SINTÉTICAS: se escribieron junto con el motor.`);

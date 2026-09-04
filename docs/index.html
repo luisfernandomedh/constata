@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Certia — ¿este mensaje es una estafa?</title>
-<meta name="description" content="Pega un mensaje sospechoso y Certia te subraya exactamente qué parte es sospechosa, y por qué. Todo ocurre en tu navegador: el mensaje nunca sale de tu dispositivo.">
-<meta property="og:title" content="Certia — ¿este mensaje es una estafa?">
+<title>Constata — ¿este mensaje es una estafa?</title>
+<meta name="description" content="Pega un mensaje sospechoso y Constata te subraya exactamente qué parte es sospechosa, y por qué. Todo ocurre en tu navegador: el mensaje nunca sale de tu dispositivo.">
+<meta property="og:title" content="Constata — ¿este mensaje es una estafa?">
 <meta property="og:description" content="Te subraya en el propio mensaje qué parte es sospechosa y por qué. Corre entero en tu navegador. Gratis, abierto y sin cuenta.">
 <meta property="og:type" content="website">
 <style>
@@ -215,7 +215,7 @@
           <path d="m9 11.8 2.2 2.2L15.4 9.8"/>
         </svg>
       </div>
-      <h1>Certia</h1>
+      <h1>Constata</h1>
     </div>
     <p class="lema">¿Este mensaje es una estafa? Pégalo y te subrayo exactamente qué parte es sospechosa, y por qué.</p>
     <p class="promesa">
@@ -277,12 +277,12 @@
   </div>
 
   <footer>
-    Certia es software libre, gratuito y de código abierto. Sin cuenta, sin publicidad, sin rastreo.<br>
+    Constata es software libre, gratuito y de código abierto. Sin cuenta, sin publicidad, sin rastreo.<br>
     <a href="como-funciona.html">Cómo funciona</a> ·
     <a href="dominios.html">Dominios verificados</a> ·
-    <a href="https://github.com/luisfernandomedh/certia">Código en GitHub</a> ·
-    <a href="https://github.com/luisfernandomedh/certia/blob/main/SECURITY.md">Modelo de amenazas</a> ·
-    <a href="https://github.com/luisfernandomedh/certia-corpus">El corpus abierto</a>
+    <a href="https://github.com/luisfernandomedh/constata">Código en GitHub</a> ·
+    <a href="https://github.com/luisfernandomedh/constata/blob/main/SECURITY.md">Modelo de amenazas</a> ·
+    <a href="https://github.com/luisfernandomedh/constata-corpus">El corpus abierto</a>
   </footer>
 
 </div>
@@ -290,8 +290,8 @@
 <script type="module">
 import { analizar, anonimizar } from "./lib/index.js";
 
-const ENDPOINT = "https://cierto-aportes.luisfernandomedh.workers.dev";
-const REPO = "luisfernandomedh/certia";
+const ENDPOINT = "https://constata-aportes.luisfernandomedh.workers.dev";
+const REPO = "luisfernandomedh/constata";
 
 const EJEMPLOS = [
   ["Banco falso", "Banco Pichincha: detectamos un consumo de $340 en Quito. Si no lo reconoce, bloquee aqui: http://pichincha-seguro.net/bloqueo"],
@@ -421,7 +421,7 @@ function pintar(texto, { riesgo, puntaje, hallazgos, avisos }) {
     </div>` : ""}
 
     ${tarjetas ? `<ul class="senales">${tarjetas}</ul>` : ""}
-    <p class="remate">Certia da indicios, no certezas. La decisión sigue siendo tuya.</p>`;
+    <p class="remate">Constata da indicios, no certezas. La decisión sigue siendo tuya.</p>`;
 
   // Señal y subrayado se iluminan juntos, en los dos sentidos.
   const resaltar = (nums, on) => {

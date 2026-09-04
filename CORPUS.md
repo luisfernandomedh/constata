@@ -4,7 +4,7 @@ No existe un conjunto público de mensajes de estafa en español latinoamericano
 
 ## Dónde vive
 
-En un repositorio aparte: **`certia-corpus`**, separado del código.
+En un repositorio aparte: **`constata-corpus`**, separado del código.
 
 La separación es deliberada. Si algún día el corpus recibe una queja, una solicitud de retiro o una marca de seguridad automática, la biblioteca sigue viva y utilizable. Mezclarlos sería atar el destino de uno al del otro sin ninguna necesidad.
 
@@ -50,7 +50,7 @@ Remitente, número de teléfono, dirección de correo, nombres propios, montos e
 
 ## Cómo se aporta
 
-Desde [la herramienta](https://luisfernandomedh.github.io/certia/):
+Desde [la herramienta](https://luisfernandomedh.github.io/constata/):
 
 1. Analizas tu mensaje. Eso ocurre entero en tu navegador, sin enviar nada.
 2. Con el resultado en pantalla aparece el texto **ya limpio y editable**, listo para aportar.
@@ -60,7 +60,7 @@ Un clic. Sin cuenta, sin registro, sin salir de la página.
 
 Ese envío no escribe en el corpus: crea una **propuesta pendiente** que una persona revisa. Ese paso no es burocracia, es la única defensa real contra que alguien envenene el conjunto o publique sin querer datos de un tercero. Ver [SECURITY.md](SECURITY.md).
 
-Si prefieres hacerlo tú mismo en GitHub, hay [plantillas de issue](https://github.com/luisfernandomedh/certia/issues/new/choose) para aportar un mensaje o para agregar una institución al registro.
+Si prefieres hacerlo tú mismo en GitHub, hay [plantillas de issue](https://github.com/luisfernandomedh/constata/issues/new/choose) para aportar un mensaje o para agregar una institución al registro.
 
 ## Licencia
 

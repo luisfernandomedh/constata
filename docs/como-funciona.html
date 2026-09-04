@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cómo funciona — Certia</title>
-<meta name="description" content="Por qué Certia existe, cómo detecta las estafas, y por qué tu mensaje nunca sale de tu dispositivo.">
+<title>Cómo funciona — Constata</title>
+<meta name="description" content="Por qué Constata existe, cómo detecta las estafas, y por qué tu mensaje nunca sale de tu dispositivo.">
 <style>
   :root {
     color-scheme: light dark;
@@ -65,14 +65,14 @@
 
   <a class="volver" href="./">← Volver a la herramienta</a>
 
-  <h1>Cómo funciona Certia</h1>
+  <h1>Cómo funciona Constata</h1>
   <p class="entrada">Y por qué está construido así, que es la parte que importa.</p>
 
   <h2>El problema</h2>
   <p>En Latinoamérica la estafa por mensaje es cotidiana. Llega un SMS diciendo que tu cuenta se bloquea, un WhatsApp de alguien que dice ser tu hijo con número nuevo, un correo del SRI ofreciéndote una devolución que nunca pediste.</p>
   <p>Y casi nada de lo que existe para verificarlo conoce al Banco Pichincha, al IESS o a Claro.</p>
 
-  <h2>Qué hace Certia</h2>
+  <h2>Qué hace Constata</h2>
   <p>Recibe un mensaje y busca señales conocidas de fraude. Luego te <strong>subraya en el propio mensaje</strong> qué parte disparó cada señal, y te explica por qué en español llano.</p>
 
   <div class="destacado">
@@ -88,14 +88,14 @@
   </div>
 
   <h2>El fuerte: los dominios comprobados</h2>
-  <p>La estafa más difícil de ver es la que usa un enlace que parece de tu banco sin serlo. Por eso Certia mantiene una <a href="dominios.html">lista de dominios verificados</a> y compara cada enlace contra ella.</p>
+  <p>La estafa más difícil de ver es la que usa un enlace que parece de tu banco sin serlo. Por eso Constata mantiene una <a href="dominios.html">lista de dominios verificados</a> y compara cada enlace contra ella.</p>
   <p>Cada dominio se comprueba contra el certificado del propio sitio, que lleva el nombre legal de la institución. La comprobación se repite sola cada mes, y la lista muestra la fecha.</p>
 
   <h2>Por qué tu mensaje no sale de tu dispositivo</h2>
   <p>No es una promesa de privacidad, es <strong>una propiedad de la arquitectura</strong>. El análisis es una función pura escrita en JavaScript que corre dentro de tu navegador. No hay servidor al que enviar nada, no hay base de datos, no hay cuenta, no hay cookies.</p>
   <p>La prueba está a tu alcance: <strong>desconecta el internet y la herramienta sigue funcionando.</strong> Ninguna herramienta que suba tus mensajes a un servidor puede hacer eso.</p>
 
-  <h2>Lo que Certia nunca te va a decir</h2>
+  <h2>Lo que Constata nunca te va a decir</h2>
   <p>Nunca va a decir «este mensaje es seguro». Cuando no encuentra nada, dice exactamente eso: <strong>no encontré señales conocidas</strong>.</p>
   <p>La diferencia no es de estilo. Decirle a alguien que un mensaje es seguro cuando en realidad era una estafa nueva sería peor que no haber dicho nada, porque le quitaríamos la desconfianza que lo protegía.</p>
 
@@ -105,18 +105,18 @@
   <div class="paso"><div class="n">2</div><div><b>Decides contribuirlo</b><span>Un acto aparte, que tú eliges después de ver el resultado. Nunca automático.</span></div></div>
   <div class="paso"><div class="n">3</div><div><b>Se limpia frente a ti</b><span>Se quitan correos, teléfonos, montos, fechas y las rutas de los enlaces. Ves el texto resultante y puedes editarlo antes de enviarlo.</span></div></div>
   <div class="paso"><div class="n">4</div><div><b>Una persona lo revisa</b><span>Nada entra al corpus automáticamente. Ese paso es la defensa contra que alguien publique sin querer datos de un tercero, o intente envenenar el conjunto.</span></div></div>
-  <p>El corpus se publica en <a href="https://github.com/luisfernandomedh/certia-corpus">un repositorio abierto</a> bajo dominio público, con los enlaces desactivados para que no sea un catálogo de sitios de phishing. Cualquiera puede usarlo sin pedir permiso.</p>
+  <p>El corpus se publica en <a href="https://github.com/luisfernandomedh/constata-corpus">un repositorio abierto</a> bajo dominio público, con los enlaces desactivados para que no sea un catálogo de sitios de phishing. Cualquiera puede usarlo sin pedir permiso.</p>
 
   <h2>Quién lo hizo y por qué es gratis</h2>
   <p>Lo hice porque mi familia recibe estos mensajes y no tiene cómo verificarlos, y porque lo que existía no servía para acá.</p>
-  <p>Es gratis, de código abierto y sin publicidad. No hay cuenta que crear ni datos que vender, porque no se recoge ninguno. <a href="https://github.com/luisfernandomedh/certia">El código está publicado</a> para que no tengas que creerme: puedes leerlo.</p>
+  <p>Es gratis, de código abierto y sin publicidad. No hay cuenta que crear ni datos que vender, porque no se recoge ninguno. <a href="https://github.com/luisfernandomedh/constata">El código está publicado</a> para que no tengas que creerme: puedes leerlo.</p>
 
   <footer>
     <a href="./">Volver a la herramienta</a> ·
     <a href="dominios.html">Dominios verificados</a> ·
-    <a href="https://github.com/luisfernandomedh/certia">Código en GitHub</a> ·
-    <a href="https://github.com/luisfernandomedh/certia/blob/main/SECURITY.md">Modelo de amenazas</a> ·
-    <a href="https://github.com/luisfernandomedh/certia-corpus">El corpus abierto</a>
+    <a href="https://github.com/luisfernandomedh/constata">Código en GitHub</a> ·
+    <a href="https://github.com/luisfernandomedh/constata/blob/main/SECURITY.md">Modelo de amenazas</a> ·
+    <a href="https://github.com/luisfernandomedh/constata-corpus">El corpus abierto</a>
   </footer>
 
 </div>

@@ -31,14 +31,14 @@ La revalidación del enlace desactivado se hace **de nuevo** aquí, aunque el cl
 
 ## Desplegar
 
-El repositorio del corpus ya existe: [certia-corpus](https://github.com/luisfernandomedh/certia-corpus).
+El repositorio del corpus ya existe: [constata-corpus](https://github.com/luisfernandomedh/constata-corpus).
 `wrangler` ya está instalado aquí, así que no hace falta `npx`.
 
 **1. Crear el token de GitHub**
 
 En Settings → Developer settings → Personal access tokens → **Fine-grained tokens**:
 
-- Repository access: **solo** `certia-corpus`
+- Repository access: **solo** `constata-corpus`
 - Permisos: `Issues: Read and write`. Nada más.
 - Vencimiento: el más corto que tolere tu ritmo de renovación.
 
@@ -59,7 +59,7 @@ npm run deploy
 En `docs/index.html`, poner la URL que devolvió el despliegue:
 
 ```js
-const ENDPOINT = "https://certia-aportes.TU-SUBDOMINIO.workers.dev";
+const ENDPOINT = "https://constata-aportes.TU-SUBDOMINIO.workers.dev";
 ```
 
 Mientras `ENDPOINT` esté vacío, la web cae de vuelta al formulario de GitHub. Nada se rompe.

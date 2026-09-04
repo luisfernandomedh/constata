@@ -1,4 +1,4 @@
-name = "cierto-aportes"
+name = "constata-aportes"
 main = "index.js"
 compatibility_date = "2026-09-01"
 
@@ -8,7 +8,7 @@ preview_urls = false
 [vars]
 # Repositorio donde aterrizan los issues. Separado del código a propósito:
 # si el corpus recibe una queja o una marca de seguridad, la biblioteca sigue viva.
-REPO_CORPUS = "luisfernandomedh/certia-corpus"
+REPO_CORPUS = "luisfernandomedh/constata-corpus"
 
 # Contador del límite por origen (5 aportes por hora).
 [[kv_namespaces]]

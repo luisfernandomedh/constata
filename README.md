@@ -1,16 +1,16 @@
-# Certia
+# Constata
 
 **Detecta señales de estafa en un mensaje y explica por qué.**
 
-Certia recibe un texto — un SMS, un correo, un mensaje de WhatsApp — y devuelve las señales de fraude que encuentra, cada una con una explicación en español llano. No da un veredicto seco: da indicios, para que la persona decida.
+Constata recibe un texto — un SMS, un correo, un mensaje de WhatsApp — y devuelve las señales de fraude que encuentra, cada una con una explicación en español llano. No da un veredicto seco: da indicios, para que la persona decida.
 
-🔎 **[Probar la demostración](https://luisfernandomedh.github.io/certia/)** — corre entera en tu navegador.
+🔎 **[Probar la demostración](https://luisfernandomedh.github.io/constata/)** — corre entera en tu navegador.
 
 ## Por qué
 
 En Latinoamérica la estafa por mensaje es cotidiana y la gente no tiene forma de verificar nada. Las herramientas que existen son de pago, están en inglés, o son cajas negras que dicen "peligroso" sin explicar nada.
 
-Certia es gratis, abierto, y sobre todo **explicable**: si le dices a alguien que un mensaje es una estafa, tienes que poder decirle por qué. Esa explicación no es un adorno, es el producto — porque enseña a reconocer el patrón la próxima vez.
+Constata es gratis, abierto, y sobre todo **explicable**: si le dices a alguien que un mensaje es una estafa, tienes que poder decirle por qué. Esa explicación no es un adorno, es el producto — porque enseña a reconocer el patrón la próxima vez.
 
 ## Principios
 
@@ -22,11 +22,11 @@ Certia es gratis, abierto, y sobre todo **explicable**: si le dices a alguien qu
 ## Uso
 
 ```bash
-npm install certia
+npm install constata
 ```
 
 ```js
-import { analizar } from "certia";
+import { analizar } from "constata";
 
 const resultado = analizar(
   "URGENTE: Su cuenta de Netflix sera suspendida hoy. Confirme su contrasena aqui: http://netflix-pagos.info/verificar"
@@ -85,9 +85,9 @@ No es una promesa, es una propiedad de la arquitectura:
 
 **Lo más valioso son mensajes de estafa reales**, en español y de Latinoamérica. No existe un corpus público de eso, y llenar esa ausencia es el aporte principal de este proyecto. Ver [CORPUS.md](CORPUS.md).
 
-Desde la [herramienta](https://luisfernandomedh.github.io/certia/): analiza tu mensaje, toca **Contribuir este ejemplo**, revisa el texto ya limpio —y edítalo, porque los nombres propios no se detectan solos— y confirma. Se abre un formulario de GitHub con todo puesto.
+Desde la [herramienta](https://luisfernandomedh.github.io/constata/): analiza tu mensaje, toca **Contribuir este ejemplo**, revisa el texto ya limpio —y edítalo, porque los nombres propios no se detectan solos— y confirma. Se abre un formulario de GitHub con todo puesto.
 
-**La segunda contribución más útil, y la más fácil: agregar una institución** al registro de [`src/marcas.ts`](src/marcas.ts). Es una línea, y mejora la detección sin tocar el motor. Hay una [plantilla de issue](https://github.com/luisfernandomedh/certia/issues/new?template=agregar-marca.yml) para eso.
+**La segunda contribución más útil, y la más fácil: agregar una institución** al registro de [`src/marcas.ts`](src/marcas.ts). Es una línea, y mejora la detección sin tocar el motor. Hay una [plantilla de issue](https://github.com/luisfernandomedh/constata/issues/new?template=agregar-marca.yml) para eso.
 
 Antes de aportar mensajes o código, lee [SECURITY.md](SECURITY.md). Aceptar contenido de desconocidos y publicarlo tiene riesgos concretos —enlaces de phishing vivos, inyección, datos personales irreversibles, envenenamiento del corpus— y el diseño los enfrenta de forma explícita.
 

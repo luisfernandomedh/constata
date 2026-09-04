@@ -1,9 +1,9 @@
 #!/bin/bash
-# Pide los dos tokens y los guarda en ~/.certia-secrets.
+# Pide los dos tokens y los guarda en ~/.constata-secrets.
 # No se muestran al escribirlos ni quedan en el historial de la terminal.
 
 set -u
-DESTINO="$HOME/.certia-secrets"
+DESTINO="$HOME/.constata-secrets"
 
 pedir() {
   local etiqueta="$1" pista="$2" valor=""
@@ -19,13 +19,13 @@ pedir() {
 }
 
 echo "─────────────────────────────────────────────"
-echo " Configuración de Certia"
+echo " Configuración de Constata"
 echo " Pega cada token y presiona Enter."
 echo " No vas a ver lo que escribes: es a propósito."
 echo "─────────────────────────────────────────────"
 
 CF="$(pedir "1/2 · Token de Cloudflare" "dash.cloudflare.com/profile/api-tokens → plantilla «Edit Cloudflare Workers»")"
-GH="$(pedir "2/2 · Token de GitHub" "github.com/settings/personal-access-tokens/new → solo certia-corpus, permiso Issues: Read and write")"
+GH="$(pedir "2/2 · Token de GitHub" "github.com/settings/personal-access-tokens/new → solo constata-corpus, permiso Issues: Read and write")"
 
 umask 077
 {

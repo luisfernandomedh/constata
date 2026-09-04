@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dominios verificados — Certia</title>
+<title>Dominios verificados — Constata</title>
 <meta name="description" content="Los dominios reales de cada banco y entidad, comprobados contra el certificado del propio sitio. Con la fecha de la última comprobación.">
 <style>
   :root {
@@ -105,13 +105,13 @@
       con guion, no — y esa es justo la trampa que buscamos.
     </p>
     <p>¿Falta tu banco? Agregarlo toma un minuto y mejora la detección para todos.</p>
-    <a class="boton" href="https://github.com/luisfernandomedh/certia/issues/new?template=agregar-marca.yml">Proponer una institución</a>
+    <a class="boton" href="https://github.com/luisfernandomedh/constata/issues/new?template=agregar-marca.yml">Proponer una institución</a>
   </div>
 
   <footer>
     <a href="./">Volver a la herramienta</a> ·
     <a href="como-funciona.html">Cómo funciona</a> ·
-    <a href="https://github.com/luisfernandomedh/certia">Ver todo en GitHub</a>
+    <a href="https://github.com/luisfernandomedh/constata">Ver todo en GitHub</a>
   </footer>
 
 </div>
@@ -187,7 +187,7 @@ function pintar(filtro = "") {
   }
   $cuerpo.innerHTML = total ? html
     : '<tr><td colspan="4" class="vacio">No está en la lista. Si es una institución real, ' +
-      '<a href="https://github.com/luisfernandomedh/certia/issues/new?template=agregar-marca.yml">propónla</a>.</td></tr>';
+      '<a href="https://github.com/luisfernandomedh/constata/issues/new?template=agregar-marca.yml">propónla</a>.</td></tr>';
 }
 
 pintar();
