@@ -86,23 +86,32 @@
   .promesa strong { color: var(--marca); }
 
   /* ── Pasos, para quien nunca ha usado algo así ──────────── */
-  .pasos {
-    list-style: none; padding: 0; margin: 0 0 20px;
-    display: grid; gap: 10px;
+  .instruccion {
+    font-size: 21px; font-weight: 620; letter-spacing: -0.02em;
+    margin: 0 0 16px; text-align: center;
   }
-  .pasos li {
-    display: flex; align-items: center; gap: 12px;
-    font-size: 17px; line-height: 1.4;
-  }
-  .pasos .p {
-    width: 28px; height: 28px; flex: none; border-radius: 50%;
-    background: var(--marca); color: var(--fondo);
-    display: grid; place-items: center; font-size: 15px; font-weight: 700;
-  }
+  .opciones { display: grid; gap: 11px; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 520px) { .opciones { grid-template-columns: 1fr; } }
   button.grande {
-    width: 100%; font-size: 19px; font-weight: 650; padding: 18px 20px;
+    width: 100%; font-size: 17px; font-weight: 640; padding: 17px 16px;
     border-radius: 12px; box-shadow: var(--sombra); letter-spacing: -0.01em;
+    display: flex; align-items: center; justify-content: center; gap: 9px;
   }
+  button.grande svg { width: 21px; height: 21px; flex: none; }
+  button.grande.secundaria {
+    background: var(--papel); color: var(--marca); border: 1.5px solid var(--marca);
+  }
+  .progreso {
+    margin-top: 14px; padding: 13px 15px; border-radius: 10px;
+    background: var(--marca-suave); font-size: 14.5px;
+    display: flex; align-items: center; gap: 11px;
+  }
+  .progreso span {
+    width: 17px; height: 17px; flex: none; border-radius: 50%;
+    border: 2.5px solid color-mix(in srgb, var(--marca) 30%, transparent);
+    border-top-color: var(--marca); animation: gira .8s linear infinite;
+  }
+  @keyframes gira { to { transform: rotate(360deg); } }
   .invitacion { margin: 18px 0 0; text-align: center; }
   button.enlace {
     background: none; border: 0; color: var(--marca); font: inherit; font-size: 14.5px;
@@ -247,18 +256,26 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/>
       </svg>
-      <span><strong>Tu mensaje no sale de tu dispositivo.</strong> Todo el análisis ocurre en tu navegador. Sin servidor, sin cuenta, sin cookies. Desconecta el internet y sigue funcionando — pruébalo.</span>
+      <span><strong>Tu mensaje no sale de tu dispositivo.</strong> Todo ocurre en tu navegador, también la lectura de las capturas. Sin servidor, sin cuenta, sin cookies.</span>
     </p>
   </header>
 
-  <ol class="pasos">
-    <li><span class="p">1</span> Copia el mensaje que te llegó</li>
-    <li><span class="p">2</span> Toca el botón verde de aquí abajo</li>
-    <li><span class="p">3</span> Te digo si es una estafa</li>
-  </ol>
+  <p class="instruccion">Pega el texto o sube tu captura.</p>
 
-  <button id="pegar" class="grande">Pegar el mensaje y revisarlo</button>
-  <p class="ayuda" id="ayudaPegar">Si el botón no funciona, escribe o pega el mensaje en el cuadro de abajo.</p>
+  <div class="opciones">
+    <button id="pegar" class="grande">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/></svg>
+      Pegar el mensaje
+    </button>
+    <button id="subir" class="grande secundaria">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.6"/><path d="m4 17 5-4.5 4 3.5 3-2.5 4 3.5"/></svg>
+      Subir una captura
+    </button>
+  </div>
+  <input type="file" id="archivo" accept="image/*" hidden>
+
+  <p class="ayuda" id="ayudaPegar">Si no puedes copiar el mensaje, toma una captura de pantalla y súbela.</p>
+  <div id="progresoOcr" class="progreso" hidden><span></span><b id="textoOcr">Leyendo la imagen…</b></div>
 
   <label class="etiqueta" for="mensaje">O escríbelo aquí</label>
   <textarea id="mensaje" placeholder="Pega o escribe aquí el mensaje…"></textarea>
@@ -547,6 +564,77 @@ $("pegar").addEventListener("click", async () => {
 
 // Si pegan directamente en el cuadro, tampoco hace falta buscar el botón.
 $mensaje.addEventListener("paste", () => setTimeout(revisar, 0));
+
+/**
+ * Leer el texto de una captura de pantalla.
+ *
+ * Nace del problema real que reportaron los usuarios: un adulto mayor no
+ * sabe seleccionar texto en su teléfono, pero **sí sabe tomar una captura**.
+ * Es un gesto que ya aprendió. Aceptar la imagen elimina el obstáculo entero.
+ *
+ * El reconocimiento corre dentro del navegador, así que la imagen tampoco
+ * sale de su dispositivo: la promesa de privacidad se mantiene igual que con
+ * el texto. La biblioteca se descarga solo cuando alguien sube una imagen,
+ * para no penalizar a quien nunca la usa.
+ */
+let motorOcr = null;
+
+async function cargarOcr() {
+  if (motorOcr) return motorOcr;
+  await new Promise((listo, falla) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js";
+    s.onload = listo;
+    s.onerror = () => falla(new Error("no se pudo descargar el lector"));
+    document.head.appendChild(s);
+  });
+  motorOcr = window.Tesseract;
+  return motorOcr;
+}
+
+const $progreso = $("progresoOcr"), $textoOcr = $("textoOcr");
+
+async function leerImagen(archivo) {
+  if (!archivo || !archivo.type.startsWith("image/")) return;
+  $progreso.hidden = false;
+  $textoOcr.textContent = "Preparando el lector…";
+  try {
+    const T = await cargarOcr();
+    const { data } = await T.recognize(archivo, "spa", {
+      logger: (m) => {
+        if (m.status === "recognizing text") {
+          $textoOcr.textContent = `Leyendo la imagen… ${Math.round(m.progress * 100)}%`;
+        } else if (m.status === "loading language traineddata") {
+          $textoOcr.textContent = "Descargando el lector, solo la primera vez…";
+        }
+      },
+    });
+    const texto = (data.text || "").trim();
+    $progreso.hidden = true;
+    if (!texto) {
+      $("ayudaPegar").innerHTML = "<strong>No pude leer texto en esa imagen.</strong> Prueba con una captura más nítida, o escribe el mensaje en el cuadro de abajo.";
+      return;
+    }
+    $mensaje.value = texto;
+    revisar();
+    requestAnimationFrame(() => {
+      document.querySelector("#resultado .veredicto")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  } catch {
+    $progreso.hidden = true;
+    $("ayudaPegar").innerHTML = "<strong>No pude leer la imagen.</strong> Escribe o pega el mensaje en el cuadro de abajo.";
+    $mensaje.focus();
+  }
+}
+
+$("subir").addEventListener("click", () => $("archivo").click());
+$("archivo").addEventListener("change", (e) => leerImagen(e.target.files?.[0]));
+
+// Muchos copian la captura en vez de guardarla: pegarla también vale.
+document.addEventListener("paste", (e) => {
+  const img = [...(e.clipboardData?.items ?? [])].find((i) => i.type.startsWith("image/"));
+  if (img) { e.preventDefault(); leerImagen(img.getAsFile()); }
+});
 $("limpiar").addEventListener("click", () => {
   $mensaje.value = ""; $resultado.innerHTML = "";
   $contribuir.hidden = true; $("abrirContribuir").hidden = true; $mensaje.focus();
