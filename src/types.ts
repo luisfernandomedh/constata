@@ -23,6 +23,13 @@ export interface Hallazgo {
   explicacion: string;
   /** El fragmento del mensaje que disparó la señal, si aplica. */
   evidencia?: string;
+  /**
+   * Dónde está ese fragmento en el texto original, como [inicio, fin).
+   * Permite resaltarlo en pantalla: leer que "el dominio imita a un banco"
+   * ayuda menos que ver subrayado cuál es el dominio.
+   * Se calcula solo, buscando `evidencia` en el mensaje.
+   */
+  posicion?: [number, number];
 }
 
 /** Resultado completo del análisis de un mensaje. */

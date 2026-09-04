@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cómo funciona — Certia</title>
+<meta name="description" content="Por qué Certia existe, cómo detecta las estafas, y por qué tu mensaje nunca sale de tu dispositivo.">
+<style>
+  :root {
+    color-scheme: light dark;
+    --fondo: #faf9f7; --papel: #ffffff; --texto: #17191c; --tenue: #64686e;
+    --borde: #e4e1dc; --marca: #0d5c4a; --marca-suave: #e6f2ee;
+    --sombra: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px -12px rgba(0,0,0,.10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fondo: #131518; --papel: #1c1f23; --texto: #eeece8; --tenue: #9a9ea5;
+      --borde: #2f3338; --marca: #5fd3b2; --marca-suave: #13312a;
+      --sombra: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.6);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--fondo); color: var(--texto);
+    font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .envoltura { max-width: 660px; margin: 0 auto; padding: 40px 20px 80px; }
+  .volver { font-size: 14px; color: var(--marca); text-decoration: none; display: inline-block; margin-bottom: 28px; }
+  .volver:hover { text-decoration: underline; }
+  h1 { font-size: 30px; letter-spacing: -0.03em; margin: 0 0 10px; font-weight: 680; }
+  .entrada { font-size: 18px; color: var(--tenue); margin: 0 0 34px; line-height: 1.6; }
+  h2 { font-size: 20px; letter-spacing: -0.02em; margin: 40px 0 12px; font-weight: 640; }
+  p { margin: 0 0 15px; }
+  strong { font-weight: 630; }
+  .destacado {
+    background: var(--marca-suave); border-radius: 12px; padding: 16px 18px;
+    margin: 22px 0; font-size: 15px; line-height: 1.65;
+  }
+  .destacado strong { color: var(--marca); }
+  ul { padding-left: 20px; margin: 0 0 15px; }
+  li { margin-bottom: 8px; }
+  .tarjetas { display: grid; gap: 11px; margin: 20px 0; }
+  .t {
+    background: var(--papel); border: 1px solid var(--borde); border-radius: 12px;
+    padding: 15px 17px; box-shadow: var(--sombra);
+  }
+  .t b { display: block; font-size: 15px; margin-bottom: 3px; }
+  .t span { font-size: 14px; color: var(--tenue); line-height: 1.55; }
+  .paso { display: flex; gap: 14px; margin-bottom: 18px; align-items: flex-start; }
+  .paso .n {
+    width: 26px; height: 26px; flex: none; border-radius: 50%; background: var(--marca);
+    color: var(--fondo); display: grid; place-items: center; font-size: 13px; font-weight: 700;
+  }
+  .paso div { flex: 1; }
+  .paso b { display: block; margin-bottom: 2px; }
+  .paso span { font-size: 15px; color: var(--tenue); }
+  footer { margin-top: 52px; padding-top: 20px; border-top: 1px solid var(--borde); font-size: 13.5px; color: var(--tenue); line-height: 1.9; }
+  footer a { color: var(--marca); }
+  a { color: var(--marca); }
+</style>
+</head>
+<body>
+<div class="envoltura">
+
+  <a class="volver" href="./">← Volver a la herramienta</a>
+
+  <h1>Cómo funciona Certia</h1>
+  <p class="entrada">Y por qué está construido así, que es la parte que importa.</p>
+
+  <h2>El problema</h2>
+  <p>En Latinoamérica la estafa por mensaje es cotidiana. Llega un SMS diciendo que tu cuenta se bloquea, un WhatsApp de alguien que dice ser tu hijo con número nuevo, un correo del SRI ofreciéndote una devolución que nunca pediste.</p>
+  <p>Las herramientas que existen para verificar eso <strong>están en inglés, cuestan dinero, o son cajas negras</strong> que dicen «peligroso» sin explicar nada. Y ninguna reconoce al Banco Pichincha, al IESS o a Claro, porque fueron hechas pensando en Netflix y PayPal.</p>
+
+  <h2>Qué hace Certia</h2>
+  <p>Recibe un mensaje y busca señales conocidas de fraude. Luego te <strong>subraya en el propio mensaje</strong> qué parte disparó cada señal, y te explica por qué en español llano.</p>
+
+  <div class="destacado">
+    <strong>Lo importante no es el veredicto, es la explicación.</strong> Si solo te decimos «esto es una estafa», te salvamos hoy. Si te mostramos que el enlace decía ser del banco pero llevaba a otro dominio, reconoces el patrón la próxima vez, y la siguiente, y ya no nos necesitas.
+  </div>
+
+  <h2>Qué señales busca</h2>
+  <div class="tarjetas">
+    <div class="t"><b>Enlaces que mienten</b><span>Que el mensaje diga ser de un banco pero el enlace vaya a otro lado. Que el dominio incluya el nombre de la marca sin pertenecerle. Que use letras de otro alfabeto que se ven idénticas a las latinas. Que esconda su destino tras un acortador.</span></div>
+    <div class="t"><b>Peticiones imposibles</b><span>Que te pida un código, una clave, un PIN o los datos de tu tarjeta. Ningún banco hace eso por mensaje. Nunca. Esa sola señal basta para no responder.</span></div>
+    <div class="t"><b>Guiones de siempre</b><span>El familiar con número nuevo que necesita una transferencia. El jefe que no puede hablar por teléfono y pide tarjetas de regalo. El trabajo de dos horas por ochenta dólares. El premio que nadie pidió.</span></div>
+    <div class="t"><b>Prisa fabricada</b><span>Plazos, amenazas de bloqueo, últimos avisos. La urgencia impide pensar, y por eso es la herramienta favorita del estafador. Por sí sola pesa poco: tu compañero de trabajo también escribe «URGENTE».</span></div>
+  </div>
+
+  <h2>Por qué tu mensaje no sale de tu dispositivo</h2>
+  <p>No es una promesa de privacidad, es <strong>una propiedad de la arquitectura</strong>. El análisis es una función pura escrita en JavaScript que corre dentro de tu navegador. No hay servidor al que enviar nada, no hay base de datos, no hay cuenta, no hay cookies.</p>
+  <p>La prueba está a tu alcance: <strong>desconecta el internet y la herramienta sigue funcionando.</strong> Ninguna herramienta que suba tus mensajes a un servidor puede hacer eso.</p>
+
+  <h2>Lo que Certia nunca te va a decir</h2>
+  <p>Nunca va a decir «este mensaje es seguro». Cuando no encuentra nada, dice exactamente eso: <strong>no encontré señales conocidas</strong>.</p>
+  <p>La diferencia no es de estilo. Decirle a alguien que un mensaje es seguro cuando en realidad era una estafa nueva sería peor que no haber dicho nada, porque le quitaríamos la desconfianza que lo protegía.</p>
+
+  <h2>Cómo mejora</h2>
+  <p>Con los mensajes que aporta la gente. No existe un conjunto público de estafas en español latinoamericano, y esa ausencia es la razón de que las herramientas extranjeras no nos sirvan.</p>
+  <div class="paso"><div class="n">1</div><div><b>Analizas tu mensaje</b><span>Ocurre entero en tu navegador, sin enviar nada.</span></div></div>
+  <div class="paso"><div class="n">2</div><div><b>Decides contribuirlo</b><span>Un acto aparte, que tú eliges después de ver el resultado. Nunca automático.</span></div></div>
+  <div class="paso"><div class="n">3</div><div><b>Se limpia frente a ti</b><span>Se quitan correos, teléfonos, montos, fechas y las rutas de los enlaces. Ves el texto resultante y puedes editarlo antes de enviarlo.</span></div></div>
+  <div class="paso"><div class="n">4</div><div><b>Una persona lo revisa</b><span>Nada entra al corpus automáticamente. Ese paso es la defensa contra que alguien publique sin querer datos de un tercero, o intente envenenar el conjunto.</span></div></div>
+  <p>El corpus se publica en <a href="https://github.com/luisfernandomedh/certia-corpus">un repositorio abierto</a> bajo dominio público, con los enlaces desactivados para que no sea un catálogo de sitios de phishing. Cualquiera puede usarlo sin pedir permiso.</p>
+
+  <h2>Quién lo hizo y por qué es gratis</h2>
+  <p>Lo hice porque mi familia recibe estos mensajes y no tiene cómo verificarlos, y porque lo que existía no servía para acá.</p>
+  <p>Es gratis, de código abierto y sin publicidad. No hay cuenta que crear ni datos que vender, porque no se recoge ninguno. <a href="https://github.com/luisfernandomedh/certia">El código está publicado</a> para que no tengas que creerme: puedes leerlo.</p>
+
+  <footer>
+    <a href="./">Volver a la herramienta</a> ·
+    <a href="https://github.com/luisfernandomedh/certia">Código en GitHub</a> ·
+    <a href="https://github.com/luisfernandomedh/certia/blob/main/SECURITY.md">Modelo de amenazas</a> ·
+    <a href="https://github.com/luisfernandomedh/certia-corpus">El corpus abierto</a>
+  </footer>
+
+</div>
+</body>
+</html>

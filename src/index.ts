@@ -56,6 +56,15 @@ export function analizar(texto: string): Resultado {
     (h.tipo === "aviso" ? avisos : hallazgos).push(h);
   }
 
+  // Cada evidencia se ubica en el texto original para poder resaltarla.
+  // Se hace aquí y no en cada detector: así ninguno tiene que preocuparse
+  // por índices, y basta con que devuelvan el fragmento culpable.
+  for (const h of [...hallazgos, ...avisos]) {
+    if (!h.evidencia) continue;
+    const i = texto.toLowerCase().indexOf(h.evidencia.toLowerCase());
+    if (i !== -1) h.posicion = [i, i + h.evidencia.length];
+  }
+
   const ids = new Set(hallazgos.map((h) => h.id));
   const base = hallazgos.reduce((a, h) => a + h.peso, 0);
   const puntaje = Math.min(

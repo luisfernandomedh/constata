@@ -5,6 +5,21 @@ function riesgo(id, peso, explicacion, evidencia) {
 function aviso(id, explicacion, evidencia) {
     return { id, tipo: "aviso", peso: 0, explicacion, evidencia };
 }
+/**
+ * Devuelve el fragmento del texto ORIGINAL que dispara el primer patrón que
+ * coincida. Los patrones se evalúan contra el texto normalizado —sin tildes y
+ * en minúsculas— pero normalizar conserva la longitud, así que los índices
+ * sirven igual para recortar el original. Eso permite resaltar en pantalla la
+ * frase exacta, tal como la escribió el estafador.
+ */
+function fragmento(ctx, patrones) {
+    for (const re of patrones) {
+        const m = ctx.normalizado.match(re);
+        if (m?.index !== undefined)
+            return ctx.texto.slice(m.index, m.index + m[0].length);
+    }
+    return undefined;
+}
 // ─────────────────────────────────────────────────────────────
 // Códigos de verificación: distinguir entregarlo de pedirlo
 // ─────────────────────────────────────────────────────────────
@@ -39,7 +54,7 @@ const pideSecreto = {
     detectar(ctx) {
         if (!RE_PIDE_SECRETO.some((re) => re.test(ctx.normalizado)))
             return null;
-        return riesgo("pide-credenciales", 65, "El mensaje te pide un código, una clave o datos de tarjeta. Ningún banco ni empresa legítima pide eso por mensaje. Nunca. Esta sola señal basta para no responder.");
+        return riesgo("pide-credenciales", 65, "El mensaje te pide un código, una clave o datos de tarjeta. Ningún banco ni empresa legítima pide eso por mensaje. Nunca. Esta sola señal basta para no responder.", fragmento(ctx, RE_PIDE_SECRETO));
     },
 };
 const entregaCodigo = {
@@ -50,7 +65,7 @@ const entregaCodigo = {
             return null;
         if (!RE_ENTREGA_CODIGO.some((re) => re.test(ctx.normalizado)))
             return null;
-        return aviso("codigo-recibido", "Este mensaje te entrega un código de verificación. Eso es normal si tú acabas de pedirlo. Si NO lo pediste, alguien está intentando entrar a tu cuenta en este momento: cambia tu contraseña y no le des ese código a nadie que te lo pida después, por ningún medio.");
+        return aviso("codigo-recibido", "Este mensaje te entrega un código de verificación. Eso es normal si tú acabas de pedirlo. Si NO lo pediste, alguien está intentando entrar a tu cuenta en este momento: cambia tu contraseña y no le des ese código a nadie que te lo pida después, por ningún medio.", fragmento(ctx, RE_ENTREGA_CODIGO));
     },
 };
 // ─────────────────────────────────────────────────────────────
@@ -162,7 +177,7 @@ const familiarSuplantado = {
         const pidePlata = RE_PIDE_PLATA.some((re) => re.test(ctx.normalizado));
         return riesgo("familiar-numero-nuevo", pidePlata ? 60 : 30, pidePlata
             ? "Alguien dice ser un familiar con un número nuevo y te pide dinero. Es una de las estafas más comunes de la región. Llama al número viejo o a otro familiar antes de mandar nada."
-            : "Alguien dice ser un familiar o conocido escribiendo desde un número nuevo. Verifica por otro medio antes de continuar, sobre todo si después te pide dinero.");
+            : "Alguien dice ser un familiar o conocido escribiendo desde un número nuevo. Verifica por otro medio antes de continuar, sobre todo si después te pide dinero.", fragmento(ctx, RE_NUMERO_NUEVO));
     },
 };
 const RE_TARJETAS_REGALO = [
@@ -180,7 +195,7 @@ const fraudeJefe = {
             return null;
         if (!seHacePasar && !noPuedeHablar)
             return null;
-        return riesgo("suplantacion-de-jefe", seHacePasar && noPuedeHablar ? 60 : 40, "Alguien dice ser tu jefe o un superior, evita hablar por voz, y te pide comprar algo o mover dinero. Es un fraude clásico. Confirma por teléfono o en persona antes de hacer nada.");
+        return riesgo("suplantacion-de-jefe", seHacePasar && noPuedeHablar ? 60 : 40, "Alguien dice ser tu jefe o un superior, evita hablar por voz, y te pide comprar algo o mover dinero. Es un fraude clásico. Confirma por teléfono o en persona antes de hacer nada.", fragmento(ctx, [...RE_TARJETAS_REGALO, ...RE_PIDE_PLATA]));
     },
 };
 const RE_EMPLEO_FALSO = [
@@ -196,7 +211,7 @@ const empleoFalso = {
         const hits = RE_EMPLEO_FALSO.filter((re) => re.test(ctx.normalizado));
         if (hits.length === 0)
             return null;
-        return riesgo("oferta-laboral-irreal", hits.length >= 2 ? 45 : 30, "El mensaje ofrece un trabajo con una paga muy alta por muy poco esfuerzo, sin proceso ni entrevista. Es el guion habitual de las estafas de empleo, que terminan pidiéndote un depósito o tus datos bancarios.");
+        return riesgo("oferta-laboral-irreal", hits.length >= 2 ? 45 : 30, "El mensaje ofrece un trabajo con una paga muy alta por muy poco esfuerzo, sin proceso ni entrevista. Es el guion habitual de las estafas de empleo, que terminan pidiéndote un depósito o tus datos bancarios.", fragmento(ctx, RE_EMPLEO_FALSO));
     },
 };
 const RE_PREMIO = [
@@ -213,7 +228,7 @@ const premioInesperado = {
         const hits = RE_PREMIO.filter((re) => re.test(ctx.normalizado));
         if (hits.length === 0)
             return null;
-        return riesgo("premio-inesperado", hits.length >= 2 ? 35 : 25, "El mensaje ofrece un premio, un pago, un reembolso o un paquete que no esperabas. Si no participaste en nada y no compraste nada, no hay nada que reclamar.");
+        return riesgo("premio-inesperado", hits.length >= 2 ? 35 : 25, "El mensaje ofrece un premio, un pago, un reembolso o un paquete que no esperabas. Si no participaste en nada y no compraste nada, no hay nada que reclamar.", fragmento(ctx, RE_PREMIO));
     },
 };
 const RE_URGENCIA = [
@@ -234,7 +249,7 @@ const urgencia = {
         const hits = RE_URGENCIA.filter((re) => re.test(ctx.normalizado));
         if (hits.length === 0)
             return null;
-        return riesgo("urgencia-artificial", hits.length >= 2 ? 15 : 10, "El mensaje te apura con un plazo o una amenaza. La prisa impide pensar, y por eso es la herramienta favorita del estafador.");
+        return riesgo("urgencia-artificial", hits.length >= 2 ? 15 : 10, "El mensaje te apura con un plazo o una amenaza. La prisa impide pensar, y por eso es la herramienta favorita del estafador.", fragmento(ctx, RE_URGENCIA));
     },
 };
 /**

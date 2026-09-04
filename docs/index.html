@@ -4,136 +4,203 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Certia — ¿este mensaje es una estafa?</title>
-<meta name="description" content="Pega un mensaje sospechoso y Certia te dice qué señales de estafa encuentra, y por qué. Todo ocurre en tu navegador: el mensaje nunca se envía a ningún servidor. Gratis y de código abierto.">
+<meta name="description" content="Pega un mensaje sospechoso y Certia te subraya exactamente qué parte es sospechosa, y por qué. Todo ocurre en tu navegador: el mensaje nunca sale de tu dispositivo.">
 <meta property="og:title" content="Certia — ¿este mensaje es una estafa?">
-<meta property="og:description" content="Análisis de mensajes sospechosos que ocurre entero en tu navegador. Tu mensaje nunca sale de tu dispositivo. Gratis, abierto y sin cuenta.">
+<meta property="og:description" content="Te subraya en el propio mensaje qué parte es sospechosa y por qué. Corre entero en tu navegador. Gratis, abierto y sin cuenta.">
 <meta property="og:type" content="website">
 <style>
   :root {
     color-scheme: light dark;
-    --fondo: #fbfaf8; --papel: #ffffff; --texto: #1a1a1a; --tenue: #6b6b6b;
-    --borde: #e2e0dc; --acento: #1f5f4f;
-    --alto: #b3261e; --alto-fondo: #fdeceb;
-    --medio: #8a5a00; --medio-fondo: #fdf3e0;
-    --bajo: #1f5f4f; --bajo-fondo: #e9f3ef;
+    --fondo: #faf9f7;
+    --papel: #ffffff;
+    --texto: #17191c;
+    --tenue: #64686e;
+    --borde: #e4e1dc;
+    --marca: #0d5c4a;
+    --marca-suave: #e6f2ee;
+
+    --alto: #c02718;
+    --alto-fondo: #fdecea;
+    --alto-marca: #f7c9c3;
+    --medio: #9a5f00;
+    --medio-fondo: #fdf3e2;
+    --medio-marca: #f8dfae;
+    --bajo: #0d5c4a;
+    --bajo-fondo: #e6f2ee;
+    --info: #1e4fa3;
+    --info-fondo: #e8effb;
+    --info-marca: #c2d5f5;
+
+    --sombra: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px -12px rgba(0,0,0,.10);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --fondo: #16181a; --papel: #1e2124; --texto: #eceae6; --tenue: #9a9894;
-      --borde: #33373b; --acento: #6fd1b4;
-      --alto: #ff8a80; --alto-fondo: #35211f;
-      --medio: #f0bf6a; --medio-fondo: #322717;
-      --bajo: #6fd1b4; --bajo-fondo: #172b26;
+      --fondo: #131518;
+      --papel: #1c1f23;
+      --texto: #eeece8;
+      --tenue: #9a9ea5;
+      --borde: #2f3338;
+      --marca: #5fd3b2;
+      --marca-suave: #13312a;
+
+      --alto: #ff9186;
+      --alto-fondo: #351d1a;
+      --alto-marca: #6e2e26;
+      --medio: #f2c274;
+      --medio-fondo: #332715;
+      --medio-marca: #6b4d1c;
+      --bajo: #5fd3b2;
+      --bajo-fondo: #13312a;
+      --info: #8fb4f5;
+      --info-fondo: #1a2540;
+      --info-marca: #2f4a80;
+
+      --sombra: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.6);
     }
   }
   * { box-sizing: border-box; }
   body {
     margin: 0; background: var(--fondo); color: var(--texto);
     font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
-  .envoltura { max-width: 700px; margin: 0 auto; padding: 48px 20px 80px; }
-  header { margin-bottom: 30px; }
-  h1 { font-size: 36px; letter-spacing: -0.025em; margin: 0 0 8px; }
-  h1 span { color: var(--acento); }
-  .lema { color: var(--tenue); margin: 0; font-size: 17px; }
-  h2 { font-size: 19px; letter-spacing: -0.01em; margin: 44px 0 12px; }
+  .envoltura { max-width: 720px; margin: 0 auto; padding: 44px 20px 80px; }
+
+  /* ── Encabezado ─────────────────────────────────────────── */
+  header { margin-bottom: 28px; }
+  .marca-fila { display: flex; align-items: center; gap: 11px; margin-bottom: 10px; }
+  .escudo {
+    width: 38px; height: 38px; border-radius: 11px; flex: none;
+    background: linear-gradient(145deg, var(--marca), color-mix(in srgb, var(--marca) 62%, #2bb894));
+    display: grid; place-items: center; box-shadow: var(--sombra);
+  }
+  .escudo svg { width: 21px; height: 21px; }
+  h1 { font-size: 31px; letter-spacing: -0.03em; margin: 0; font-weight: 680; }
+  .lema { color: var(--tenue); margin: 0; font-size: 16.5px; max-width: 54ch; }
   .promesa {
-    margin-top: 20px; padding: 14px 16px; font-size: 14.5px; line-height: 1.55;
-    background: var(--bajo-fondo); border-left: 3px solid var(--acento);
-    border-radius: 0 8px 8px 0;
+    margin-top: 18px; padding: 12px 15px; font-size: 14px; line-height: 1.55;
+    background: var(--marca-suave); border-radius: 10px;
+    display: flex; gap: 10px; align-items: flex-start;
   }
-  .promesa strong { color: var(--acento); }
+  .promesa svg { width: 17px; height: 17px; flex: none; margin-top: 2px; color: var(--marca); }
+  .promesa strong { color: var(--marca); }
+
+  /* ── Entrada ────────────────────────────────────────────── */
+  .etiqueta { display: block; font-size: 13px; color: var(--tenue); margin-bottom: 7px; font-weight: 500; }
   textarea {
     width: 100%; padding: 14px; font: inherit; font-size: 15px;
     background: var(--papel); color: var(--texto);
-    border: 1px solid var(--borde); border-radius: 10px; resize: vertical;
+    border: 1px solid var(--borde); border-radius: 12px; resize: vertical;
+    box-shadow: var(--sombra);
   }
-  #mensaje { min-height: 148px; }
-  textarea:focus { outline: 2px solid var(--acento); outline-offset: 1px; }
-  .etiqueta { display: block; font-size: 13.5px; color: var(--tenue); margin-bottom: 8px; }
-  .fila { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+  #mensaje { min-height: 132px; }
+  textarea:focus { outline: 2px solid var(--marca); outline-offset: 1px; }
+  .fila { display: flex; gap: 9px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
   button {
-    font: inherit; font-weight: 600; padding: 10px 20px; border-radius: 8px;
-    border: 1px solid var(--acento); background: var(--acento); color: var(--fondo);
-    cursor: pointer;
+    font: inherit; font-weight: 600; font-size: 15px; padding: 11px 22px;
+    border-radius: 9px; border: 1px solid var(--marca);
+    background: var(--marca); color: var(--fondo); cursor: pointer;
+    transition: transform .06s, opacity .15s;
   }
-  button.secundario { background: transparent; color: var(--acento); font-weight: 500; }
-  button:hover { opacity: .88; }
-  .ejemplos { margin-top: 26px; }
-  .ejemplos p { font-size: 12.5px; color: var(--tenue); margin: 0 0 8px; text-transform: uppercase; letter-spacing: .07em; }
+  button:hover { opacity: .9; }
+  button:active { transform: translateY(1px); }
+  button.secundario { background: transparent; color: var(--marca); font-weight: 500; }
+  button:disabled { opacity: .5; cursor: default; }
+
+  .ejemplos { margin-top: 24px; }
+  .ejemplos p { font-size: 12px; color: var(--tenue); margin: 0 0 8px; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
   .ejemplos button {
     background: var(--papel); color: var(--texto); border: 1px solid var(--borde);
-    font-weight: 400; font-size: 14px; padding: 7px 13px; margin: 0 6px 6px 0; border-radius: 20px;
+    font-weight: 450; font-size: 13.5px; padding: 7px 13px; margin: 0 6px 6px 0;
+    border-radius: 18px; box-shadow: none;
   }
-  #resultado { margin-top: 32px; }
+  .ejemplos button:hover { border-color: var(--marca); color: var(--marca); opacity: 1; }
+
+  /* ── Veredicto ──────────────────────────────────────────── */
+  #resultado { margin-top: 34px; }
   .veredicto {
-    padding: 16px 18px; border-radius: 10px; border: 1px solid transparent;
-    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+    border-radius: 14px; padding: 18px 20px; display: flex; gap: 15px;
+    align-items: center; box-shadow: var(--sombra); border: 1px solid transparent;
   }
-  .veredicto strong { font-size: 20px; letter-spacing: -0.01em; }
-  .veredicto .puntaje { font-size: 14px; color: var(--tenue); margin-left: auto; }
-  .alto  { background: var(--alto-fondo);  border-color: var(--alto);  color: var(--alto); }
-  .medio { background: var(--medio-fondo); border-color: var(--medio); color: var(--medio); }
-  .bajo  { background: var(--bajo-fondo);  border-color: var(--bajo);  color: var(--bajo); }
-  ul.senales, ul.avisos { list-style: none; padding: 0; margin: 16px 0 0; }
+  .veredicto .icono { width: 40px; height: 40px; flex: none; display: grid; place-items: center; border-radius: 50%; }
+  .veredicto .icono svg { width: 23px; height: 23px; }
+  .veredicto h2 { margin: 0; font-size: 20px; letter-spacing: -0.015em; }
+  .veredicto p { margin: 3px 0 0; font-size: 14px; line-height: 1.5; opacity: .92; }
+  .barra { height: 5px; border-radius: 3px; background: currentColor; opacity: .18; margin-top: 12px; overflow: hidden; }
+  .barra i { display: block; height: 100%; background: currentColor; opacity: 1; border-radius: 3px; }
+
+  .v-alto  { background: var(--alto-fondo);  border-color: var(--alto-marca);  color: var(--alto); }
+  .v-medio { background: var(--medio-fondo); border-color: var(--medio-marca); color: var(--medio); }
+  .v-bajo  { background: var(--bajo-fondo);  border-color: var(--marca);       color: var(--bajo); }
+  .veredicto .icono { background: color-mix(in srgb, currentColor 16%, transparent); }
+  .veredicto h2, .veredicto p { color: var(--texto); }
+
+  /* ── El mensaje con las señales subrayadas ──────────────── */
+  .lienzo {
+    margin-top: 18px; background: var(--papel); border: 1px solid var(--borde);
+    border-radius: 14px; padding: 18px 20px; box-shadow: var(--sombra);
+  }
+  .lienzo > .titulo {
+    font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--tenue); font-weight: 700; margin-bottom: 12px;
+  }
+  .mensaje-marcado {
+    font-size: 15.5px; line-height: 2.1; white-space: pre-wrap; word-break: break-word;
+  }
+  mark {
+    background: var(--alto-marca); color: inherit; padding: 3px 2px 2px;
+    border-radius: 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;
+    cursor: pointer; transition: box-shadow .15s, filter .15s;
+  }
+  mark.m-medio { background: var(--medio-marca); }
+  mark.m-aviso { background: var(--info-marca); }
+  mark .num {
+    font-size: 10px; font-weight: 800; vertical-align: super;
+    margin-left: 3px; opacity: .75; letter-spacing: 0;
+  }
+  mark.activa { box-shadow: 0 0 0 2px currentColor; filter: brightness(1.04); }
+
+  /* ── Tarjetas de señal ──────────────────────────────────── */
+  ul.senales { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 9px; }
   ul.senales li {
-    background: var(--papel); border: 1px solid var(--borde);
-    border-radius: 10px; padding: 14px 16px; margin-bottom: 10px;
+    background: var(--papel); border: 1px solid var(--borde); border-left: 4px solid var(--alto);
+    border-radius: 11px; padding: 13px 15px; display: flex; gap: 12px;
+    cursor: pointer; transition: border-color .15s, transform .06s;
   }
-  ul.avisos li {
-    background: var(--medio-fondo); border: 1px solid var(--medio); border-left-width: 4px;
-    border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; color: var(--texto);
+  ul.senales li.s-medio { border-left-color: var(--medio); }
+  ul.senales li.s-aviso { border-left-color: var(--info); background: var(--info-fondo); }
+  ul.senales li:hover, ul.senales li.activa { border-color: var(--marca); transform: translateX(2px); }
+  .insignia {
+    width: 22px; height: 22px; flex: none; border-radius: 50%; display: grid; place-items: center;
+    font-size: 11.5px; font-weight: 800; background: var(--alto-marca); color: var(--alto);
   }
-  .id, .titulo {
-    font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em;
-    display: block; margin-bottom: 6px;
+  li.s-medio .insignia { background: var(--medio-marca); color: var(--medio); }
+  li.s-aviso .insignia { background: var(--info-marca); color: var(--info); }
+  .senal-cuerpo { flex: 1; min-width: 0; }
+  .senal-cuerpo .nombre { font-weight: 620; font-size: 14.5px; margin-bottom: 2px; }
+  .senal-cuerpo .detalle { font-size: 14px; line-height: 1.55; color: var(--tenue); }
+  .senal-cuerpo .fuente {
+    font: 12.5px ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--tenue); margin-top: 6px; word-break: break-all; display: block;
   }
-  .id { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--tenue); }
-  .titulo { color: var(--medio); font-weight: 700; }
-  .evidencia {
-    font: 13px ui-monospace, SFMono-Regular, Menlo, monospace;
-    color: var(--tenue); display: block; margin-top: 8px; word-break: break-all;
-  }
-  .remate { margin-top: 18px; font-size: 14.5px; color: var(--tenue); line-height: 1.55; }
-  /* Contribución */
-  #contribuir { margin-top: 28px; }
-  .caja {
-    background: var(--papel); border: 1px solid var(--borde);
-    border-radius: 12px; padding: 18px 20px;
-  }
-  .caja h3 { margin: 0 0 6px; font-size: 16px; }
-  .caja p { margin: 0 0 14px; font-size: 14.5px; color: var(--tenue); line-height: 1.55; }
-  #limpio { min-height: 110px; font: 14px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; }
-  .cambios {
-    font-size: 13.5px; color: var(--tenue); margin: 10px 0 0;
-    padding: 10px 12px; background: var(--bajo-fondo); border-radius: 8px;
-  }
-  .ojo {
-    font-size: 13.5px; line-height: 1.55; margin: 12px 0 0;
-    padding: 10px 12px; background: var(--medio-fondo);
-    border-left: 3px solid var(--medio); border-radius: 0 8px 8px 0;
-  }
-  .campos { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 14px; }
-  .campos label { font-size: 13.5px; color: var(--tenue); display: flex; flex-direction: column; gap: 5px; }
-  .campos select {
-    font: inherit; font-size: 14.5px; color: var(--texto); background: var(--papel);
-    border: 1px solid var(--borde); border-radius: 8px; padding: 7px 10px;
-  }
-  .exito {
-    margin-top: 14px; padding: 12px 14px; border-radius: 8px;
-    background: var(--bajo-fondo); border-left: 3px solid var(--acento);
-    font-size: 14.5px; line-height: 1.55;
-  }
-  .fallo {
-    margin-top: 14px; padding: 12px 14px; border-radius: 8px;
-    background: var(--alto-fondo); border-left: 3px solid var(--alto);
-    font-size: 14.5px; line-height: 1.55; color: var(--texto);
-  }
-  .como { font-size: 15px; line-height: 1.65; color: var(--texto); }
-  .como p { margin: 0 0 14px; }
-  .como strong { color: var(--acento); }
-  footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--borde); font-size: 14px; color: var(--tenue); line-height: 1.8; }
-  footer a { color: var(--acento); }
+  .remate { margin-top: 16px; font-size: 14px; color: var(--tenue); line-height: 1.6; }
+
+  /* ── Contribuir ─────────────────────────────────────────── */
+  #contribuir { margin-top: 26px; }
+  .caja { background: var(--papel); border: 1px solid var(--borde); border-radius: 14px; padding: 18px 20px; box-shadow: var(--sombra); }
+  .caja h3 { margin: 0 0 6px; font-size: 15.5px; }
+  .caja > p { margin: 0 0 14px; font-size: 14px; color: var(--tenue); line-height: 1.55; }
+  #limpio { min-height: 96px; font: 13.5px/1.65 ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .cambios { font-size: 13px; color: var(--tenue); margin: 9px 0 0; padding: 9px 12px; background: var(--marca-suave); border-radius: 8px; }
+  .ojo { font-size: 13px; line-height: 1.55; margin: 11px 0 0; padding: 10px 12px; background: var(--medio-fondo); border-radius: 8px; }
+  .campos { display: flex; gap: 13px; flex-wrap: wrap; margin-top: 13px; }
+  .campos label { font-size: 13px; color: var(--tenue); display: flex; flex-direction: column; gap: 5px; }
+  .campos select { font: inherit; font-size: 14px; color: var(--texto); background: var(--papel); border: 1px solid var(--borde); border-radius: 8px; padding: 7px 10px; }
+  .exito { margin-top: 13px; padding: 11px 14px; border-radius: 9px; background: var(--marca-suave); font-size: 14px; line-height: 1.55; }
+  .fallo { margin-top: 13px; padding: 11px 14px; border-radius: 9px; background: var(--alto-fondo); font-size: 14px; line-height: 1.55; }
+
+  footer { margin-top: 52px; padding-top: 20px; border-top: 1px solid var(--borde); font-size: 13.5px; color: var(--tenue); line-height: 1.9; }
+  footer a { color: var(--marca); text-decoration-color: color-mix(in srgb, var(--marca) 35%, transparent); }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -141,12 +208,21 @@
 <div class="envoltura">
 
   <header>
-    <h1><span>Certia</span></h1>
-    <p class="lema">¿Este mensaje es una estafa? Pégalo y te digo qué señales tiene, y por qué.</p>
+    <div class="marca-fila">
+      <div class="escudo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2.5 4.5 5.8v5.4c0 4.6 3.2 8.9 7.5 10.3 4.3-1.4 7.5-5.7 7.5-10.3V5.8z"/>
+          <path d="m9 11.8 2.2 2.2L15.4 9.8"/>
+        </svg>
+      </div>
+      <h1>Certia</h1>
+    </div>
+    <p class="lema">¿Este mensaje es una estafa? Pégalo y te subrayo exactamente qué parte es sospechosa, y por qué.</p>
     <p class="promesa">
-      <strong>Tu mensaje no sale de tu dispositivo.</strong> Todo el análisis ocurre dentro de
-      tu navegador. No hay servidor, no hay cuenta, no se guarda nada, no se envía nada, no hay
-      cookies. Puedes desconectar el internet y sigue funcionando — pruébalo.
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/>
+      </svg>
+      <span><strong>Tu mensaje no sale de tu dispositivo.</strong> Todo el análisis ocurre en tu navegador. Sin servidor, sin cuenta, sin cookies. Desconecta el internet y sigue funcionando — pruébalo.</span>
     </p>
   </header>
 
@@ -168,15 +244,9 @@
   <div id="contribuir" hidden>
     <div class="caja">
       <h3>¿Nos ayudas a mejorar esto?</h3>
-      <p>
-        No existe un conjunto público de mensajes de estafa en español latinoamericano.
-        Por eso ninguna herramienta extranjera reconoce al Banco Pichincha ni al SRI.
-        Donar este ejemplo ayuda a llenar ese vacío — sin cuenta y sin registrarte.
-      </p>
+      <p>No existe un conjunto público de mensajes de estafa en español latinoamericano. Por eso ninguna herramienta extranjera reconoce al Banco Pichincha ni al SRI. Donar este ejemplo ayuda a llenar ese vacío — sin cuenta y sin registrarte.</p>
 
-      <label class="etiqueta" for="limpio">
-        Esto es exactamente lo que se enviaría. Puedes editarlo.
-      </label>
+      <label class="etiqueta" for="limpio">Esto es exactamente lo que se enviaría. Puedes editarlo.</label>
       <textarea id="limpio" spellcheck="false"></textarea>
       <p class="cambios" id="cambios"></p>
 
@@ -189,59 +259,29 @@
         </label>
         <label>Por dónde llegó
           <select id="canal">
-            <option value="sms">SMS</option>
-            <option value="whatsapp">WhatsApp</option>
-            <option value="correo">Correo</option>
-            <option value="llamada">Llamada</option>
-            <option value="red-social">Red social</option>
-            <option value="otro">Otro</option>
+            <option value="sms">SMS</option><option value="whatsapp">WhatsApp</option>
+            <option value="correo">Correo</option><option value="llamada">Llamada</option>
+            <option value="red-social">Red social</option><option value="otro">Otro</option>
           </select>
         </label>
       </div>
 
-      <p class="ojo">
-        <strong>Revísalo con tus ojos.</strong> La limpieza automática quita correos,
-        teléfonos, montos, números largos y las rutas de los enlaces. <strong>No detecta
-        nombres propios.</strong> Si aparece el tuyo o el de alguien más, bórralo ahora.
-      </p>
+      <p class="ojo"><strong>Revísalo con tus ojos.</strong> La limpieza automática quita correos, teléfonos, montos, fechas y las rutas de los enlaces. <strong>No detecta nombres propios.</strong> Si aparece el tuyo o el de alguien más, bórralo ahora.</p>
 
       <div class="fila">
         <button id="enviar">Enviar al corpus</button>
         <button id="cancelar" class="secundario">Ahora no</button>
       </div>
-      <p class="remate" id="estadoEnvio">
-        Se publica como propuesta pendiente. Una persona lo revisa antes de que entre al corpus.
-      </p>
+      <p class="remate" id="estadoEnvio">Se publica como propuesta pendiente. Una persona lo revisa antes de que entre al corpus.</p>
     </div>
-  </div>
-
-  <h2>Cómo funciona</h2>
-  <div class="como">
-    <p>
-      Certia busca <strong>señales conocidas</strong> de fraude: que el enlace no coincida con
-      la marca que dice ser, dominios que imitan a un banco, letras de otro alfabeto disfrazadas
-      de latinas, acortadores que esconden el destino, peticiones de códigos o claves, y los
-      guiones de siempre — el familiar con número nuevo, el jefe que no puede hablar, el premio
-      que nadie pidió.
-    </p>
-    <p>
-      Conoce instituciones de Ecuador y de la región: Pichincha, Guayaquil, Produbanco, Pacífico,
-      Diners, el SRI, el IESS, Claro, Movistar, y bancos de Colombia, Perú y México. Esa es la
-      diferencia con las herramientas hechas afuera.
-    </p>
-    <p>
-      <strong>No te da un veredicto, te da indicios explicados.</strong> Porque el objetivo no es
-      solo salvarte hoy: es que reconozcas el patrón la próxima vez. Y porque decirle a alguien
-      «esto es seguro» cuando no lo es sería peor que no haber dicho nada. Riesgo bajo significa
-      <em>no encontré señales conocidas</em>, nunca <em>esto es seguro</em>.
-    </p>
   </div>
 
   <footer>
     Certia es software libre, gratuito y de código abierto. Sin cuenta, sin publicidad, sin rastreo.<br>
+    <a href="como-funciona.html">Cómo funciona</a> ·
     <a href="https://github.com/luisfernandomedh/certia">Código en GitHub</a> ·
     <a href="https://github.com/luisfernandomedh/certia/blob/main/SECURITY.md">Modelo de amenazas</a> ·
-    <a href="https://github.com/luisfernandomedh/certia/blob/main/CORPUS.md">El corpus abierto</a>
+    <a href="https://github.com/luisfernandomedh/certia-corpus">El corpus abierto</a>
   </footer>
 
 </div>
@@ -249,8 +289,6 @@
 <script type="module">
 import { analizar, anonimizar } from "./lib/index.js";
 
-// URL del Worker que crea el issue con un solo clic (ver worker/README.md).
-// Mientras esté vacía, la web usa el formulario de GitHub como respaldo.
 const ENDPOINT = "https://cierto-aportes.luisfernandomedh.workers.dev";
 const REPO = "luisfernandomedh/certia";
 
@@ -266,100 +304,177 @@ const EJEMPLOS = [
   ["Mensaje normal", "Banco Pichincha: consumo aprobado por $45.20 en SUPERMAXI. Si no lo reconoce llame al 1700 100 100."],
 ];
 
-const ETIQUETA = {
-  alto: "Riesgo alto",
-  medio: "Riesgo medio",
-  bajo: "No encontré señales conocidas",
+// Nombre corto y legible por señal. El identificador técnico sirve al código,
+// no a una persona asustada mirando su teléfono.
+const NOMBRES = {
+  "pide-credenciales": "Te pide una clave o un código",
+  "codigo-recibido": "Te está llegando un código",
+  "desajuste-marca-enlace": "El enlace no es de quien dice ser",
+  "dominio-imitador": "El dominio imita a una marca real",
+  "dominio-generico-financiero": "Dominio con palabras genéricas",
+  "caracteres-enganosos": "Letras de otro alfabeto disfrazadas",
+  "formulario-en-sitio-generico": "Formulario en una página cualquiera",
+  "enlace-desconocido-accion-sensible": "Enlace desconocido pidiendo tus datos",
+  "enlace-acortado": "Enlace acortado que oculta su destino",
+  "familiar-numero-nuevo": "Un «familiar» con número nuevo",
+  "suplantacion-de-jefe": "Alguien se hace pasar por tu jefe",
+  "oferta-laboral-irreal": "Trabajo demasiado bueno para ser real",
+  "premio-inesperado": "Un premio que nadie pidió",
+  "urgencia-artificial": "Te apura para que no pienses",
 };
-const REMATE = {
-  alto: "Tiene varias marcas típicas de una estafa. No abras los enlaces, no respondas, y si dice ser tu banco, llama tú al número que está en tu tarjeta.",
-  medio: "Tiene algo sospechoso. Verifica por un canal oficial antes de hacer nada.",
-  bajo: "Eso no garantiza que sea seguro: solo significa que no reconocí ninguna de las señales que sé buscar. Desconfía igual si algo te pide dinero o datos.",
+
+const VEREDICTO = {
+  alto: {
+    titulo: "Esto parece una estafa",
+    sub: "Tiene varias marcas típicas del fraude. No abras los enlaces ni respondas. Si dice ser tu banco, llama tú al número de tu tarjeta.",
+    icono: '<path d="M12 3 2 20h20z"/><path d="M12 9.5v4.5"/><circle cx="12" cy="17.2" r=".9" fill="currentColor" stroke="none"/>',
+  },
+  medio: {
+    titulo: "Algo no cuadra",
+    sub: "Hay señales sospechosas, pero no son concluyentes. Verifica por un canal oficial antes de hacer nada.",
+    icono: '<circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16.3" r=".9" fill="currentColor" stroke="none"/>',
+  },
+  bajo: {
+    titulo: "No encontré señales conocidas",
+    sub: "Eso no significa que sea seguro: significa que no reconocí ninguna de las señales que sé buscar. Desconfía igual si te piden dinero o datos.",
+    icono: '<circle cx="12" cy="12" r="9"/><path d="m8.4 12.2 2.5 2.5 4.7-4.9"/>',
+  },
 };
 
 const $ = (id) => document.getElementById(id);
 const $mensaje = $("mensaje"), $resultado = $("resultado"), $contribuir = $("contribuir");
 const $limpio = $("limpio"), $cambios = $("cambios"), $estado = $("estadoEnvio");
 
-// Todo contenido que provenga del mensaje se escapa antes de tocar el documento.
+// Todo lo que venga del mensaje se escapa antes de tocar el documento.
 // Ver SECURITY.md, amenaza A2.
-const escapar = (s) => String(s).replace(/[&<>"']/g, (c) =>
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
-function pintar({ riesgo, puntaje, hallazgos, avisos }) {
-  const senales = hallazgos.map((h) => `
-    <li>
-      <span class="id">${escapar(h.id)}</span>
-      ${escapar(h.explicacion)}
-      ${h.evidencia ? `<span class="evidencia">${escapar(h.evidencia)}</span>` : ""}
+/**
+ * Reconstruye el mensaje intercalando marcas donde están las señales.
+ * Varias señales pueden apuntar al mismo fragmento —un dominio falso suele
+ * disparar tres— así que se agrupan y el fragmento se resalta una sola vez.
+ */
+function mensajeMarcado(texto, senales) {
+  const grupos = new Map();
+  for (const s of senales) {
+    if (!s.posicion) continue;
+    const clave = s.posicion.join(":");
+    if (!grupos.has(clave)) grupos.set(clave, { pos: s.posicion, ids: [] });
+    grupos.get(clave).ids.push(s.n);
+  }
+  const tramos = [...grupos.values()].sort((a, b) => a.pos[0] - b.pos[0]);
+
+  let html = "", cursor = 0;
+  for (const { pos, ids } of tramos) {
+    if (pos[0] < cursor) continue; // solapado: ya está cubierto
+    const clase = senales.find((s) => s.n === ids[0]).clase;
+    html += esc(texto.slice(cursor, pos[0]));
+    html += `<mark class="m-${clase}" data-senales="${ids.join(",")}">` +
+            esc(texto.slice(pos[0], pos[1])) +
+            `<span class="num">${ids.join(" ")}</span></mark>`;
+    cursor = pos[1];
+  }
+  return html + esc(texto.slice(cursor));
+}
+
+function pintar(texto, { riesgo, puntaje, hallazgos, avisos }) {
+  // Numeración compartida entre el mensaje y las tarjetas: el número que ves
+  // subrayado en el texto es el mismo que encabeza su explicación.
+  let n = 0;
+  const senales = [
+    ...hallazgos.map((h) => ({ ...h, n: ++n, clase: h.peso >= 45 ? "alto" : "medio" })),
+    ...avisos.map((a) => ({ ...a, n: ++n, clase: "aviso" })),
+  ];
+
+  const v = VEREDICTO[riesgo];
+  const tarjetas = senales.map((s) => `
+    <li class="s-${s.clase}" data-n="${s.n}">
+      <span class="insignia">${s.n}</span>
+      <div class="senal-cuerpo">
+        <div class="nombre">${esc(NOMBRES[s.id] ?? s.id)}</div>
+        <div class="detalle">${esc(s.explicacion)}</div>
+        ${s.evidencia ? `<span class="fuente">${esc(s.evidencia)}</span>` : ""}
+      </div>
     </li>`).join("");
 
-  const listaAvisos = (avisos ?? []).map((a) => `
-    <li>
-      <span class="titulo">Algo que debes saber</span>
-      ${escapar(a.explicacion)}
-    </li>`).join("");
+  const marcado = mensajeMarcado(texto, senales);
+  const hayMarcas = senales.some((s) => s.posicion);
 
   $resultado.innerHTML = `
-    <div class="veredicto ${riesgo}">
-      <strong>${ETIQUETA[riesgo]}</strong>
-      <span class="puntaje">${puntaje} / 100</span>
+    <div class="veredicto v-${riesgo}">
+      <div class="icono">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">${v.icono}</svg>
+      </div>
+      <div style="flex:1;min-width:0">
+        <h2>${v.titulo}</h2>
+        <p>${v.sub}</p>
+        <div class="barra"><i style="width:${Math.max(puntaje, 3)}%"></i></div>
+      </div>
     </div>
-    ${listaAvisos ? `<ul class="avisos">${listaAvisos}</ul>` : ""}
-    ${senales ? `<ul class="senales">${senales}</ul>` : ""}
-    <p class="remate">${REMATE[riesgo]}</p>`;
+
+    ${hayMarcas ? `
+    <div class="lienzo">
+      <div class="titulo">Lo subrayado es lo sospechoso</div>
+      <div class="mensaje-marcado">${marcado}</div>
+    </div>` : ""}
+
+    ${tarjetas ? `<ul class="senales">${tarjetas}</ul>` : ""}
+    <p class="remate">Certia da indicios, no certezas. La decisión sigue siendo tuya.</p>`;
+
+  // Señal y subrayado se iluminan juntos, en los dos sentidos.
+  const resaltar = (nums, on) => {
+    for (const num of nums) {
+      $resultado.querySelector(`li[data-n="${num}"]`)?.classList.toggle("activa", on);
+      for (const m of $resultado.querySelectorAll("mark")) {
+        if (m.dataset.senales.split(",").includes(String(num))) m.classList.toggle("activa", on);
+      }
+    }
+  };
+  for (const li of $resultado.querySelectorAll("li[data-n]")) {
+    li.addEventListener("mouseenter", () => resaltar([li.dataset.n], true));
+    li.addEventListener("mouseleave", () => resaltar([li.dataset.n], false));
+  }
+  for (const m of $resultado.querySelectorAll("mark")) {
+    const nums = m.dataset.senales.split(",");
+    m.addEventListener("mouseenter", () => resaltar(nums, true));
+    m.addEventListener("mouseleave", () => resaltar(nums, false));
+  }
 }
 
-const AVISO_PENDIENTE =
-  "Se publica como propuesta pendiente. Una persona lo revisa antes de que entre al corpus.";
+const AVISO_PENDIENTE = "Se publica como propuesta pendiente. Una persona lo revisa antes de que entre al corpus.";
 
-function reiniciarEstado() {
-  $estado.className = "remate";
-  $estado.textContent = AVISO_PENDIENTE;
-  $("enviar").disabled = false;
-  $("enviar").textContent = "Enviar al corpus";
-}
-
-/**
- * Prepara la contribución en el mismo momento del análisis: el texto ya sale
- * limpio y visible, para que enviarlo sea un solo clic.
- */
 function prepararContribucion(texto, riesgo) {
   const { texto: limpio, reemplazos } = anonimizar(texto);
   $limpio.value = limpio;
   $cambios.textContent = reemplazos.length
     ? `Se reemplazó automáticamente: ${reemplazos.join(", ")}.`
     : "No se encontró ningún dato personal que reemplazar. Revísalo igual.";
-  // La etiqueta se propone según el veredicto, pero la persona puede cambiarla.
   $("etiqueta").value = riesgo === "bajo" ? "legitimo" : "estafa";
-  reiniciarEstado();
+  $estado.className = "remate";
+  $estado.textContent = AVISO_PENDIENTE;
+  $("enviar").disabled = false;
+  $("enviar").textContent = "Enviar al corpus";
 }
 
 function revisar() {
   const texto = $mensaje.value.trim();
   if (!texto) { $resultado.innerHTML = ""; $contribuir.hidden = true; return; }
-  const resultado = analizar(texto);
-  pintar(resultado);
-  prepararContribucion(texto, resultado.riesgo);
+  const r = analizar(texto);
+  pintar(texto, r);
+  prepararContribucion(texto, r.riesgo);
   $contribuir.hidden = false;
 }
 
 $("analizar").addEventListener("click", revisar);
-
 $("limpiar").addEventListener("click", () => {
-  $mensaje.value = "";
-  $resultado.innerHTML = "";
-  $contribuir.hidden = true;
-  $mensaje.focus();
+  $mensaje.value = ""; $resultado.innerHTML = ""; $contribuir.hidden = true; $mensaje.focus();
 });
-
 $mensaje.addEventListener("keydown", (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") revisar();
 });
-
 $("cancelar").addEventListener("click", () => { $contribuir.hidden = true; });
 
-/** Sin endpoint configurado, se cae de vuelta al formulario de GitHub. Nada se rompe. */
 function enviarPorGitHub(cuerpo) {
   const url = new URL(`https://github.com/${REPO}/issues/new`);
   url.searchParams.set("template", "aportar-mensaje.yml");
@@ -377,47 +492,33 @@ $("enviar").addEventListener("click", async () => {
     $estado.textContent = "El mensaje es demasiado corto para aportarlo.";
     return;
   }
-
   if (!ENDPOINT) return enviarPorGitHub(cuerpo);
 
   const boton = $("enviar");
-  boton.disabled = true;
-  boton.textContent = "Enviando…";
-  $estado.className = "remate";
-  $estado.textContent = "Enviando…";
+  boton.disabled = true; boton.textContent = "Enviando…";
+  $estado.className = "remate"; $estado.textContent = "Enviando…";
 
   try {
     const r = await fetch(ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        texto: cuerpo,
-        etiqueta: $("etiqueta").value,
-        canal: $("canal").value,
-      }),
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ texto: cuerpo, etiqueta: $("etiqueta").value, canal: $("canal").value }),
     });
     const datos = await r.json().catch(() => ({}));
-
     if (r.ok && datos.ok) {
       $estado.className = "exito";
-      $estado.innerHTML =
-        "Gracias. Tu ejemplo quedó registrado como propuesta " +
-        `<a href="${escapar(datos.url)}" target="_blank" rel="noopener">#${escapar(datos.numero)}</a>. ` +
+      $estado.innerHTML = "Gracias. Tu ejemplo quedó registrado como propuesta " +
+        `<a href="${esc(datos.url)}" target="_blank" rel="noopener">#${esc(datos.numero)}</a>. ` +
         "Una persona lo revisa antes de que entre al corpus.";
       boton.textContent = "Enviado";
       return;
     }
-
     $estado.className = "fallo";
     $estado.textContent = datos.error || "No se pudo enviar ahora mismo. Inténtalo más tarde.";
   } catch {
     $estado.className = "fallo";
     $estado.textContent = "No se pudo conectar. Revisa tu internet e inténtalo de nuevo.";
   } finally {
-    if (boton.textContent === "Enviando…") {
-      boton.disabled = false;
-      boton.textContent = "Enviar al corpus";
-    }
+    if (boton.textContent === "Enviando…") { boton.disabled = false; boton.textContent = "Enviar al corpus"; }
   }
 });
 
