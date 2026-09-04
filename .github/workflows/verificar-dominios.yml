@@ -1,0 +1,51 @@
+name: Verificar dominios
+
+# Los certificados caducan y rotan, así que una verificación sin fecha es una
+# verificación vencida. Esto la mantiene fresca sin que nadie se acuerde.
+on:
+  schedule:
+    - cron: "0 9 1 * *"   # el día 1 de cada mes
+  workflow_dispatch:       # o cuando alguien lo pida a mano
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+
+      - run: npm ci && npm run build
+
+      - name: Verificar contra los certificados
+        id: v
+        continue-on-error: true      # el código 3 significa "hay que mirar", no "falló"
+        run: npm run verificar:json
+
+      - name: Guardar el resultado
+        run: |
+          if git diff --quiet docs/verificacion.json; then
+            echo "sin cambios en el estado de los dominios"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/verificacion.json
+          git commit -m "auditoría: verificación mensual de dominios ($(date +%Y-%m-%d))"
+          git push
+
+      # Nada se borra solo. Si algo empeoró, lo mira una persona.
+      - name: Avisar si algo empeoró
+        if: steps.v.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          npm run verificar 2>&1 | tail -40 > /tmp/detalle.txt || true
+          gh issue create \
+            --title "Verificación de dominios: algo cambió ($(date +%Y-%m-%d))" \
+            --label "dominios" \
+            --body "$(printf 'La verificación mensual encontró dominios que ya no se comprueban como antes.\n\nUn certificado renovado o un sitio caído es normal. Lo que hay que mirar es un dominio **DUDOSO** o uno **sin ningún certificado emitido jamás**: eso puede significar que el dominio cambió de manos.\n\n**Nada se ha borrado del registro.** Esta revisión es humana.\n\n```\n%s\n```\n\nDetalle completo en `docs/verificacion.json`.' "$(cat /tmp/detalle.txt)")"

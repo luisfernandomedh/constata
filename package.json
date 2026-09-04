@@ -18,7 +18,8 @@
     "build": "tsc && rm -rf docs/lib && cp -R dist docs/lib",
     "test": "node --test test/*.test.js",
     "medir": "node scripts/medir.mjs",
-    "verificar": "node scripts/verificar-dominios.mjs"
+    "verificar": "node scripts/verificar-dominios.mjs",
+    "verificar:json": "node scripts/verificar-dominios.mjs --json"
   },
   "keywords": [
     "phishing",

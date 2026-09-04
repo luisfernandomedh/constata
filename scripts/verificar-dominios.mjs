@@ -24,6 +24,7 @@ import { MARCAS } from "../dist/index.js";
 
 const args = process.argv.slice(2);
 const soloDudosos = args.includes("--dudosos");
+const comoJson = args.includes("--json");
 const pais = args.includes("--pais") ? args[args.indexOf("--pais") + 1] : null;
 
 /** Abre una conexión TLS y devuelve lo que dice el certificado del servidor. */
@@ -149,6 +150,44 @@ for (let i = 0; i < tareas.length; i += 6) {
   process.stdout.write(`\r  ${resultados.length}/${tareas.length}`);
 }
 process.stdout.write("\r".padEnd(40) + "\r");
+
+// Salida legible por máquina: la escribe la tarea programada y la lee la web.
+// El historial de git de este archivo ES el registro de auditoría — muestra
+// cuándo cambió el estado de cada dominio, y no hay que construir nada más.
+if (comoJson) {
+  const salida = {
+    revisado: new Date().toISOString(),
+    metodo: "certificado TLS del servidor; historial de transparencia como respaldo",
+    resumen: {
+      total: resultados.length,
+      confirmados: resultados.filter((r) => r.nivel === "CONFIRMADO").length,
+      revisar: resultados.filter((r) => r.nivel === "REVISAR").length,
+      dudosos: resultados.filter((r) => r.nivel === "DUDOSO").length,
+      sin_respuesta: resultados.filter((r) => r.nivel === "ERROR").length,
+    },
+    dominios: Object.fromEntries(
+      resultados
+        .sort((a, b) => a.dominio.localeCompare(b.dominio))
+        .map((r) => [r.dominio, {
+          institucion: r.marca.nombre,
+          estado: r.nivel,
+          detalle: r.nota,
+          ...(r.cert?.hasta ? { certificado_vence: r.cert.hasta } : {}),
+        }]),
+    ),
+  };
+  const { writeFileSync } = await import("node:fs");
+  writeFileSync("docs/verificacion.json", JSON.stringify(salida, null, 2) + "\n");
+  console.log(`docs/verificacion.json escrito · ${salida.resumen.confirmados}/${salida.resumen.total} confirmados`);
+  // Señal para la tarea programada: algo empeoró y hace falta un humano.
+  const graves = resultados.filter((r) => r.nivel === "DUDOSO" || /NUNCA se le emiti/.test(r.nota ?? ""));
+  if (graves.length) {
+    console.log("\nATENCION:");
+    for (const g of graves) console.log(`  ${g.dominio} (${g.marca.nombre}) — ${g.nota}`);
+    process.exit(3);
+  }
+  process.exit(0);
+}
 
 const ICONO = { CONFIRMADO: "✔", REVISAR: "?", DUDOSO: "✖", ERROR: "…" };
 const orden = ["DUDOSO", "REVISAR", "ERROR", "CONFIRMADO"];

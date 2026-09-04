@@ -68,6 +68,12 @@
     border: 1px solid var(--borde); border-radius: 10px;
   }
   .leyenda b { color: var(--texto); }
+  .auditoria {
+    font-size: 13.5px; color: var(--tenue); margin: 0 0 20px; padding: 12px 15px;
+    background: var(--marca-suave); border-radius: 10px; line-height: 1.6;
+  }
+  .auditoria b { color: var(--marca); }
+  .auditoria a { text-decoration: underline; }
   .leyenda code { font: 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--marca-suave); padding: 1px 5px; border-radius: 4px; }
   .pais {
     font-size: 10.5px; font-weight: 700; letter-spacing: .05em; padding: 2px 6px;
@@ -107,6 +113,8 @@
   </p>
 
   <p class="conteo"><b id="nInst">—</b> instituciones · <b id="nDom">—</b> dominios · <b id="nOk">—</b> confirmadas por certificado</p>
+
+  <p class="auditoria" id="auditoria">Cargando la última auditoría…</p>
 
   <p class="leyenda">
     <b>Comprobado</b> significa que el certificado TLS del sitio lleva el nombre legal de la
@@ -205,6 +213,33 @@ function pintar(filtro = "") {
     ? html
     : `<p class="vacio">No encontré «${esc(filtro)}» en la lista. Si es una institución real, <a href="https://github.com/luisfernandomedh/certia/issues/new?template=agregar-marca.yml">propónla</a> y la agregamos.</p>`;
 }
+
+/**
+ * Los certificados caducan y rotan, así que una verificación sin fecha es una
+ * verificación vencida. Una tarea programada revisa todo cada mes y escribe
+ * verificacion.json; el historial de git de ese archivo es el registro de
+ * auditoría, y aquí se muestra cuándo fue la última vez.
+ */
+try {
+  const r = await fetch("verificacion.json", { cache: "no-store" });
+  if (r.ok) {
+    const a = await r.json();
+    const f = new Date(a.revisado);
+    const dias = Math.floor((Date.now() - f) / 86400000);
+    const cuando = f.toLocaleDateString("es-EC", { day: "numeric", month: "long", year: "numeric" });
+    const antiguedad = dias <= 1 ? "hoy" : dias < 45 ? `hace ${dias} días` : `hace ${dias} días — toca revisar`;
+    document.getElementById("auditoria").innerHTML =
+      `<b>Última verificación automática: ${cuando}</b> (${antiguedad}).<br>` +
+      `${a.resumen.confirmados} de ${a.resumen.total} dominios comprobados contra el certificado del sitio` +
+      (a.resumen.dudosos ? ` · <b>${a.resumen.dudosos} dudosos</b>` : "") +
+      (a.resumen.sin_respuesta ? ` · ${a.resumen.sin_respuesta} no respondieron ese día` : "") +
+      `. Se repite el día 1 de cada mes. ` +
+      `<a href="verificacion.json">Ver el detalle</a> · ` +
+      `<a href="https://github.com/luisfernandomedh/certia/commits/main/docs/verificacion.json">Historial de auditoría</a>`;
+  } else {
+    document.getElementById("auditoria").remove();
+  }
+} catch { document.getElementById("auditoria")?.remove(); }
 
 pintar();
 document.getElementById("buscar").addEventListener("input", (e) => pintar(e.target.value));
