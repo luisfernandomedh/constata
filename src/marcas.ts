@@ -72,7 +72,7 @@ export const MARCAS: Marca[] = [
   { nombre: "DHL", alias: ["dhl"], dominios: ["dhl.com"], verificacion: "certificado" },
   { nombre: "FedEx", alias: ["fedex"], dominios: ["fedex.com"], verificacion: "certificado" },
   { nombre: "UPS", alias: ["ups"], dominios: ["ups.com"], verificacion: "certificado" },
-  { nombre: "Servientrega", alias: ["servientrega"], dominios: ["servientrega.com"] },
+  { nombre: "Servientrega", alias: ["servientrega"], dominios: ["servientrega.com.ec", "servientrega.com"] },
   { nombre: "Correos del Ecuador", pais: "EC", alias: ["correos del ecuador"], dominios: ["correosdelecuador.com.ec"] },
 
   // ── Plataformas globales ──────────────────────────────────────
@@ -90,7 +90,20 @@ export const MARCAS: Marca[] = [
   { nombre: "Disney+", alias: ["disney"], dominios: ["disneyplus.com"] },
 ];
 
-/** ¿Este dominio pertenece a la marca, directamente o como subdominio? */
+/**
+ * ¿Este dominio pertenece a la marca, directamente o como subdominio?
+ *
+ * Que acepte subdominios no es un descuido, es lo que hace que funcione: las
+ * bancas web reales viven ahí — `bancaweb.pichincha.com`,
+ * `bancavirtual.bancoguayaquil.com`, `bancaempresas.pichincha.com`— y son
+ * justamente el blanco favorito de la suplantación. Enumerarlas una por una
+ * sería imposible de mantener y no haría falta.
+ *
+ * La regla exige el punto: `bancaweb.pichincha.com` pasa porque termina en
+ * `.pichincha.com`, pero `bancaweb-pichincha.com` no, y ahí está la trampa
+ * que se quiere atrapar. Para colarse haría falta controlar un subdominio
+ * real del banco, que es decir que el banco ya está comprometido.
+ */
 export function esDominioDe(dominio: string, marca: Marca): boolean {
   return marca.dominios.some((d) => dominio === d || dominio.endsWith(`.${d}`));
 }

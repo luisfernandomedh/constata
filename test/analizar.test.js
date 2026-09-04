@@ -106,3 +106,26 @@ test("el puntaje nunca se sale del rango", () => {
     assert.ok(puntaje >= 0 && puntaje <= 100, `puntaje fuera de rango: ${puntaje}`);
   }
 });
+
+// La banca web es el blanco favorito de la suplantación de dominio. Estas
+// pruebas fijan que los subdominios reales pasen y sus imitaciones no.
+test("las bancas web reales se reconocen como propias", async () => {
+  const { esDominioConocido } = await import("../dist/index.js");
+  for (const d of [
+    "bancaweb.pichincha.com", "bancaempresas.pichincha.com",
+    "bancavirtual.bancoguayaquil.com", "pagos.bancoguayaquil.com",
+    "servientrega.com.ec",
+  ]) assert.ok(esDominioConocido(d), `debería reconocerse: ${d}`);
+});
+
+test("las imitaciones de banca web NO se reconocen y salen con riesgo alto", async () => {
+  const { esDominioConocido } = await import("../dist/index.js");
+  const trampas = [
+    "bancaweb-pichincha.com", "pichincha.com.acceso-seguro.net",
+    "bancavirtual-bancoguayaquil.com", "bancawebpichincha.com",
+  ];
+  for (const d of trampas) assert.ok(!esDominioConocido(d), `NO debería reconocerse: ${d}`);
+
+  const r = analizar("Banco Pichincha: ingrese a su banca web en https://bancaweb-pichincha.com/login");
+  assert.equal(r.riesgo, "alto", "una banca web imitada debe salir como riesgo alto");
+});
