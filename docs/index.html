@@ -61,7 +61,7 @@
   * { box-sizing: border-box; }
   body {
     margin: 0; background: var(--fondo); color: var(--texto);
-    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    font: 17px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
   .envoltura { max-width: 720px; margin: 0 auto; padding: 44px 20px 80px; }
@@ -76,7 +76,7 @@
   }
   .escudo svg { width: 21px; height: 21px; }
   h1 { font-size: 31px; letter-spacing: -0.03em; margin: 0; font-weight: 680; }
-  .lema { color: var(--tenue); margin: 0; font-size: 16.5px; max-width: 54ch; }
+  .lema { color: var(--tenue); margin: 0; font-size: 17.5px; max-width: 54ch; }
   .promesa {
     margin-top: 18px; padding: 12px 15px; font-size: 14px; line-height: 1.55;
     background: var(--marca-suave); border-radius: 10px;
@@ -84,6 +84,26 @@
   }
   .promesa svg { width: 17px; height: 17px; flex: none; margin-top: 2px; color: var(--marca); }
   .promesa strong { color: var(--marca); }
+
+  /* ── Pasos, para quien nunca ha usado algo así ──────────── */
+  .pasos {
+    list-style: none; padding: 0; margin: 0 0 20px;
+    display: grid; gap: 10px;
+  }
+  .pasos li {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 17px; line-height: 1.4;
+  }
+  .pasos .p {
+    width: 28px; height: 28px; flex: none; border-radius: 50%;
+    background: var(--marca); color: var(--fondo);
+    display: grid; place-items: center; font-size: 15px; font-weight: 700;
+  }
+  button.grande {
+    width: 100%; font-size: 19px; font-weight: 650; padding: 18px 20px;
+    border-radius: 12px; box-shadow: var(--sombra); letter-spacing: -0.01em;
+  }
+  .ayuda { font-size: 13.5px; color: var(--tenue); margin: 10px 0 26px; text-align: center; }
 
   /* ── Entrada ────────────────────────────────────────────── */
   .etiqueta { display: block; font-size: 13px; color: var(--tenue); margin-bottom: 7px; font-weight: 500; }
@@ -93,7 +113,7 @@
     border: 1px solid var(--borde); border-radius: 12px; resize: vertical;
     box-shadow: var(--sombra);
   }
-  #mensaje { min-height: 132px; }
+  #mensaje { min-height: 110px; font-size: 16px; }
   textarea:focus { outline: 2px solid var(--marca); outline-offset: 1px; }
   .fila { display: flex; gap: 9px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
   button {
@@ -226,12 +246,21 @@
     </p>
   </header>
 
-  <label class="etiqueta" for="mensaje">Mensaje a revisar</label>
-  <textarea id="mensaje" placeholder="Pega aquí el SMS, el correo o el mensaje de WhatsApp…"></textarea>
+  <ol class="pasos">
+    <li><span class="p">1</span> Copia el mensaje que te llegó</li>
+    <li><span class="p">2</span> Toca el botón verde de aquí abajo</li>
+    <li><span class="p">3</span> Te digo si es una estafa</li>
+  </ol>
+
+  <button id="pegar" class="grande">Pegar el mensaje y revisarlo</button>
+  <p class="ayuda" id="ayudaPegar">Si el botón no funciona, escribe o pega el mensaje en el cuadro de abajo.</p>
+
+  <label class="etiqueta" for="mensaje">O escríbelo aquí</label>
+  <textarea id="mensaje" placeholder="Pega o escribe aquí el mensaje…"></textarea>
 
   <div class="fila">
     <button id="analizar">Revisar mensaje</button>
-    <button id="limpiar" class="secundario">Limpiar</button>
+    <button id="limpiar" class="secundario">Borrar</button>
   </div>
 
   <div class="ejemplos">
@@ -468,6 +497,40 @@ function revisar() {
 }
 
 $("analizar").addEventListener("click", revisar);
+
+/**
+ * El botón de pegar existe por una razón concreta: la gente mayor —que es
+ * justo la más estafada— sabe copiar un mensaje, pero pegarlo en un cuadro
+ * le cuesta. Mantener pulsado, esperar el menú, elegir "pegar". Son tres
+ * gestos que muchos no conocen.
+ *
+ * Con esto es uno: tocar. El navegador lee el portapapeles, lo pone y lo
+ * analiza de una vez.
+ */
+$("pegar").addEventListener("click", async () => {
+  const boton = $("pegar");
+  try {
+    const texto = await navigator.clipboard.readText();
+    if (!texto.trim()) {
+      $("ayudaPegar").textContent = "No encontré nada copiado. Copia primero el mensaje y vuelve a tocar aquí.";
+      return;
+    }
+    $mensaje.value = texto;
+    $("ayudaPegar").textContent = "Si el botón no funciona, escribe o pega el mensaje en el cuadro de abajo.";
+    revisar();
+    document.getElementById("resultado").scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch {
+    // Sin permiso de portapapeles: se degrada al cuadro de texto de siempre.
+    $("ayudaPegar").innerHTML = "<strong>Tu navegador no me deja leer lo que copiaste.</strong> Pega el mensaje en el cuadro de abajo y toca «Revisar mensaje».";
+    $mensaje.focus();
+    $mensaje.scrollIntoView({ behavior: "smooth", block: "center" });
+  } finally {
+    boton.blur();
+  }
+});
+
+// Si pegan directamente en el cuadro, tampoco hace falta buscar el botón.
+$mensaje.addEventListener("paste", () => setTimeout(revisar, 0));
 $("limpiar").addEventListener("click", () => {
   $mensaje.value = ""; $resultado.innerHTML = ""; $contribuir.hidden = true; $mensaje.focus();
 });
