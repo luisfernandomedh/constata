@@ -150,6 +150,20 @@
   }
   .ejemplos button:hover { border-color: var(--marca); color: var(--marca); opacity: 1; }
 
+  /* ── Vistas: la respuesta ocupa su propia pantalla ──────── */
+  .analizando { text-align: center; padding: 60px 20px; }
+  .analizando p { font-size: 19px; color: var(--tenue); margin: 18px 0 0; }
+  .rueda {
+    display: inline-block; width: 42px; height: 42px; border-radius: 50%;
+    border: 4px solid color-mix(in srgb, var(--marca) 22%, transparent);
+    border-top-color: var(--marca); animation: gira .8s linear infinite;
+  }
+  .volver-arriba {
+    background: none; border: 0; color: var(--marca); font: inherit; font-size: 15px;
+    padding: 0 0 18px; cursor: pointer; box-shadow: none; font-weight: 500;
+  }
+  #vista-resultado #otro { margin-top: 30px; }
+
   /* ── Veredicto ──────────────────────────────────────────── */
   #resultado { margin-top: 34px; }
   .veredicto {
@@ -252,7 +266,7 @@
       <h1>Constata</h1>
     </div>
     <p class="lema">¿Este mensaje es una estafa? Pégalo y te subrayo exactamente qué parte es sospechosa, y por qué.</p>
-    <p class="promesa">
+    <p class="promesa" id="promesa">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/>
       </svg>
@@ -260,6 +274,7 @@
     </p>
   </header>
 
+  <section id="vista-inicio">
   <p class="instruccion">Pega el texto o sube tu captura.</p>
 
   <div class="opciones">
@@ -290,6 +305,17 @@
     <div id="ejemplos"></div>
   </div>
 
+  </section>
+
+  <section id="vista-analizando" hidden>
+    <div class="analizando">
+      <span class="rueda"></span>
+      <p>Revisando el mensaje…</p>
+    </div>
+  </section>
+
+  <section id="vista-resultado" hidden>
+    <button id="volver" class="volver-arriba">← Revisar otro mensaje</button>
   <div id="resultado" aria-live="polite"></div>
 
   <p class="invitacion" id="abrirContribuir" hidden>
@@ -330,6 +356,10 @@
       <p class="remate" id="estadoEnvio">Se publica como propuesta pendiente. Una persona lo revisa antes de que entre al corpus.</p>
     </div>
   </div>
+
+
+    <button id="otro" class="grande">Revisar otro mensaje</button>
+  </section>
 
   <footer>
     Constata es software libre, gratuito y de código abierto. Sin cuenta, sin publicidad, sin rastreo.<br>
@@ -513,15 +543,49 @@ function prepararContribucion(texto, riesgo) {
   $("enviar").textContent = "Enviar al corpus";
 }
 
+/**
+ * Tres pantallas en vez de una página larga.
+ *
+ * Los usuarios reportaron que no veían la respuesta: quedaba más abajo y
+ * había que deslizar para encontrarla, entre ejemplos y cajas. Con pantallas
+ * separadas la respuesta ocupa todo y no hay nada que buscar.
+ *
+ * La pausa de medio segundo es a propósito. El análisis es instantáneo, pero
+ * sin ella la pantalla cambia de golpe y no se entiende que pasó algo.
+ */
+const VISTAS = ["vista-inicio", "vista-analizando", "vista-resultado"];
+function mostrar(cual) {
+  for (const v of VISTAS) $(v).hidden = v !== cual;
+  // La promesa de privacidad convence antes de usar la herramienta; en la
+  // pantalla del resultado solo roba espacio a lo que la persona vino a ver.
+  $("promesa").hidden = cual !== "vista-inicio";
+  window.scrollTo({ top: 0, behavior: "instant" });
+}
+
 function revisar() {
   const texto = $mensaje.value.trim();
-  if (!texto) { $resultado.innerHTML = ""; $contribuir.hidden = true; $("abrirContribuir").hidden = true; return; }
-  const r = analizar(texto);
-  pintar(texto, r);
-  prepararContribucion(texto, r.riesgo);
-  $contribuir.hidden = true;
-  $("abrirContribuir").hidden = false;
+  if (!texto) return;
+  mostrar("vista-analizando");
+  setTimeout(() => {
+    const r = analizar(texto);
+    pintar(texto, r);
+    prepararContribucion(texto, r.riesgo);
+    $contribuir.hidden = true;
+    $("abrirContribuir").hidden = false;
+    mostrar("vista-resultado");
+  }, 550);
 }
+
+function volverAlInicio() {
+  $mensaje.value = "";
+  $resultado.innerHTML = "";
+  $contribuir.hidden = true;
+  $("abrirContribuir").hidden = true;
+  $("ayudaPegar").textContent = "Si no puedes copiar el mensaje, toma una captura de pantalla y súbela.";
+  mostrar("vista-inicio");
+}
+$("volver").addEventListener("click", volverAlInicio);
+$("otro").addEventListener("click", volverAlInicio);
 
 $("analizar").addEventListener("click", revisar);
 
@@ -545,13 +609,6 @@ $("pegar").addEventListener("click", async () => {
     $mensaje.value = texto;
     $("ayudaPegar").textContent = "Si el botón no funciona, escribe o pega el mensaje en el cuadro de abajo.";
     revisar();
-    // Llevar la vista al veredicto, no al final de la página. Antes saltaba
-    // hasta la caja de contribuir y la persona perdía de vista la respuesta,
-    // que es lo único que vino a buscar.
-    requestAnimationFrame(() => {
-      document.querySelector("#resultado .veredicto")
-        ?.scrollIntoView({ behavior: "smooth", block: "center" });
-    });
   } catch {
     // Sin permiso de portapapeles: se degrada al cuadro de texto de siempre.
     $("ayudaPegar").innerHTML = "<strong>Tu navegador no me deja leer lo que copiaste.</strong> Pega el mensaje en el cuadro de abajo y toca «Revisar mensaje».";
@@ -617,9 +674,6 @@ async function leerImagen(archivo) {
     }
     $mensaje.value = texto;
     revisar();
-    requestAnimationFrame(() => {
-      document.querySelector("#resultado .veredicto")?.scrollIntoView({ behavior: "smooth", block: "center" });
-    });
   } catch {
     $progreso.hidden = true;
     $("ayudaPegar").innerHTML = "<strong>No pude leer la imagen.</strong> Escribe o pega el mensaje en el cuadro de abajo.";
@@ -635,10 +689,7 @@ document.addEventListener("paste", (e) => {
   const img = [...(e.clipboardData?.items ?? [])].find((i) => i.type.startsWith("image/"));
   if (img) { e.preventDefault(); leerImagen(img.getAsFile()); }
 });
-$("limpiar").addEventListener("click", () => {
-  $mensaje.value = ""; $resultado.innerHTML = "";
-  $contribuir.hidden = true; $("abrirContribuir").hidden = true; $mensaje.focus();
-});
+$("limpiar").addEventListener("click", () => { $mensaje.value = ""; $mensaje.focus(); });
 $mensaje.addEventListener("keydown", (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") revisar();
 });
