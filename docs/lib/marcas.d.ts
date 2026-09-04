@@ -6,6 +6,21 @@
  * son instituciones locales, porque son las que ninguna herramienta extranjera
  * conoce y las que más se suplantan en la región.
  */
+/**
+ * Qué tan comprobado está que estos dominios son de quien decimos.
+ *
+ * - `certificado`: el certificado TLS del sitio lleva el nombre legal de la
+ *   organización. Es la prueba fuerte: para obtenerlo hay que demostrarle a
+ *   una autoridad certificadora que controlas el dominio, y en los de
+ *   validación de organización además hay documentos de por medio.
+ * - `pendiente`: el dominio responde y es plausible, pero su certificado no
+ *   confirma quién está detrás. Muy común, y no significa que esté mal.
+ *
+ * Se comprueba con `npm run verificar`. La distinción se muestra en público:
+ * una lista verificada que nadie verificó no vale más que una alucinación
+ * bien formateada.
+ */
+export type Verificacion = "certificado" | "pendiente";
 export interface Marca {
     nombre: string;
     /** Formas en que el mensaje puede nombrarla, en minúsculas y sin tildes. */
@@ -13,6 +28,7 @@ export interface Marca {
     /** Dominios que sí le pertenecen. Un subdominio de estos también vale. */
     dominios: string[];
     pais?: string;
+    verificacion?: Verificacion;
 }
 export declare const MARCAS: Marca[];
 /** ¿Este dominio pertenece a la marca, directamente o como subdominio? */
