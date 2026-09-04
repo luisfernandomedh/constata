@@ -4,242 +4,191 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dominios verificados — Certia</title>
-<meta name="description" content="La lista de dominios reales de bancos, entidades públicas y operadoras que Certia usa para detectar suplantación. Verdad verificada, no una respuesta probable de una IA.">
+<meta name="description" content="Los dominios reales de cada banco y entidad, comprobados contra el certificado del propio sitio. Con la fecha de la última comprobación.">
 <style>
   :root {
     color-scheme: light dark;
-    --fondo: #faf9f7; --papel: #ffffff; --texto: #17191c; --tenue: #64686e;
-    --borde: #e4e1dc; --marca: #0d5c4a; --marca-suave: #e6f2ee;
-    --sombra: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px -12px rgba(0,0,0,.10);
+    --fondo: #faf9f7; --papel: #ffffff; --texto: #17191c; --tenue: #6a6e74;
+    --borde: #e6e3de; --marca: #0d5c4a; --marca-suave: #e6f2ee; --ambar: #9a5f00;
+    --sombra: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px -14px rgba(0,0,0,.10);
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --fondo: #131518; --papel: #1c1f23; --texto: #eeece8; --tenue: #9a9ea5;
-      --borde: #2f3338; --marca: #5fd3b2; --marca-suave: #13312a;
-      --sombra: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.6);
+      --borde: #2f3338; --marca: #5fd3b2; --marca-suave: #13312a; --ambar: #f2c274;
+      --sombra: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -14px rgba(0,0,0,.6);
     }
   }
   * { box-sizing: border-box; }
   body {
     margin: 0; background: var(--fondo); color: var(--texto);
-    font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
-  .envoltura { max-width: 720px; margin: 0 auto; padding: 40px 20px 80px; }
-  .volver { font-size: 14px; color: var(--marca); text-decoration: none; display: inline-block; margin-bottom: 26px; }
-  .volver:hover { text-decoration: underline; }
-  h1 { font-size: 30px; letter-spacing: -0.03em; margin: 0 0 10px; font-weight: 680; }
-  .entrada { font-size: 17.5px; color: var(--tenue); margin: 0 0 26px; line-height: 1.6; }
-  .clave {
-    background: var(--marca-suave); border-radius: 12px; padding: 16px 18px;
-    margin: 0 0 30px; font-size: 15px; line-height: 1.65;
+  .envoltura { max-width: 760px; margin: 0 auto; padding: 40px 20px 80px; }
+  .volver { font-size: 14px; color: var(--marca); text-decoration: none; display: inline-block; margin-bottom: 24px; }
+  h1 { font-size: 29px; letter-spacing: -0.03em; margin: 0 0 10px; font-weight: 680; }
+  .entrada { font-size: 16.5px; color: var(--tenue); margin: 0 0 20px; max-width: 56ch; }
+  .fecha {
+    font-size: 13.5px; color: var(--tenue); margin: 0 0 22px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
   }
-  .clave strong { color: var(--marca); }
-  h2 {
-    font-size: 13px; text-transform: uppercase; letter-spacing: .09em; font-weight: 700;
-    color: var(--tenue); margin: 32px 0 12px;
-  }
-  .conteo { font-size: 14px; color: var(--tenue); margin-bottom: 22px; }
-  .conteo b { color: var(--marca); font-size: 20px; font-weight: 700; }
+  .fecha .punto { width: 7px; height: 7px; border-radius: 50%; background: var(--marca); flex: none; }
+  .fecha b { color: var(--texto); font-weight: 600; }
   .buscador {
-    width: 100%; padding: 12px 14px; font: inherit; font-size: 15px;
+    width: 100%; padding: 11px 14px; font: inherit; font-size: 15px;
     background: var(--papel); color: var(--texto);
     border: 1px solid var(--borde); border-radius: 10px; box-shadow: var(--sombra);
-    margin-bottom: 6px;
+    margin-bottom: 18px;
   }
   .buscador:focus { outline: 2px solid var(--marca); outline-offset: 1px; }
-  .lista { display: grid; gap: 8px; }
-  .fila {
-    background: var(--papel); border: 1px solid var(--borde); border-radius: 11px;
-    padding: 12px 15px; display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap;
+
+  table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  thead th {
+    text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: .07em;
+    color: var(--tenue); font-weight: 700; padding: 0 10px 8px; border-bottom: 1px solid var(--borde);
   }
-  .fila .nombre { font-weight: 600; font-size: 15px; min-width: 190px; flex: none; }
-  .fila .doms { font: 13.5px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--tenue); word-break: break-all; }
-  .fila .doms span { display: inline-block; margin-right: 12px; }
-  .sello {
-    font-size: 10.5px; font-weight: 700; letter-spacing: .04em; padding: 2px 7px;
-    border-radius: 5px; vertical-align: middle; white-space: nowrap;
+  tbody td { padding: 11px 10px; border-bottom: 1px solid var(--borde); vertical-align: middle; }
+  tbody tr:hover { background: var(--papel); }
+  td.inst { font-weight: 600; }
+  td.dom { font: 13.5px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--tenue); word-break: break-all; }
+  td.est, td.cuando { white-space: nowrap; }
+  .ok { color: var(--marca); font-weight: 600; font-size: 13.5px; }
+  .pend { color: var(--ambar); font-size: 13.5px; }
+  td.cuando { font-size: 13px; color: var(--tenue); }
+  .grupo td {
+    padding: 22px 10px 6px; font-size: 11.5px; text-transform: uppercase;
+    letter-spacing: .07em; color: var(--tenue); font-weight: 700; border: 0;
   }
-  .sello.ok { background: var(--marca-suave); color: var(--marca); }
-  .sello.pend { background: var(--borde); color: var(--tenue); }
-  .leyenda {
-    font-size: 13.5px; color: var(--tenue); line-height: 1.65;
-    margin: 0 0 20px; padding: 13px 15px; background: var(--papel);
-    border: 1px solid var(--borde); border-radius: 10px;
+  .vacio { color: var(--tenue); padding: 24px 0; }
+
+  .cierre {
+    margin-top: 30px; background: var(--papel); border: 1px solid var(--borde);
+    border-radius: 12px; padding: 16px 18px; box-shadow: var(--sombra);
   }
-  .leyenda b { color: var(--texto); }
-  .auditoria {
-    font-size: 13.5px; color: var(--tenue); margin: 0 0 20px; padding: 12px 15px;
-    background: var(--marca-suave); border-radius: 10px; line-height: 1.6;
-  }
-  .auditoria b { color: var(--marca); }
-  .auditoria a { text-decoration: underline; }
-  .leyenda code { font: 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--marca-suave); padding: 1px 5px; border-radius: 4px; }
-  .pais {
-    font-size: 10.5px; font-weight: 700; letter-spacing: .05em; padding: 2px 6px;
-    border-radius: 5px; background: var(--marca-suave); color: var(--marca); vertical-align: middle;
-  }
-  .vacio { color: var(--tenue); font-size: 15px; padding: 20px 0; }
-  .aporta {
-    margin-top: 34px; background: var(--papel); border: 1px solid var(--borde);
-    border-radius: 12px; padding: 17px 19px; box-shadow: var(--sombra);
-  }
-  .aporta h3 { margin: 0 0 6px; font-size: 15.5px; }
-  .aporta p { margin: 0 0 12px; font-size: 14.5px; color: var(--tenue); line-height: 1.6; }
+  .cierre p { margin: 0 0 12px; font-size: 14.5px; color: var(--tenue); line-height: 1.6; }
+  .cierre code { font: 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--marca-suave); padding: 1px 5px; border-radius: 4px; }
   .boton {
     display: inline-block; font-size: 14.5px; font-weight: 600; padding: 9px 18px;
     border-radius: 8px; background: var(--marca); color: var(--fondo); text-decoration: none;
   }
-  footer { margin-top: 50px; padding-top: 20px; border-top: 1px solid var(--borde); font-size: 13.5px; color: var(--tenue); line-height: 1.9; }
+  footer { margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--borde); font-size: 13.5px; color: var(--tenue); line-height: 1.9; }
   footer a, a { color: var(--marca); }
 </style>
 </head>
 <body>
 <div class="envoltura">
 
-  <a class="volver" href="./">← Volver a la herramienta</a>
+  <a class="volver" href="./">← Volver</a>
 
   <h1>Dominios verificados</h1>
-  <p class="entrada">Esta es la lista contra la que Certia compara cada enlace que le pegas.</p>
-
-  <p class="clave">
-    <strong>Por qué esto importa más que la inteligencia artificial.</strong>
-    Si le preguntas a una IA cuál es el dominio real de tu banco, te da una respuesta
-    <em>probable</em>. Puede acertar, puede equivocarse, y no te avisa cuál de las dos.
-    Una lista verificada te da un <strong>hecho</strong>. Contra la suplantación de dominio
-    —la estafa que hace que un enlace parezca de tu banco sin serlo— esa diferencia lo es todo.
-    Y para que no tengas que creernos a nosotros tampoco, cada institución dice abajo si su
-    dominio está comprobado contra el certificado del sitio o si todavía está pendiente.
+  <p class="entrada">
+    Los enlaces que te llegan se comparan contra esta lista. Cada dominio se comprueba
+    contra el certificado del propio sitio, que lleva el nombre legal de la institución.
   </p>
 
-  <p class="conteo"><b id="nInst">—</b> instituciones · <b id="nDom">—</b> dominios · <b id="nOk">—</b> confirmadas por certificado</p>
+  <p class="fecha" id="fecha"></p>
 
-  <p class="auditoria" id="auditoria">Cargando la última auditoría…</p>
+  <input class="buscador" id="buscar" type="search" placeholder="Buscar tu banco o un dominio…" autocomplete="off">
 
-  <p class="leyenda">
-    <b>Comprobado</b> significa que el certificado TLS del sitio lleva el nombre legal de la
-    organización — «Banco Pichincha C.A.», «Servicio de Rentas Internas». Esa prueba no se puede
-    falsificar sin comprometer a una autoridad certificadora.<br>
-    <b>Sin confirmar</b> significa que el dominio responde y es plausible, pero su certificado no
-    acredita quién está detrás. Es muy común y no implica que esté mal — implica que todavía no
-    lo podemos demostrar, y preferimos decirlo.
-  </p>
+  <table>
+    <thead>
+      <tr><th>Institución</th><th>Dominio</th><th>Estado</th><th>Comprobado</th></tr>
+    </thead>
+    <tbody id="cuerpo"></tbody>
+  </table>
 
-  <p class="leyenda">
-    <b>Los subdominios cuentan.</b> No hace falta listar cada banca web: si
-    <code>pichincha.com</code> está aquí, entonces <code>bancaweb.pichincha.com</code> y
-    <code>bancaempresas.pichincha.com</code> también valen. Y ahí está la trampa que se
-    quiere atrapar: <code>bancaweb.pichincha.com</code> es del banco, pero
-    <code>bancaweb-pichincha.com</code> —con guion en vez de punto— no lo es, y Certia
-    lo marca como riesgo alto. Para colarse haría falta controlar un subdominio real
-    del banco, o sea que el banco ya estaría comprometido.
-  </p>
-
-  <input class="buscador" id="buscar" type="search" placeholder="Buscar una institución o un dominio…" autocomplete="off">
-
-  <div id="salida"></div>
-
-  <div class="aporta">
-    <h3>¿Falta tu banco?</h3>
+  <div class="cierre">
     <p>
-      Agregar una institución es la contribución más útil y más fácil del proyecto: es una línea,
-      y mejora la detección para todos sin tocar el motor. Solo hacen falta el nombre y sus
-      dominios reales.
+      Los subdominios cuentan: si <code>pichincha.com</code> está en la lista,
+      <code>bancaweb.pichincha.com</code> también vale. Pero <code>bancaweb-pichincha.com</code>,
+      con guion, no — y esa es justo la trampa que buscamos.
     </p>
+    <p>¿Falta tu banco? Agregarlo toma un minuto y mejora la detección para todos.</p>
     <a class="boton" href="https://github.com/luisfernandomedh/certia/issues/new?template=agregar-marca.yml">Proponer una institución</a>
   </div>
 
   <footer>
     <a href="./">Volver a la herramienta</a> ·
     <a href="como-funciona.html">Cómo funciona</a> ·
-    <a href="https://github.com/luisfernandomedh/certia/blob/main/src/marcas.ts">Ver esta lista en el código</a>
+    <a href="https://github.com/luisfernandomedh/certia">Ver todo en GitHub</a>
   </footer>
 
 </div>
 
 <script type="module">
-// La página lee el mismo registro que usa el motor. Si se agrega una
-// institución al código, aparece aquí sola — no hay dos listas que puedan
-// desincronizarse, que es exactamente el error que haría inútil esta página.
+// La tabla lee el mismo registro que usa el motor, y las fechas salen del
+// archivo que escribe la comprobación mensual. Ninguna lista se mantiene a
+// mano, así que no pueden desincronizarse.
 import { MARCAS } from "./lib/index.js";
-
-const PAISES = { EC: "Ecuador", CO: "Colombia", PE: "Perú", MX: "México" };
-const GRUPOS = [
-  ["Bancos y pagos de Ecuador", (m) => m.pais === "EC" && !esEstado(m) && !esTelco(m)],
-  ["Entidades del Estado ecuatoriano", (m) => m.pais === "EC" && esEstado(m)],
-  ["Operadoras", (m) => esTelco(m)],
-  ["Bancos y pagos de la región", (m) => m.pais && m.pais !== "EC"],
-  ["Plataformas globales", (m) => !m.pais && !esTelco(m)],
-];
-const esEstado = (m) => ["SRI", "IESS", "ANT", "Registro Civil", "Correos del Ecuador"].includes(m.nombre);
-const esTelco = (m) => ["Claro", "Movistar", "CNT"].includes(m.nombre);
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
-document.getElementById("nInst").textContent = MARCAS.length;
-document.getElementById("nDom").textContent = MARCAS.reduce((a, m) => a + m.dominios.length, 0);
-document.getElementById("nOk").textContent = MARCAS.filter((m) => m.verificacion === "certificado").length;
+const ESTADO = new Set(["SRI", "IESS", "ANT", "Registro Civil", "Correos del Ecuador"]);
+const TELCO = new Set(["Claro", "Movistar", "CNT"]);
+const GRUPOS = [
+  ["Bancos de Ecuador", (m) => m.pais === "EC" && !ESTADO.has(m.nombre) && !TELCO.has(m.nombre)],
+  ["Entidades públicas", (m) => ESTADO.has(m.nombre)],
+  ["Operadoras", (m) => TELCO.has(m.nombre)],
+  ["Región", (m) => m.pais && m.pais !== "EC"],
+  ["Plataformas globales", (m) => !m.pais],
+];
 
-const $salida = document.getElementById("salida");
+let auditoria = null;
+try {
+  const r = await fetch("verificacion.json", { cache: "no-store" });
+  if (r.ok) auditoria = await r.json();
+} catch { /* la tabla funciona igual sin fechas */ }
+
+const $fecha = document.getElementById("fecha");
+if (auditoria) {
+  const f = new Date(auditoria.revisado);
+  $fecha.innerHTML = '<span class="punto"></span>Última comprobación: <b>' +
+    f.toLocaleDateString("es-EC", { day: "numeric", month: "long", year: "numeric" }) +
+    "</b>. Se repite sola cada mes.";
+} else {
+  $fecha.remove();
+}
+
+const fechaCorta = auditoria
+  ? new Date(auditoria.revisado).toLocaleDateString("es-EC", { day: "numeric", month: "short" })
+  : "";
+
+const confirmado = (m) =>
+  auditoria?.dominios?.[m.dominios[0]]?.estado === "CONFIRMADO" ||
+  m.verificacion === "certificado";
+
+const $cuerpo = document.getElementById("cuerpo");
 
 function pintar(filtro = "") {
   const q = filtro.trim().toLowerCase();
-  const coincide = (m) =>
-    !q || m.nombre.toLowerCase().includes(q) ||
-    m.dominios.some((d) => d.includes(q)) ||
-    m.alias.some((a) => a.includes(q));
+  const coincide = (m) => !q || m.nombre.toLowerCase().includes(q) ||
+    m.dominios.some((d) => d.includes(q)) || m.alias.some((a) => a.includes(q));
 
   let html = "", total = 0;
-  const yaVistos = new Set();
-
+  const vistos = new Set();
   for (const [titulo, filtroGrupo] of GRUPOS) {
-    const marcas = MARCAS.filter((m) => !yaVistos.has(m.nombre) && filtroGrupo(m));
-    for (const m of marcas) yaVistos.add(m.nombre);
+    const marcas = MARCAS.filter((m) => !vistos.has(m.nombre) && filtroGrupo(m));
+    for (const m of marcas) vistos.add(m.nombre);
     const visibles = marcas.filter(coincide);
     if (!visibles.length) continue;
     total += visibles.length;
-    html += `<h2>${esc(titulo)}</h2><div class="lista">` + visibles.map((m) => `
-      <div class="fila">
-        <span class="nombre">${esc(m.nombre)}${m.pais && titulo.includes("región") ? ` <span class="pais">${esc(PAISES[m.pais] ?? m.pais)}</span>` : ""}
-          ${m.verificacion === "certificado"
-            ? '<span class="sello ok">✓ comprobado</span>'
-            : '<span class="sello pend">sin confirmar</span>'}</span>
-        <span class="doms">${m.dominios.map((d) => `<span>${esc(d)}</span>`).join("")}</span>
-      </div>`).join("") + `</div>`;
+    html += `<tr class="grupo"><td colspan="4">${esc(titulo)}</td></tr>`;
+    for (const m of visibles) {
+      const ok = confirmado(m);
+      html += `<tr>
+        <td class="inst">${esc(m.nombre)}</td>
+        <td class="dom">${m.dominios.map(esc).join("<br>")}</td>
+        <td class="est">${ok ? '<span class="ok">✓ verificado</span>' : '<span class="pend">por comprobar</span>'}</td>
+        <td class="cuando">${ok ? esc(fechaCorta) : "—"}</td>
+      </tr>`;
+    }
   }
-
-  $salida.innerHTML = total
-    ? html
-    : `<p class="vacio">No encontré «${esc(filtro)}» en la lista. Si es una institución real, <a href="https://github.com/luisfernandomedh/certia/issues/new?template=agregar-marca.yml">propónla</a> y la agregamos.</p>`;
+  $cuerpo.innerHTML = total ? html
+    : '<tr><td colspan="4" class="vacio">No está en la lista. Si es una institución real, ' +
+      '<a href="https://github.com/luisfernandomedh/certia/issues/new?template=agregar-marca.yml">propónla</a>.</td></tr>';
 }
-
-/**
- * Los certificados caducan y rotan, así que una verificación sin fecha es una
- * verificación vencida. Una tarea programada revisa todo cada mes y escribe
- * verificacion.json; el historial de git de ese archivo es el registro de
- * auditoría, y aquí se muestra cuándo fue la última vez.
- */
-try {
-  const r = await fetch("verificacion.json", { cache: "no-store" });
-  if (r.ok) {
-    const a = await r.json();
-    const f = new Date(a.revisado);
-    const dias = Math.floor((Date.now() - f) / 86400000);
-    const cuando = f.toLocaleDateString("es-EC", { day: "numeric", month: "long", year: "numeric" });
-    const antiguedad = dias <= 1 ? "hoy" : dias < 45 ? `hace ${dias} días` : `hace ${dias} días — toca revisar`;
-    document.getElementById("auditoria").innerHTML =
-      `<b>Última verificación automática: ${cuando}</b> (${antiguedad}).<br>` +
-      `${a.resumen.confirmados} de ${a.resumen.total} dominios comprobados contra el certificado del sitio` +
-      (a.resumen.dudosos ? ` · <b>${a.resumen.dudosos} dudosos</b>` : "") +
-      (a.resumen.sin_respuesta ? ` · ${a.resumen.sin_respuesta} no respondieron ese día` : "") +
-      `. Se repite el día 1 de cada mes. ` +
-      `<a href="verificacion.json">Ver el detalle</a> · ` +
-      `<a href="https://github.com/luisfernandomedh/certia/commits/main/docs/verificacion.json">Historial de auditoría</a>`;
-  } else {
-    document.getElementById("auditoria").remove();
-  }
-} catch { document.getElementById("auditoria")?.remove(); }
 
 pintar();
 document.getElementById("buscar").addEventListener("input", (e) => pintar(e.target.value));
