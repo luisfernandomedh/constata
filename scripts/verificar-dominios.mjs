@@ -61,6 +61,30 @@ function palabrasClave(nombre) {
 const norm = (s) => (s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 /** Compara lo que dice el certificado contra lo que dice el registro. */
+/**
+ * Historial de certificados emitidos para el dominio.
+ *
+ * Funciona aunque el sitio esté caído, porque los registros de transparencia
+ * guardan cada certificado que se ha emitido. Es la salida para las entidades
+ * públicas de Ecuador, que se caen a menudo y cuya indisponibilidad no dice
+ * nada sobre si el dominio es legítimo.
+ *
+ * Ojo con lo que prueba y lo que no: confirma que el dominio existe y que
+ * alguien lo controla desde hace tiempo. NO confirma quién.
+ */
+async function historial(dominio) {
+  try {
+    const r = await fetch(`https://crt.sh/?q=${encodeURIComponent(dominio)}&output=json`, {
+      signal: AbortSignal.timeout(20000),
+    });
+    if (!r.ok) return null;
+    const cs = await r.json();
+    if (!Array.isArray(cs) || cs.length === 0) return { n: 0 };
+    const fechas = cs.map((c) => c.not_before).filter(Boolean).sort();
+    return { n: cs.length, desde: (fechas[0] ?? "").slice(0, 10) };
+  } catch { return null; }
+}
+
 function juzgar(marca, dominio, cert) {
   if (cert.error) return { nivel: "ERROR", nota: cert.error };
   if (!cert.ok) return { nivel: "DUDOSO", nota: "certificado no confiable" };
@@ -81,6 +105,22 @@ function juzgar(marca, dominio, cert) {
   return { nivel: "REVISAR", nota: "certificado sin nombre de organización (validación simple)" };
 }
 
+/**
+ * Antes de nada, comprobar que la red de QUIEN CORRE ESTO funciona.
+ *
+ * Sin esto el script miente de la peor manera: si tu conexión falla, todos
+ * los dominios salen "no responde" y parece que medio Ecuador está caído.
+ * Pasó de verdad. Un diagnóstico que no distingue "el sitio está mal" de
+ * "yo estoy mal" no sirve para decidir nada.
+ */
+const CONTROL = ["google.com", "cloudflare.com"];
+const controles = await Promise.all(CONTROL.map((d) => certificadoDe(d, 6000)));
+if (controles.every((c) => c.error)) {
+  console.error("\nTu conexión no está respondiendo — ni siquiera google.com.");
+  console.error("Los resultados serían falsos: todo saldría como caído. Inténtalo más tarde.\n");
+  process.exit(2);
+}
+
 const objetivo = MARCAS.filter((m) => !pais || m.pais === pais);
 const tareas = objetivo.flatMap((m) => m.dominios.map((d) => ({ marca: m, dominio: d })));
 
@@ -94,7 +134,15 @@ for (let i = 0; i < tareas.length; i += 6) {
   const hechos = await Promise.all(
     lote.map(async ({ marca, dominio }) => {
       const cert = await certificadoDe(dominio);
-      return { marca, dominio, cert, ...juzgar(marca, dominio, cert) };
+      const j = juzgar(marca, dominio, cert);
+      // Si el sitio no respondió, preguntarle al historial de certificados,
+      // que sí sabe aunque el servidor esté caído.
+      if (j.nivel === "ERROR") {
+        const h = await historial(dominio);
+        if (h?.n) j.nota = `${cert.error} — pero tiene ${h.n} certificados emitidos desde ${h.desde}: el dominio es real y activo. Reintenta cuando el sitio esté arriba.`;
+        else if (h?.n === 0) j.nota = `${cert.error} — y NUNCA se le emitió un certificado. Sospechoso: revísalo.`;
+      }
+      return { marca, dominio, cert, ...j };
     }),
   );
   resultados.push(...hechos);
@@ -124,6 +172,8 @@ console.log("  CONFIRMADO  el certificado lleva el nombre de la organización y 
 console.log("  REVISAR     el certificado es válido para el dominio, pero no confirma el nombre.");
 console.log("              Muy común: muchos sitios usan certificados de validación simple.");
 console.log("  DUDOSO      el certificado no cubre este dominio. Investigar antes de confiar.");
-console.log("  ERROR       no respondió. Puede ser red, no necesariamente un problema del dominio.\n");
+console.log("  ERROR       no respondió ahora. Las entidades públicas de Ecuador se caen a menudo;");
+console.log("              eso no dice nada sobre su legitimidad. Se consulta el historial de");
+console.log("              certificados, que funciona aunque el sitio esté abajo, y se reintenta luego.\n");
 console.log("Contraste independiente para bancos de Ecuador: la lista oficial de entidades");
 console.log("autorizadas está en superbancos.gob.ec — no dependas solo de esto ni de mí.\n");
