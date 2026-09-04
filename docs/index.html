@@ -684,10 +684,23 @@ async function leerImagen(archivo) {
 $("subir").addEventListener("click", () => $("archivo").click());
 $("archivo").addEventListener("change", (e) => leerImagen(e.target.files?.[0]));
 
-// Muchos copian la captura en vez de guardarla: pegarla también vale.
+/**
+ * Pegar una captura copiada también vale, no solo subir el archivo.
+ *
+ * Pero el texto manda siempre. Muchas aplicaciones ponen en el portapapeles
+ * el texto Y una imagen del mismo texto; si nos quedamos con la imagen,
+ * descargamos un lector de varios megas para averiguar algo que ya teníamos
+ * escrito al lado. Solo se usa la imagen cuando no hay texto que usar.
+ */
 document.addEventListener("paste", (e) => {
-  const img = [...(e.clipboardData?.items ?? [])].find((i) => i.type.startsWith("image/"));
-  if (img) { e.preventDefault(); leerImagen(img.getAsFile()); }
+  const datos = e.clipboardData;
+  if (!datos) return;
+  if ((datos.getData("text/plain") ?? "").trim()) return; // hay texto: no tocar nada
+
+  const img = [...(datos.items ?? [])].find((i) => i.type.startsWith("image/"));
+  if (!img) return;
+  e.preventDefault();
+  leerImagen(img.getAsFile());
 });
 $("limpiar").addEventListener("click", () => { $mensaje.value = ""; $mensaje.focus(); });
 $mensaje.addEventListener("keydown", (e) => {
