@@ -103,6 +103,11 @@
     width: 100%; font-size: 19px; font-weight: 650; padding: 18px 20px;
     border-radius: 12px; box-shadow: var(--sombra); letter-spacing: -0.01em;
   }
+  .invitacion { margin: 18px 0 0; text-align: center; }
+  button.enlace {
+    background: none; border: 0; color: var(--marca); font: inherit; font-size: 14.5px;
+    text-decoration: underline; cursor: pointer; padding: 6px; box-shadow: none;
+  }
   .ayuda { font-size: 13.5px; color: var(--tenue); margin: 10px 0 26px; text-align: center; }
 
   /* ── Entrada ────────────────────────────────────────────── */
@@ -269,6 +274,10 @@
   </div>
 
   <div id="resultado" aria-live="polite"></div>
+
+  <p class="invitacion" id="abrirContribuir" hidden>
+    <button class="enlace" id="botonContribuir">¿Nos ayudas? Dona este ejemplo para mejorar la herramienta</button>
+  </p>
 
   <div id="contribuir" hidden>
     <div class="caja">
@@ -489,11 +498,12 @@ function prepararContribucion(texto, riesgo) {
 
 function revisar() {
   const texto = $mensaje.value.trim();
-  if (!texto) { $resultado.innerHTML = ""; $contribuir.hidden = true; return; }
+  if (!texto) { $resultado.innerHTML = ""; $contribuir.hidden = true; $("abrirContribuir").hidden = true; return; }
   const r = analizar(texto);
   pintar(texto, r);
   prepararContribucion(texto, r.riesgo);
-  $contribuir.hidden = false;
+  $contribuir.hidden = true;
+  $("abrirContribuir").hidden = false;
 }
 
 $("analizar").addEventListener("click", revisar);
@@ -518,7 +528,13 @@ $("pegar").addEventListener("click", async () => {
     $mensaje.value = texto;
     $("ayudaPegar").textContent = "Si el botón no funciona, escribe o pega el mensaje en el cuadro de abajo.";
     revisar();
-    document.getElementById("resultado").scrollIntoView({ behavior: "smooth", block: "start" });
+    // Llevar la vista al veredicto, no al final de la página. Antes saltaba
+    // hasta la caja de contribuir y la persona perdía de vista la respuesta,
+    // que es lo único que vino a buscar.
+    requestAnimationFrame(() => {
+      document.querySelector("#resultado .veredicto")
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
   } catch {
     // Sin permiso de portapapeles: se degrada al cuadro de texto de siempre.
     $("ayudaPegar").innerHTML = "<strong>Tu navegador no me deja leer lo que copiaste.</strong> Pega el mensaje en el cuadro de abajo y toca «Revisar mensaje».";
@@ -532,12 +548,21 @@ $("pegar").addEventListener("click", async () => {
 // Si pegan directamente en el cuadro, tampoco hace falta buscar el botón.
 $mensaje.addEventListener("paste", () => setTimeout(revisar, 0));
 $("limpiar").addEventListener("click", () => {
-  $mensaje.value = ""; $resultado.innerHTML = ""; $contribuir.hidden = true; $mensaje.focus();
+  $mensaje.value = ""; $resultado.innerHTML = "";
+  $contribuir.hidden = true; $("abrirContribuir").hidden = true; $mensaje.focus();
 });
 $mensaje.addEventListener("keydown", (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") revisar();
 });
-$("cancelar").addEventListener("click", () => { $contribuir.hidden = true; });
+$("botonContribuir").addEventListener("click", () => {
+  $contribuir.hidden = false;
+  $("abrirContribuir").hidden = true;
+  $contribuir.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+$("cancelar").addEventListener("click", () => {
+  $contribuir.hidden = true;
+  $("abrirContribuir").hidden = false;
+});
 
 function enviarPorGitHub(cuerpo) {
   const url = new URL(`https://github.com/${REPO}/issues/new`);
