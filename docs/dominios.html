@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dominios verificados — Certia</title>
+<meta name="description" content="La lista de dominios reales de bancos, entidades públicas y operadoras que Certia usa para detectar suplantación. Verdad verificada, no una respuesta probable de una IA.">
+<style>
+  :root {
+    color-scheme: light dark;
+    --fondo: #faf9f7; --papel: #ffffff; --texto: #17191c; --tenue: #64686e;
+    --borde: #e4e1dc; --marca: #0d5c4a; --marca-suave: #e6f2ee;
+    --sombra: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px -12px rgba(0,0,0,.10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fondo: #131518; --papel: #1c1f23; --texto: #eeece8; --tenue: #9a9ea5;
+      --borde: #2f3338; --marca: #5fd3b2; --marca-suave: #13312a;
+      --sombra: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.6);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--fondo); color: var(--texto);
+    font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .envoltura { max-width: 720px; margin: 0 auto; padding: 40px 20px 80px; }
+  .volver { font-size: 14px; color: var(--marca); text-decoration: none; display: inline-block; margin-bottom: 26px; }
+  .volver:hover { text-decoration: underline; }
+  h1 { font-size: 30px; letter-spacing: -0.03em; margin: 0 0 10px; font-weight: 680; }
+  .entrada { font-size: 17.5px; color: var(--tenue); margin: 0 0 26px; line-height: 1.6; }
+  .clave {
+    background: var(--marca-suave); border-radius: 12px; padding: 16px 18px;
+    margin: 0 0 30px; font-size: 15px; line-height: 1.65;
+  }
+  .clave strong { color: var(--marca); }
+  h2 {
+    font-size: 13px; text-transform: uppercase; letter-spacing: .09em; font-weight: 700;
+    color: var(--tenue); margin: 32px 0 12px;
+  }
+  .conteo { font-size: 14px; color: var(--tenue); margin-bottom: 22px; }
+  .conteo b { color: var(--marca); font-size: 20px; font-weight: 700; }
+  .buscador {
+    width: 100%; padding: 12px 14px; font: inherit; font-size: 15px;
+    background: var(--papel); color: var(--texto);
+    border: 1px solid var(--borde); border-radius: 10px; box-shadow: var(--sombra);
+    margin-bottom: 6px;
+  }
+  .buscador:focus { outline: 2px solid var(--marca); outline-offset: 1px; }
+  .lista { display: grid; gap: 8px; }
+  .fila {
+    background: var(--papel); border: 1px solid var(--borde); border-radius: 11px;
+    padding: 12px 15px; display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap;
+  }
+  .fila .nombre { font-weight: 600; font-size: 15px; min-width: 190px; flex: none; }
+  .fila .doms { font: 13.5px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--tenue); word-break: break-all; }
+  .fila .doms span { display: inline-block; margin-right: 12px; }
+  .pais {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .05em; padding: 2px 6px;
+    border-radius: 5px; background: var(--marca-suave); color: var(--marca); vertical-align: middle;
+  }
+  .vacio { color: var(--tenue); font-size: 15px; padding: 20px 0; }
+  .aporta {
+    margin-top: 34px; background: var(--papel); border: 1px solid var(--borde);
+    border-radius: 12px; padding: 17px 19px; box-shadow: var(--sombra);
+  }
+  .aporta h3 { margin: 0 0 6px; font-size: 15.5px; }
+  .aporta p { margin: 0 0 12px; font-size: 14.5px; color: var(--tenue); line-height: 1.6; }
+  .boton {
+    display: inline-block; font-size: 14.5px; font-weight: 600; padding: 9px 18px;
+    border-radius: 8px; background: var(--marca); color: var(--fondo); text-decoration: none;
+  }
+  footer { margin-top: 50px; padding-top: 20px; border-top: 1px solid var(--borde); font-size: 13.5px; color: var(--tenue); line-height: 1.9; }
+  footer a, a { color: var(--marca); }
+</style>
+</head>
+<body>
+<div class="envoltura">
+
+  <a class="volver" href="./">← Volver a la herramienta</a>
+
+  <h1>Dominios verificados</h1>
+  <p class="entrada">Esta es la lista contra la que Certia compara cada enlace que le pegas.</p>
+
+  <p class="clave">
+    <strong>Por qué esto importa más que la inteligencia artificial.</strong>
+    Si le preguntas a una IA cuál es el dominio real de tu banco, te da una respuesta
+    <em>probable</em>. Puede acertar, puede equivocarse, y no te avisa cuál de las dos.
+    Una lista verificada te da un <strong>hecho</strong>. Contra la suplantación de dominio
+    —la estafa que hace que un enlace parezca de tu banco sin serlo— esa diferencia lo es todo.
+  </p>
+
+  <p class="conteo"><b id="nInst">—</b> instituciones · <b id="nDom">—</b> dominios verificados</p>
+
+  <input class="buscador" id="buscar" type="search" placeholder="Buscar una institución o un dominio…" autocomplete="off">
+
+  <div id="salida"></div>
+
+  <div class="aporta">
+    <h3>¿Falta tu banco?</h3>
+    <p>
+      Agregar una institución es la contribución más útil y más fácil del proyecto: es una línea,
+      y mejora la detección para todos sin tocar el motor. Solo hacen falta el nombre y sus
+      dominios reales.
+    </p>
+    <a class="boton" href="https://github.com/luisfernandomedh/certia/issues/new?template=agregar-marca.yml">Proponer una institución</a>
+  </div>
+
+  <footer>
+    <a href="./">Volver a la herramienta</a> ·
+    <a href="como-funciona.html">Cómo funciona</a> ·
+    <a href="https://github.com/luisfernandomedh/certia/blob/main/src/marcas.ts">Ver esta lista en el código</a>
+  </footer>
+
+</div>
+
+<script type="module">
+// La página lee el mismo registro que usa el motor. Si se agrega una
+// institución al código, aparece aquí sola — no hay dos listas que puedan
+// desincronizarse, que es exactamente el error que haría inútil esta página.
+import { MARCAS } from "./lib/index.js";
+
+const PAISES = { EC: "Ecuador", CO: "Colombia", PE: "Perú", MX: "México" };
+const GRUPOS = [
+  ["Bancos y pagos de Ecuador", (m) => m.pais === "EC" && !esEstado(m) && !esTelco(m)],
+  ["Entidades del Estado ecuatoriano", (m) => m.pais === "EC" && esEstado(m)],
+  ["Operadoras", (m) => esTelco(m)],
+  ["Bancos y pagos de la región", (m) => m.pais && m.pais !== "EC"],
+  ["Plataformas globales", (m) => !m.pais && !esTelco(m)],
+];
+const esEstado = (m) => ["SRI", "IESS", "ANT", "Registro Civil", "Correos del Ecuador"].includes(m.nombre);
+const esTelco = (m) => ["Claro", "Movistar", "CNT"].includes(m.nombre);
+
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+document.getElementById("nInst").textContent = MARCAS.length;
+document.getElementById("nDom").textContent = MARCAS.reduce((a, m) => a + m.dominios.length, 0);
+
+const $salida = document.getElementById("salida");
+
+function pintar(filtro = "") {
+  const q = filtro.trim().toLowerCase();
+  const coincide = (m) =>
+    !q || m.nombre.toLowerCase().includes(q) ||
+    m.dominios.some((d) => d.includes(q)) ||
+    m.alias.some((a) => a.includes(q));
+
+  let html = "", total = 0;
+  const yaVistos = new Set();
+
+  for (const [titulo, filtroGrupo] of GRUPOS) {
+    const marcas = MARCAS.filter((m) => !yaVistos.has(m.nombre) && filtroGrupo(m));
+    for (const m of marcas) yaVistos.add(m.nombre);
+    const visibles = marcas.filter(coincide);
+    if (!visibles.length) continue;
+    total += visibles.length;
+    html += `<h2>${esc(titulo)}</h2><div class="lista">` + visibles.map((m) => `
+      <div class="fila">
+        <span class="nombre">${esc(m.nombre)}${m.pais && titulo.includes("región") ? ` <span class="pais">${esc(PAISES[m.pais] ?? m.pais)}</span>` : ""}</span>
+        <span class="doms">${m.dominios.map((d) => `<span>${esc(d)}</span>`).join("")}</span>
+      </div>`).join("") + `</div>`;
+  }
+
+  $salida.innerHTML = total
+    ? html
+    : `<p class="vacio">No encontré «${esc(filtro)}» en la lista. Si es una institución real, <a href="https://github.com/luisfernandomedh/certia/issues/new?template=agregar-marca.yml">propónla</a> y la agregamos.</p>`;
+}
+
+pintar();
+document.getElementById("buscar").addEventListener("input", (e) => pintar(e.target.value));
+</script>
+</body>
+</html>
