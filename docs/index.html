@@ -306,38 +306,62 @@
   padding: 12px 14px;
   font-size: .86rem;
   line-height: 1.55;
-  color: var(--tenue, #55627a);
-  background: var(--suave, #f4f8fd);
-  border-left: 3px solid var(--azul, #2f6fd0);
+  color: var(--tenue);
+  background: var(--marca-suave);
+  border-left: 3px solid var(--marca);
   border-radius: 0 8px 8px 0;
 }
-.aviso-envio strong { color: var(--texto, #22304a); font-weight: 600; }
-.aviso-envio a { color: var(--azul, #2f6fd0); white-space: nowrap; }
+.aviso-envio strong { color: var(--texto); font-weight: 600; }
+.aviso-envio a { color: var(--marca); white-space: nowrap; }
 
 /* Repreguntas. Se ofrecen sugerencias porque quien está nervioso no sabe qué
    preguntar, y un cuadro de texto en blanco lo deja parado. */
 .conversar {
   margin: 22px 0 0;
   padding: 18px 20px;
-  border: 1px solid var(--borde, #cfd9e6);
+  border: 1px solid var(--borde);
   border-radius: 12px;
-  background: var(--suave, #f4f8fd);
+  background: var(--marca-suave);
 }
 .conversar h3 { margin: 0 0 12px; font-size: 1rem; }
 .conversar .fila { gap: 8px; }
 .conversar input {
   flex: 1; min-width: 0; padding: 11px 13px; font: inherit;
-  border: 1px solid var(--borde, #cfd9e6); border-radius: 9px; background: #fff;
+  color: var(--texto); background: var(--papel);
+  border: 1px solid var(--borde); border-radius: 9px;
 }
+.conversar input::placeholder { color: var(--tenue); }
 .sugerencias { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .sugerencias button {
   padding: 8px 13px; font-size: .87rem; font-family: inherit; cursor: pointer;
-  color: var(--azul, #2f6fd0); background: #fff;
-  border: 1px solid var(--borde, #cfd9e6); border-radius: 999px;
+  color: var(--marca); background: var(--papel);
+  border: 1px solid var(--borde); border-radius: 999px;
 }
-.sugerencias button:hover { border-color: var(--azul, #2f6fd0); }
-.cuota { margin: 12px 0 0; font-size: .84rem; color: var(--tenue, #55627a); }
-.cuota.ultima { color: #9a5b00; }
+.sugerencias button:hover { border-color: var(--marca); }
+.miniatura {
+  display: block; margin: 0 auto 22px; max-width: 190px; max-height: 240px;
+  border-radius: 12px; border: 1px solid var(--borde); box-shadow: var(--sombra);
+}
+.lo-analizado {
+  display: flex; align-items: center; gap: 12px;
+  margin: 4px 0 18px; padding: 10px 12px;
+  border: 1px solid var(--borde); border-radius: 12px; background: var(--marca-suave);
+  font-size: .87rem; color: var(--tenue);
+}
+.lo-analizado img {
+  width: 46px; height: 46px; object-fit: cover; object-position: top;
+  border-radius: 8px; border: 1px solid var(--borde); flex: none;
+}
+#verEnvio { margin: 4px 0 14px; }
+#verEnvio summary {
+  cursor: pointer; padding: 9px 0; font-size: .89rem; color: var(--marca);
+}
+#verEnvio[open] summary { margin-bottom: 8px; }
+#enviar.grande { flex: 2 1 200px; }
+.salidas { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
+.salidas button { flex: 1 1 auto; }
+.cuota { margin: 12px 0 0; font-size: .84rem; color: var(--tenue); }
+.cuota.ultima { color: var(--medio); font-weight: 600; }
 @media (max-width: 480px) {
   .conversar .fila { flex-direction: column; }
   .conversar .fila button { width: 100%; }
@@ -414,13 +438,28 @@
 
   <section id="vista-analizando" hidden>
     <div class="analizando">
+      <img id="miniaturaEspera" class="miniatura" alt="" hidden>
       <span class="rueda"></span>
-      <p>Tómate un segundo. Estoy revisando el mensaje…</p>
+      <p id="textoAnalizando">Tómate un segundo. Estoy revisando el mensaje…</p>
     </div>
   </section>
 
   <section id="vista-resultado" hidden>
-    <button id="volver" class="volver-arriba">← Revisar otro mensaje</button>
+    <!--
+      Estas dos salidas van arriba y siempre visibles. Quien acaba de ver un
+      veredicto suele tener otra captura en la mano, y obligarle a bajar hasta
+      el final para encontrar cómo seguir es hacerle perder el hilo.
+    -->
+    <div class="salidas">
+      <button id="volver" class="volver-arriba">← Revisar otro mensaje</button>
+      <button id="subirOtra" class="volver-arriba">Subir otra captura</button>
+    </div>
+  <!-- Se ve qué se analizó. Sin esto no hay forma de saber si subió la
+       captura correcta, y con varias en el carrete es fácil equivocarse. -->
+  <div id="loAnalizado" class="lo-analizado" hidden>
+    <img id="miniaturaResultado" alt="Captura que se analizó">
+    <span>Esto es lo que revisé</span>
+  </div>
   <div id="resultado" aria-live="polite"></div>
 
   <!--
@@ -448,9 +487,17 @@
       <h3>¿Nos ayudas a mejorar esto?</h3>
       <p>No existe un conjunto público de mensajes de estafa en español latinoamericano. Por eso ninguna herramienta extranjera reconoce al Banco Pichincha ni al SRI. Donar este ejemplo ayuda a llenar ese vacío — sin cuenta y sin registrarte.</p>
 
-      <label class="etiqueta" for="limpio">Esto es exactamente lo que se enviaría. Puedes editarlo.</label>
-      <textarea id="limpio" spellcheck="false"></textarea>
-      <p class="cambios" id="cambios"></p>
+      <!--
+        El texto va plegado, no fuera. Enseñar un muro de texto extraído
+        confunde y hace que la gente abandone el aporte. Pero sigue estando
+        a un toque, porque nadie debería enviar a un sitio público algo que
+        no pudo mirar.
+      -->
+      <details id="verEnvio">
+        <summary>Ver y editar exactamente lo que se enviaría</summary>
+        <textarea id="limpio" spellcheck="false"></textarea>
+        <p class="cambios" id="cambios"></p>
+      </details>
 
       <div class="campos">
         <label>Qué es
@@ -468,10 +515,10 @@
         </label>
       </div>
 
-      <p class="ojo"><strong>Revísalo con tus ojos.</strong> La limpieza automática quita correos, teléfonos, montos, fechas y las rutas de los enlaces. <strong>No detecta nombres propios.</strong> Si aparece el tuyo o el de alguien más, bórralo ahora.</p>
+      <p class="ojo">Se envía solo el <strong>texto</strong>, nunca tu imagen. Ya se le quitaron correos, teléfonos, montos y fechas — pero <strong>la limpieza no detecta nombres propios</strong>. Si arriba aparece el tuyo o el de alguien más, ábrelo y bórralo.</p>
 
       <div class="fila">
-        <button id="enviar">Enviar al corpus</button>
+        <button id="enviar" class="grande">Enviar este ejemplo</button>
         <button id="cancelar" class="secundario">Ahora no</button>
       </div>
       <p class="remate" id="estadoEnvio">Se publica como propuesta pendiente. Una persona lo revisa antes de que entre al corpus.</p>
@@ -772,7 +819,7 @@ function prepararContribucion(texto, riesgo) {
   $estado.className = "remate";
   $estado.textContent = AVISO_PENDIENTE;
   $("enviar").disabled = false;
-  $("enviar").textContent = "Enviar al corpus";
+  $("enviar").textContent = "Enviar este ejemplo";
 }
 
 /**
@@ -791,7 +838,10 @@ function mostrar(cual) {
   // La promesa de privacidad convence antes de usar la herramienta; en la
   // pantalla del resultado solo roba espacio a lo que la persona vino a ver.
   $("promesa").hidden = cual !== "vista-inicio";
-  window.scrollTo({ top: 0, behavior: "instant" });
+  // Safari viejo no acepta behavior:"instant" y lanza TypeError. Si eso
+  // ocurriera aquí, la pantalla se quedaría a medias por un detalle cosmético.
+  try { window.scrollTo({ top: 0, behavior: "instant" }); }
+  catch { try { window.scrollTo(0, 0); } catch { /* da igual */ } }
 }
 
 function revisar() {
@@ -810,10 +860,13 @@ function volverAlInicio() {
   historial = []; repreguntas = 0;
   $("conversar").hidden = true;
   $("repregunta").value = "";
+  if (miniatura) { URL.revokeObjectURL(miniatura); miniatura = null; }
+  $("loAnalizado").hidden = $("miniaturaEspera").hidden = true;
   mostrar("vista-inicio");
 }
 $("volver").addEventListener("click", volverAlInicio);
 $("otro").addEventListener("click", volverAlInicio);
+$("subirOtra").addEventListener("click", () => $("archivo").click());
 
 $("analizar").addEventListener("click", revisar);
 
@@ -919,36 +972,25 @@ async function prepararImagen(archivo) {
   return new Promise((r) => lienzo.toBlob(r, "image/png"));
 }
 
-async function leerImagen(archivo) {
-  if (!archivo || !archivo.type.startsWith("image/")) return;
-  $progreso.hidden = false;
-  $textoOcr.textContent = "Preparando…";
-  try {
-    const T = await cargarOcr();
-    $textoOcr.textContent = "Preparando la imagen…";
-    const limpia = await prepararImagen(archivo).catch(() => archivo);
-    const { data } = await T.recognize(limpia, "spa", {
-      logger: (m) => {
-        if (m.status === "recognizing text") {
-          $textoOcr.textContent = `Leyendo la imagen… ${Math.round(m.progress * 100)}%`;
-        } else if (m.status === "loading language traineddata") {
-          $textoOcr.textContent = "Esto tarda un poco la primera vez…";
-        }
-      },
-    });
-    const texto = (data.text || "").trim();
-    $progreso.hidden = true;
-    if (!texto) {
-      $("ayudaPegar").innerHTML = "<strong>No logré leer esa imagen.</strong> Prueba con una foto más clara, o escribe el mensaje en el cuadro de abajo.";
-      return;
-    }
-    $mensaje.value = texto;
-    revisar();
-  } catch {
-    $progreso.hidden = true;
-    $("ayudaPegar").innerHTML = "<strong>No logré leer esa imagen.</strong> Escribe o pega el mensaje en el cuadro de abajo.";
-    $mensaje.focus();
-  }
+/**
+ * Lee el texto de una imagen aquí mismo, sin red. Es la red de seguridad
+ * cuando el modelo no responde: peor que él, pero funciona sin salir del
+ * dispositivo. Solo devuelve el texto; quien la llama decide qué hacer.
+ */
+async function leerTextoDeImagen(archivo) {
+  if (!archivo || !archivo.type.startsWith("image/")) return "";
+  const T = await cargarOcr();
+  const limpia = await prepararImagen(archivo).catch(() => archivo);
+  const { data } = await T.recognize(limpia, "spa", {
+    logger: (m) => {
+      if (m.status === "recognizing text") {
+        $("textoAnalizando").textContent = `Leyéndola aquí, en tu dispositivo… ${Math.round(m.progress * 100)}%`;
+      } else if (m.status === "loading language traineddata") {
+        $("textoAnalizando").textContent = "Esto tarda un poco la primera vez…";
+      }
+    },
+  });
+  return (data.text || "").trim();
 }
 
 /**
@@ -1023,6 +1065,7 @@ function pintarModelo(d) {
 /** Lo último que analizó el modelo: alimenta el aporte al corpus. */
 let ultimaTranscripcion = "";
 let ultimoRiesgo = "medio";
+let miniatura = null;
 
 /**
  * El modelo es el camino normal, no la excepción.
@@ -1035,7 +1078,18 @@ let ultimoRiesgo = "medio";
 async function conModelo(entrada, { seguimiento = false } = {}) {
   const esImagen = entrada instanceof Blob;
   if (!seguimiento) { historial = []; repreguntas = 0; }
-  if (!seguimiento) mostrar("vista-analizando");
+  if (!seguimiento) {
+    if (miniatura) { URL.revokeObjectURL(miniatura); miniatura = null; }
+    if (esImagen) {
+      miniatura = URL.createObjectURL(entrada);
+      $("miniaturaEspera").src = $("miniaturaResultado").src = miniatura;
+    }
+    $("miniaturaEspera").hidden = $("loAnalizado").hidden = !esImagen;
+    $("textoAnalizando").textContent = esImagen
+      ? "Estoy mirando tu captura. Un momento…"
+      : "Tómate un segundo. Estoy revisando el mensaje…";
+    mostrar("vista-analizando");
+  }
   try {
     const cuerpo = esImagen
       ? { imagen: await encogerImagen(entrada) }
@@ -1055,19 +1109,26 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     historial.push({ role: "assistant", content: d.resumen || "" });
     ultimoRiesgo = d.riesgo;
 
+    // Primero lo que la persona vino a ver. Todo lo demás es accesorio y va
+    // aislado: si el preparado del aporte falla, el veredicto ya está en
+    // pantalla y no se pierde.
     pintarModelo(d);
-    pintarConversacion(d.riesgo);
+    mostrar("vista-resultado");
+    try { pintarConversacion(d.riesgo); } catch { $("conversar").hidden = true; }
     // Para donar hace falta el texto del mensaje, no la imagen. Cuando vino
     // de una captura, se usa lo que el modelo transcribió; y se anonimiza
     // aquí, en el navegador, antes de que la persona decida.
     if (!seguimiento) {
-      ultimaTranscripcion = esImagen ? (d.transcripcion || "") : entrada;
-      prepararContribucion(ultimaTranscripcion, d.riesgo);
-      $("abrirContribuir").hidden = !ultimaTranscripcion.trim();
-      $contribuir.hidden = true;
+      try {
+        ultimaTranscripcion = esImagen ? (d.transcripcion || "") : entrada;
+        prepararContribucion(ultimaTranscripcion, d.riesgo);
+        $("abrirContribuir").hidden = !ultimaTranscripcion.trim();
+        $contribuir.hidden = true;
+      } catch { $("abrirContribuir").hidden = true; }
     }
-    mostrar("vista-resultado");
-    if (seguimiento) $("conversar").scrollIntoView({ behavior: "smooth", block: "center" });
+    if (seguimiento) {
+      try { $("conversar").scrollIntoView({ behavior: "smooth", block: "center" }); } catch { /* cosmético */ }
+    }
   } catch (e) {
     if (seguimiento) {
       // A media conversación no se puede volver al inicio: se avisa y se deja
@@ -1081,19 +1142,38 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
       historial.pop();
       return;
     }
-    // Red de seguridad: nunca se queda muda. Las reglas locales siguen ahí.
+    // Red de seguridad. Nunca se vuelve al inicio: quien acaba de subir una
+    // captura y se encuentra otra vez en la pantalla de partida cree que la
+    // herramienta no hizo nada. Se sigue adelante con lo que haya.
+    let texto = entrada;
     if (esImagen) {
-      mostrar("vista-inicio");
-      $("ayudaPegar").innerHTML = "<strong>El análisis a fondo no respondió.</strong> La reviso aquí mismo, con lo que tengo en tu dispositivo.";
-      await leerImagen(entrada);
-    } else {
-      const local = analizar(entrada);
-      pintar(entrada, local);
-      prepararContribucion(entrada, local.riesgo);
+      $("textoAnalizando").textContent = "El análisis a fondo no respondió. Lo estoy leyendo aquí, en tu dispositivo…";
+      texto = await leerTextoDeImagen(entrada).catch(() => "");
+    }
+    if (!texto) {
+      $resultado.innerHTML = `
+        <div class="veredicto v-medio">
+          <div class="icono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">${VEREDICTO.medio?.icono ?? ""}</svg></div>
+          <div style="flex:1;min-width:0">
+            <h2>No pude revisarlo esta vez</h2>
+            <p>El análisis no respondió y tampoco logré leer la imagen. No es culpa tuya.
+               Prueba a subirla otra vez, o escribe el mensaje a mano en el cuadro.</p>
+          </div>
+        </div>`;
+      $("conversar").hidden = true;
+      $("abrirContribuir").hidden = true;
+      mostrar("vista-resultado");
+      return;
+    }
+    const local = analizar(texto);
+    pintar(texto, local);
+    mostrar("vista-resultado");
+    $("conversar").hidden = true;
+    try {
+      prepararContribucion(texto, local.riesgo);
       $contribuir.hidden = true;
       $("abrirContribuir").hidden = false;
-      mostrar("vista-resultado");
-    }
+    } catch { $("abrirContribuir").hidden = true; }
   }
 }
 

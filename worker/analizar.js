@@ -49,6 +49,25 @@ REGLAS QUE NO PUEDES ROMPER
 3. Como máximo UNA pregunta en tu respuesta, y solo si de verdad cambia el
    consejo. Si ya puedes concluir, no preguntes nada.
 
+LA PREGUNTA QUE SÍ VALE LA PENA
+Cuando el mensaje por sí solo no basta para decidir, hay UN dato que casi
+siempre resuelve el caso. Pregúntalo, y solo ese.
+
+- Código de verificación o doble factor: lo único que importa es si esa
+  persona estaba iniciando sesión, pagando o registrándose en ese preciso
+  momento. Si no lo pidió ella, alguien tiene su contraseña y está entrando.
+  Eso es urgente y se dice así.
+- Cobro, compra o consumo: si reconoce esa compra, y si la hizo ella.
+- Alguien conocido que pide dinero: si ha hablado con esa persona por otra
+  vía —llamarla al número de siempre, no al del mensaje.
+- Entrega, aduana o paquete: si esperaba de verdad un paquete.
+- Banco que avisa de un problema: si entró por un enlace del mensaje o
+  escribiendo la dirección ella misma.
+- Premio, trabajo o inversión: si ella se inscribió o postuló a algo.
+
+Pregunta en una sola frase, sin rodeos. Y cuando te contesten, di qué cambia:
+si lo pidió ella, la alarma baja; si no, sube y hay que actuar ya.
+
 SI TE HACEN UNA REPREGUNTA
 Cuando ya hay conversación previa, la persona te está preguntando algo
 concreto sobre lo que le dijiste. Respóndele eso y nada más, en "resumen".
@@ -87,6 +106,13 @@ const json = (d, s = 200) =>
 const LIMITE_IMAGEN_HORA = 4;
 const LIMITE_TEXTO_HORA = 15;
 
+/**
+ * Por debajo de 100 consultas al día no pasa absolutamente nada: ni espera,
+ * ni bloqueo. Es el margen para probar sin que la herramienta te expulse a
+ * mitad de una prueba. Pasadas las 100, ahí sí empieza el enfriamiento.
+ */
+const UMBRAL_DIARIO = 100;
+
 async function huella(ip) {
   const b = new TextEncoder().encode(`constata-analisis:${ip}`);
   const h = await crypto.subtle.digest("SHA-256", b);
@@ -111,37 +137,45 @@ const ESPERAS = [1, 3, 12]; // horas
 
 async function cupo(env, ip, esImagen) {
   const tope = esImagen ? LIMITE_IMAGEN_HORA : LIMITE_TEXTO_HORA;
-  if (!env.LIMITES) return { excedido: false, restantes: tope, tope, espera: 0 };
+  if (!env.LIMITES) return { excedido: false, restantes: tope, tope, espera: 0, hoy: 0 };
 
   const id = await huella(ip);
   const hora = Math.floor(Date.now() / 3_600_000);
+  const dia = Math.floor(Date.now() / 86_400_000);
 
-  // ¿Hay un enfriamiento activo de una insistencia anterior?
+  // El umbral diario se mira PRIMERO. Por debajo de 100 no hay castigo que
+  // valga, ni siquiera uno heredado de antes: nadie debe quedarse fuera a
+  // mitad de una prueba por algo que pasó hace rato.
+  const claveDia = `d:${id}:${dia}`;
+  const hoy = Number(await env.LIMITES.get(claveDia)) || 0;
+  await env.LIMITES.put(claveDia, String(hoy + 1), { expirationTtl: 172800 });
+
+  const claveHora = `a:${esImagen ? "i" : "t"}:${id}:${hora}`;
+  const usados = Number(await env.LIMITES.get(claveHora)) || 0;
+
+  if (hoy < UMBRAL_DIARIO) {
+    await env.LIMITES.put(claveHora, String(usados + 1), { expirationTtl: 7200 });
+    return { excedido: false, restantes: Math.max(0, tope - usados - 1), tope, espera: 0, hoy };
+  }
+
+  // A partir de aquí sí: pasadas las 100 del día, el enfriamiento manda.
   const castigo = await env.LIMITES.get(`c:${id}`, { type: "json" });
   if (castigo && castigo.hasta > Date.now()) {
-    return {
-      excedido: true, restantes: 0, tope,
-      espera: Math.ceil((castigo.hasta - Date.now()) / 3_600_000),
-    };
+    return { excedido: true, restantes: 0, tope, hoy,
+             espera: Math.ceil((castigo.hasta - Date.now()) / 3_600_000) };
   }
-
-  const clave = `a:${esImagen ? "i" : "t"}:${id}:${hora}`;
-  const usados = Number(await env.LIMITES.get(clave)) || 0;
 
   if (usados >= tope) {
-    // Insiste con el cupo agotado: la espera sube un escalón, sin pasar del último.
-    const nivel = Math.min((castigo?.nivel ?? 0), ESPERAS.length - 1);
+    const nivel = Math.min(castigo?.nivel ?? 0, ESPERAS.length - 1);
     const horas = ESPERAS[nivel];
-    await env.LIMITES.put(
-      `c:${id}`,
+    await env.LIMITES.put(`c:${id}`,
       JSON.stringify({ nivel: nivel + 1, hasta: Date.now() + horas * 3_600_000 }),
-      { expirationTtl: 86400 },
-    );
-    return { excedido: true, restantes: 0, tope, espera: horas };
+      { expirationTtl: 86400 });
+    return { excedido: true, restantes: 0, tope, espera: horas, hoy };
   }
 
-  await env.LIMITES.put(clave, String(usados + 1), { expirationTtl: 7200 });
-  return { excedido: false, restantes: tope - usados - 1, tope, espera: 0 };
+  await env.LIMITES.put(claveHora, String(usados + 1), { expirationTtl: 7200 });
+  return { excedido: false, restantes: tope - usados - 1, tope, espera: 0, hoy };
 }
 
 export async function analizar(peticion, env) {
