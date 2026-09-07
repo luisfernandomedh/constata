@@ -402,6 +402,17 @@
 }
 .intercambio .el ol { margin: 10px 0 0; padding-left: 20px; }
 .intercambio .el li { margin: 5px 0; }
+/* Lo que el modelo necesita saber. Va destacado porque contestarlo es lo
+   que convierte un consejo genérico en uno que sirve. */
+.pide {
+  margin: 18px 0; padding: 16px 18px;
+  border: 1px solid var(--borde); border-left: 4px solid var(--marca);
+  border-radius: 0 12px 12px 0; background: var(--marca-suave);
+}
+.pide h3 { margin: 0 0 8px; font-size: 1rem; }
+.pide ul, .pide-hilo { margin: 0; padding-left: 20px; }
+.pide li, .pide-hilo li { margin: 6px 0; font-weight: 600; color: var(--texto); }
+.pide-hilo { margin-top: 10px; }
 .salidas { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
 .salidas button { flex: 1 1 auto; }
 .cuota { margin: 12px 0 0; font-size: .84rem; color: var(--tenue); }
@@ -1128,8 +1139,10 @@ function pintarModelo(d) {
     ${d.pasos?.length ? `<div class="pasos-hacer"><h3>Qué hacer ahora</h3>
       <ol>${d.pasos.map((x) => `<li>${esc(x)}</li>`).join("")}</ol></div>` : ""}
 
-    ${d.pregunta ? `<div class="lienzo"><div class="titulo">Una sola pregunta</div>
-      <div class="mensaje-marcado">${esc(d.pregunta)}</div></div>` : ""}
+    ${d.preguntas?.length ? `<div class="pide">
+      <h3>${d.preguntas.length > 1 ? "Contéstame esto y afino el consejo" : "Contéstame una cosa y afino el consejo"}</h3>
+      <ul>${d.preguntas.map((q) => `<li>${esc(q)}</li>`).join("")}</ul>
+    </div>` : ""}
 
     ${senales ? `<h3 class="titulo-senales">Por qué lo digo</h3><ul class="senales">${senales}</ul>` : ""}
 
@@ -1141,6 +1154,7 @@ function pintarModelo(d) {
 let ultimaTranscripcion = "";
 let ultimoRiesgo = "medio";
 let miniatura = null;
+let ultimasPreguntas = [];
 
 /**
  * El modelo es el camino normal, no la excepción.
@@ -1183,6 +1197,7 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     if (!seguimiento) historial.push({ role: "user", content: esImagen ? "(captura de pantalla)" : entrada });
     historial.push({ role: "assistant", content: d.resumen || "" });
     ultimoRiesgo = d.riesgo;
+    ultimasPreguntas = d.preguntas ?? [];
 
     // Primero lo que la persona vino a ver. Todo lo demás es accesorio y va
     // aislado: si el preparado del aporte falla, el veredicto ya está en
@@ -1296,7 +1311,7 @@ function anadirIntercambio(pregunta, d) {
     <div class="el">
       <p>${esc(d.resumen || "")}</p>
       ${d.pasos?.length ? `<ol>${d.pasos.map((x) => `<li>${esc(x)}</li>`).join("")}</ol>` : ""}
-      ${d.pregunta ? `<p><strong>${esc(d.pregunta)}</strong></p>` : ""}
+      ${d.preguntas?.length ? `<ul class="pide-hilo">${d.preguntas.map((q) => `<li>${esc(q)}</li>`).join("")}</ul>` : ""}
     </div>`;
   $("hilo").appendChild(bloque);
   try { bloque.scrollIntoView({ behavior: "smooth", block: "start" }); } catch { /* cosmético */ }
@@ -1317,6 +1332,9 @@ function pintarConversacion(riesgo) {
 
   $("sugerencias").innerHTML = (SUGERENCIAS[riesgo] ?? SUGERENCIAS.medio)
     .map((t) => `<button type="button">${esc(t)}</button>`).join("");
+  $("conversar").querySelector("h3").textContent = ultimasPreguntas.length
+    ? "Contéstame arriba, o pregúntame lo que quieras"
+    : "¿Quieres preguntarme algo más?";
   for (const b of $("sugerencias").children) {
     b.addEventListener("click", () => enviarRepregunta(b.textContent));
   }

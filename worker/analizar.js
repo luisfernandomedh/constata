@@ -11,8 +11,10 @@
  * 1. El mensaje es DATO, nunca instrucción. Un estafador que sepa que hay un
  *    modelo detrás va a intentar hablarle. Ver SECURITY.md, amenaza A3.
  * 2. Nunca dice que algo es seguro. Dice qué encontró y qué no.
- * 3. Como máximo una pregunta por respuesta, y tres en toda la conversación.
- *    Quien está asustado no aguanta un interrogatorio.
+ * 3. Pregunta siempre al menos una cosa, dos como mucho. Suponer es lo que
+ *    convierte un consejo en humo: el caso real que lo demostró fue el de
+ *    quien ya había pagado y mandado el comprobante. Sin saber cómo pagó y
+ *    cuánto hace, no se puede decir si todavía hay reversa.
  */
 
 // Cambiado el 7 sept 2026: `meta-llama/llama-4-scout-17b-16e-instruct`
@@ -215,6 +217,12 @@ export async function analizar(peticion, env) {
         })).filter((s) => s.que)
       : [],
     pasos: Array.isArray(salida.pasos) ? salida.pasos.slice(0, 5).map((p) => String(p).slice(0, 300)) : [],
-    pregunta: salida.pregunta ? String(salida.pregunta).slice(0, 250) : null,
+    // Siempre pregunta al menos una cosa: no suponer es lo que separa un
+    // consejo útil de un consejo genérico. Dos como mucho, y solo si el caso
+    // es ambiguo de verdad.
+    preguntas: (Array.isArray(salida.preguntas) ? salida.preguntas : [salida.pregunta])
+      .filter((x) => typeof x === "string" && x.trim())
+      .slice(0, 2)
+      .map((x) => x.trim().slice(0, 250)),
   });
 }
