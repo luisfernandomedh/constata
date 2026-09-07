@@ -358,6 +358,43 @@
 }
 #verEnvio[open] summary { margin-bottom: 8px; }
 #enviar.grande { flex: 2 1 200px; }
+/* Zona de entrada. Un solo sitio donde arrastrar, pegar o tocar. */
+.zona {
+  margin: 4px 0 18px; padding: 26px 20px;
+  border: 2px dashed var(--borde); border-radius: 16px;
+  background: var(--marca-suave); text-align: center;
+  transition: border-color .15s, background .15s;
+}
+.zona.encima { border-color: var(--marca); border-style: solid; }
+.zona-icono { width: 40px; height: 40px; color: var(--marca); opacity: .75; }
+.zona-titulo { margin: 8px 0 2px; font-size: 1.02rem; font-weight: 600; color: var(--texto); }
+.zona-sub { margin: 0 0 16px; font-size: .88rem; color: var(--tenue); }
+.zona .opciones { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 0; }
+#zonaImagen { display: flex; align-items: center; gap: 16px; text-align: left; }
+#previa {
+  width: 84px; height: 84px; flex: none; object-fit: cover; object-position: top;
+  border-radius: 10px; border: 1px solid var(--borde);
+}
+.zona-datos b { display: block; color: var(--texto); }
+.zona-datos span { font-size: .85rem; color: var(--tenue); }
+.zona-acciones { display: flex; gap: 14px; margin-top: 8px; }
+#analizar.principal { flex: 2 1 220px; font-size: 1.05rem; }
+#analizar:disabled { opacity: .45; cursor: not-allowed; }
+
+/* Hilo de repreguntas: cada intercambio se queda, no reemplaza al anterior. */
+.intercambio { margin: 16px 0 0; }
+.intercambio .yo {
+  margin: 0 0 8px; padding: 10px 14px;
+  background: var(--marca-suave); border-radius: 14px 14px 14px 4px;
+  font-weight: 600; color: var(--texto); display: inline-block; max-width: 90%;
+}
+.intercambio .el {
+  margin: 0; padding: 14px 16px;
+  background: var(--papel); border: 1px solid var(--borde); border-radius: 12px;
+  line-height: 1.6;
+}
+.intercambio .el ol { margin: 10px 0 0; padding-left: 20px; }
+.intercambio .el li { margin: 5px 0; }
 .salidas { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
 .salidas button { flex: 1 1 auto; }
 .cuota { margin: 12px 0 0; font-size: .84rem; color: var(--tenue); }
@@ -391,42 +428,58 @@
   </header>
 
   <section id="vista-inicio">
-  <p class="instruccion">Con calma. Pega el texto o sube tu captura.</p>
+  <p class="instruccion">Con calma. Pon aquí el mensaje o la captura.</p>
 
-  <div class="opciones">
-    <button id="pegar" class="grande">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/></svg>
-      Pegar el mensaje
-    </button>
-    <button id="subir" class="grande secundaria">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.6"/><path d="m4 17 5-4.5 4 3.5 3-2.5 4 3.5"/></svg>
-      Subir una captura
-    </button>
+  <!--
+    Adjuntar y revisar son dos actos separados, a propósito.
+    Antes, elegir una captura disparaba el análisis solo: no se veía qué se
+    había subido, y el botón «Revisar» quedaba sin sentido porque ya había
+    pasado todo. Ahora primero se ve la miniatura, se comprueba que es la
+    correcta, y después se decide.
+  -->
+  <div id="zona" class="zona">
+    <div id="zonaVacia">
+      <svg class="zona-icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.6"/><path d="m4 17 5-4.5 4 3.5 3-2.5 4 3.5"/></svg>
+      <p class="zona-titulo">Arrastra aquí tu captura</p>
+      <p class="zona-sub">o pégala, o tócala para buscarla</p>
+      <div class="opciones">
+        <button id="subir" type="button" class="grande">Elegir una captura</button>
+        <button id="pegar" type="button" class="grande secundaria">Pegar</button>
+      </div>
+    </div>
+
+    <div id="zonaImagen" hidden>
+      <img id="previa" alt="Captura que vas a revisar">
+      <div class="zona-datos">
+        <b>Captura lista</b>
+        <span id="pesoImagen"></span>
+        <div class="zona-acciones">
+          <button id="cambiarImagen" type="button" class="enlace">Cambiar</button>
+          <button id="quitarImagen" type="button" class="enlace">Quitar</button>
+        </div>
+      </div>
+    </div>
   </div>
   <input type="file" id="archivo" accept="image/*" hidden>
 
-  </div>
-
   <p class="ayuda" id="ayudaPegar">Si no logras copiar el mensaje, toma una foto de la pantalla y súbela.</p>
-  <div id="progresoOcr" class="progreso" hidden><span></span><b id="textoOcr">Leyendo la imagen…</b></div>
 
-  <label class="etiqueta" for="mensaje">O escríbelo tú aquí</label>
+  <label class="etiqueta" for="mensaje">O escribe el mensaje aquí</label>
   <textarea id="mensaje" placeholder="Pega o escribe aquí el mensaje…"></textarea>
 
   <div class="fila">
-    <button id="analizar">Revisar mensaje</button>
+    <button id="analizar" class="principal" disabled>Revisar</button>
     <button id="limpiar" class="secundario">Borrar</button>
   </div>
 
   <!--
-    El aviso va aquí, pegado al botón, y no escondido en un pie de página.
+    El aviso va pegado al botón, no escondido en un pie de página.
     Se lee justo antes de decidir, que es cuando sirve de algo.
   -->
   <p class="aviso-envio">
-    Para revisarlo, <strong>el mensaje o la captura se envían a un servicio de análisis</strong>
-    y salen de tu dispositivo. No se guardan allí ni aquí: se analizan y se descartan.
-    <strong>Quita tu nombre y el de otras personas</strong> antes de enviarlo, si aparecen.
-    <a href="https://github.com/luisfernandomedh/constata/blob/main/ANALISIS.md" target="_blank" rel="noopener">Cómo funciona el análisis</a>
+    Al revisar, el mensaje sale de tu dispositivo y se analiza. No se guarda.
+    <strong>Quita los nombres propios.</strong>
+    <a href="https://github.com/luisfernandomedh/constata/blob/main/ANALISIS.md" target="_blank" rel="noopener">Cómo funciona</a>
   </p>
 
   <div class="ejemplos">
@@ -435,6 +488,7 @@
   </div>
 
   </section>
+
 
   <section id="vista-analizando" hidden>
     <div class="analizando">
@@ -461,6 +515,7 @@
     <span>Esto es lo que revisé</span>
   </div>
   <div id="resultado" aria-live="polite"></div>
+  <div id="hilo"></div>
 
   <!--
     Tres repreguntas y se acaba. No es tacañería: quien está asustado se
@@ -845,9 +900,9 @@ function mostrar(cual) {
 }
 
 function revisar() {
+  if (adjunta) return conModelo(adjunta);
   const texto = $mensaje.value.trim();
-  if (!texto) return;
-  conModelo(texto);
+  if (texto) conModelo(texto);
 }
 
 function volverAlInicio() {
@@ -859,7 +914,9 @@ function volverAlInicio() {
   ultimaTranscripcion = "";
   historial = []; repreguntas = 0;
   $("conversar").hidden = true;
+  $("hilo").innerHTML = "";
   $("repregunta").value = "";
+  soltarAdjunta();
   if (miniatura) { URL.revokeObjectURL(miniatura); miniatura = null; }
   $("loAnalizado").hidden = $("miniaturaEspera").hidden = true;
   mostrar("vista-inicio");
@@ -888,11 +945,11 @@ $("pegar").addEventListener("click", async () => {
       return;
     }
     $mensaje.value = texto;
-    $("ayudaPegar").textContent = "Si el botón no funciona, escribe o pega el mensaje en el cuadro de abajo.";
-    revisar();
+    $("ayudaPegar").textContent = "Ya está pegado. Léelo y toca Revisar cuando quieras.";
+    refrescarBoton();
   } catch {
     // Sin permiso de portapapeles: se degrada al cuadro de texto de siempre.
-    $("ayudaPegar").innerHTML = "<strong>No pude tomar lo que copiaste.</strong> Pégalo en el cuadro de abajo y toca «Revisar mensaje».";
+    $("ayudaPegar").innerHTML = "<strong>No pude tomar lo que copiaste.</strong> Pégalo en el cuadro de abajo y toca «Revisar».";
     $mensaje.focus();
     $mensaje.scrollIntoView({ behavior: "smooth", block: "center" });
   } finally {
@@ -900,8 +957,9 @@ $("pegar").addEventListener("click", async () => {
   }
 });
 
-// Si pegan directamente en el cuadro, tampoco hace falta buscar el botón.
-$mensaje.addEventListener("paste", () => setTimeout(revisar, 0));
+// Pegar deja el texto puesto y nada más. Analizar por sorpresa desconcierta:
+// la persona no llegó a leer lo que pegó y ya tiene un veredicto encima.
+$mensaje.addEventListener("paste", () => setTimeout(refrescarBoton, 0));
 
 /**
  * Leer el texto de una captura de pantalla.
@@ -930,7 +988,6 @@ async function cargarOcr() {
   return motorOcr;
 }
 
-const $progreso = $("progresoOcr"), $textoOcr = $("textoOcr");
 
 /**
  * Prepara la imagen antes de leerla. Sin esto, una captura de WhatsApp en
@@ -1112,7 +1169,11 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     // Primero lo que la persona vino a ver. Todo lo demás es accesorio y va
     // aislado: si el preparado del aporte falla, el veredicto ya está en
     // pantalla y no se pierde.
-    pintarModelo(d);
+    // El primer análisis pinta el veredicto. Las repreguntas se acumulan
+    // debajo, en un hilo: si cada respuesta borrase la anterior, la persona
+    // perdería justo lo que acaba de leer.
+    if (seguimiento) anadirIntercambio(historial.at(-2)?.content ?? "", d);
+    else { $("hilo").innerHTML = ""; pintarModelo(d); }
     mostrar("vista-resultado");
     try { pintarConversacion(d.riesgo); } catch { $("conversar").hidden = true; }
     // Para donar hace falta el texto del mensaje, no la imagen. Cuando vino
@@ -1126,9 +1187,7 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
         $contribuir.hidden = true;
       } catch { $("abrirContribuir").hidden = true; }
     }
-    if (seguimiento) {
-      try { $("conversar").scrollIntoView({ behavior: "smooth", block: "center" }); } catch { /* cosmético */ }
-    }
+
   } catch (e) {
     if (seguimiento) {
       // A media conversación no se puede volver al inicio: se avisa y se deja
@@ -1211,6 +1270,20 @@ const SUGERENCIAS = {
   ],
 };
 
+function anadirIntercambio(pregunta, d) {
+  const bloque = document.createElement("div");
+  bloque.className = "intercambio";
+  bloque.innerHTML = `
+    <p class="yo">${esc(pregunta)}</p>
+    <div class="el">
+      <p>${esc(d.resumen || "")}</p>
+      ${d.pasos?.length ? `<ol>${d.pasos.map((x) => `<li>${esc(x)}</li>`).join("")}</ol>` : ""}
+      ${d.pregunta ? `<p><strong>${esc(d.pregunta)}</strong></p>` : ""}
+    </div>`;
+  $("hilo").appendChild(bloque);
+  try { bloque.scrollIntoView({ behavior: "smooth", block: "start" }); } catch { /* cosmético */ }
+}
+
 function pintarConversacion(riesgo) {
   const quedan = TOPE_REPREGUNTAS - repreguntas;
   const $c = $("conversar"), $q = $("cuota");
@@ -1253,13 +1326,67 @@ $("repregunta").addEventListener("keydown", (e) => {
   if (e.key === "Enter") enviarRepregunta($("repregunta").value);
 });
 
-function decidirImagen(archivo) {
+/**
+ * Adjuntar una captura NO la analiza. Solo la deja lista y a la vista.
+ * Quien sube una imagen quiere comprobar que es la correcta antes de que
+ * salga de su teléfono — con varias capturas en el carrete es fácil errar.
+ */
+let adjunta = null;
+
+function adjuntar(archivo) {
   if (!archivo || !archivo.type.startsWith("image/")) return;
-  conModelo(archivo);
+  if (miniatura) URL.revokeObjectURL(miniatura);
+  adjunta = archivo;
+  miniatura = URL.createObjectURL(archivo);
+  $("previa").src = miniatura;
+  $("pesoImagen").textContent = `${Math.round(archivo.size / 1024)} KB`;
+  $("zonaVacia").hidden = true;
+  $("zonaImagen").hidden = false;
+  $("ayudaPegar").textContent = "Comprueba que es la captura correcta y toca Revisar.";
+  refrescarBoton();
+}
+
+function soltarAdjunta() {
+  adjunta = null;
+  if (miniatura) { URL.revokeObjectURL(miniatura); miniatura = null; }
+  $("previa").removeAttribute("src");
+  $("zonaVacia").hidden = false;
+  $("zonaImagen").hidden = true;
+  $("ayudaPegar").textContent = "Si no logras copiar el mensaje, toma una foto de la pantalla y súbela.";
+  refrescarBoton();
+}
+
+/** El botón dice qué va a hacer, y no se puede tocar si no hay nada. */
+function refrescarBoton() {
+  const hayTexto = $mensaje.value.trim().length > 0;
+  const b = $("analizar");
+  b.disabled = !adjunta && !hayTexto;
+  b.textContent = adjunta ? "Revisar la captura" : hayTexto ? "Revisar el mensaje" : "Revisar";
 }
 
 $("subir").addEventListener("click", () => $("archivo").click());
-$("archivo").addEventListener("change", (e) => decidirImagen(e.target.files?.[0]));
+$("cambiarImagen").addEventListener("click", () => $("archivo").click());
+$("quitarImagen").addEventListener("click", soltarAdjunta);
+$("archivo").addEventListener("change", (e) => { adjuntar(e.target.files?.[0]); e.target.value = ""; });
+$mensaje.addEventListener("input", refrescarBoton);
+
+// Arrastrar y soltar. El recuadro se marca al pasar por encima, o no se
+// entiende que se puede soltar ahí.
+const $zona = $("zona");
+for (const ev of ["dragenter", "dragover"]) {
+  $zona.addEventListener(ev, (e) => { e.preventDefault(); $zona.classList.add("encima"); });
+}
+for (const ev of ["dragleave", "drop"]) {
+  $zona.addEventListener(ev, () => $zona.classList.remove("encima"));
+}
+$zona.addEventListener("drop", (e) => {
+  e.preventDefault();
+  const f = [...(e.dataTransfer?.files ?? [])].find((x) => x.type.startsWith("image/"));
+  if (f) adjuntar(f);
+});
+$zona.addEventListener("click", (e) => { if (e.target === $zona) $("archivo").click(); });
+
+
 
 /**
  * Pegar una captura copiada también vale, no solo subir el archivo.
@@ -1277,9 +1404,11 @@ document.addEventListener("paste", (e) => {
   const img = [...(datos.items ?? [])].find((i) => i.type.startsWith("image/"));
   if (!img) return;
   e.preventDefault();
-  decidirImagen(img.getAsFile());
+  adjuntar(img.getAsFile());
 });
-$("limpiar").addEventListener("click", () => { $mensaje.value = ""; $mensaje.focus(); });
+$("limpiar").addEventListener("click", () => {
+  $mensaje.value = ""; soltarAdjunta(); refrescarBoton(); $mensaje.focus();
+});
 $mensaje.addEventListener("keydown", (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") revisar();
 });
