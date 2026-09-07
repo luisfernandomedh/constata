@@ -19,10 +19,10 @@
     --marca: #0d5c4a;
     --marca-suave: #e6f2ee;
 
-    --alto: #c02718;
-    --alto-fondo: #fdecea;
-    --alto-marca: #f7c9c3;
-    --medio: #9a5f00;
+    --alto: #a8442f;
+    --alto-fondo: #fbeee9;
+    --alto-marca: #f2d5cb;
+    --medio: #8a6320;
     --medio-fondo: #fdf3e2;
     --medio-marca: #f8dfae;
     --bajo: #0d5c4a;
@@ -43,9 +43,9 @@
       --marca: #5fd3b2;
       --marca-suave: #13312a;
 
-      --alto: #ff9186;
-      --alto-fondo: #351d1a;
-      --alto-marca: #6e2e26;
+      --alto: #eda08c;
+      --alto-fondo: #2e211d;
+      --alto-marca: #61362c;
       --medio: #f2c274;
       --medio-fondo: #332715;
       --medio-marca: #6b4d1c;
@@ -154,9 +154,9 @@
   .analizando { text-align: center; padding: 60px 20px; }
   .analizando p { font-size: 19px; color: var(--tenue); margin: 18px 0 0; }
   .rueda {
-    display: inline-block; width: 42px; height: 42px; border-radius: 50%;
+    display: inline-block; width: 38px; height: 38px; border-radius: 50%;
     border: 4px solid color-mix(in srgb, var(--marca) 22%, transparent);
-    border-top-color: var(--marca); animation: gira .8s linear infinite;
+    border-top-color: var(--marca); animation: gira 1.4s linear infinite;
   }
   .volver-arriba {
     background: none; border: 0; color: var(--marca); font: inherit; font-size: 15px;
@@ -182,6 +182,19 @@
   .v-bajo  { background: var(--bajo-fondo);  border-color: var(--marca);       color: var(--bajo); }
   .veredicto .icono { background: color-mix(in srgb, currentColor 16%, transparent); }
   .veredicto h2, .veredicto p { color: var(--texto); }
+
+  .pasos-hacer {
+    margin-top: 18px; background: var(--papel); border: 1px solid var(--borde);
+    border-radius: 14px; padding: 18px 20px; box-shadow: var(--sombra);
+  }
+  .pasos-hacer h3 { margin: 0 0 12px; font-size: 16.5px; letter-spacing: -0.01em; }
+  .pasos-hacer ol { margin: 0; padding-left: 22px; }
+  .pasos-hacer li { margin-bottom: 9px; font-size: 15.5px; line-height: 1.55; }
+  .pasos-hacer li:last-child { margin-bottom: 0; }
+  .titulo-senales {
+    font-size: 13px; text-transform: uppercase; letter-spacing: .07em;
+    color: var(--tenue); font-weight: 700; margin: 26px 0 10px;
+  }
 
   /* ── El mensaje con las señales subrayadas ──────────────── */
   .lienzo {
@@ -265,7 +278,7 @@
       </div>
       <h1>Constata</h1>
     </div>
-    <p class="lema">¿Este mensaje es una estafa? Pégalo y te subrayo exactamente qué parte es sospechosa, y por qué.</p>
+    <p class="lema">¿Te llegó un mensaje raro? Pégalo aquí y lo revisamos juntos, con calma.</p>
     <p class="promesa" id="promesa">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/>
@@ -275,7 +288,7 @@
   </header>
 
   <section id="vista-inicio">
-  <p class="instruccion">Pega el texto o sube tu captura.</p>
+  <p class="instruccion">Con calma. Pega el texto o sube tu captura.</p>
 
   <div class="opciones">
     <button id="pegar" class="grande">
@@ -310,7 +323,7 @@
   <section id="vista-analizando" hidden>
     <div class="analizando">
       <span class="rueda"></span>
-      <p>Revisando el mensaje…</p>
+      <p>Tómate un segundo. Estoy revisando el mensaje…</p>
     </div>
   </section>
 
@@ -410,21 +423,46 @@ const NOMBRES = {
   "urgencia-artificial": "Te apura para que no pienses",
 };
 
+/**
+ * El veredicto habla primero a la persona y después del mensaje.
+ *
+ * Quien llega aquí suele estar asustado: acaba de recibir algo que lo
+ * alarmó y no sabe si le mintieron. Un cartel rojo con signos de admiración
+ * empeora eso. Lo que calma es saber que no ha pasado nada todavía y tener
+ * dos o tres pasos concretos que dar.
+ *
+ * Por eso no hay puntaje a la vista: un número no le sirve a nadie que esté
+ * nervioso, y sugiere una precisión que no tenemos.
+ */
 const VEREDICTO = {
   alto: {
-    titulo: "Esto parece una estafa",
-    sub: "Tiene varias marcas típicas del fraude. No abras los enlaces ni respondas. Si dice ser tu banco, llama tú al número de tu tarjeta.",
-    icono: '<path d="M12 3 2 20h20z"/><path d="M12 9.5v4.5"/><circle cx="12" cy="17.2" r=".9" fill="currentColor" stroke="none"/>',
+    titulo: "Respira. Esto parece una estafa.",
+    sub: "Mientras no respondas ni abras el enlace, no ha pasado nada. Tómate un minuto.",
+    icono: '<circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16.3" r=".9" fill="currentColor" stroke="none"/>',
+    pasos: [
+      "No respondas y no abras los enlaces.",
+      "Si dice ser tu banco, llama tú al número que está en tu tarjeta. Nunca al del mensaje.",
+      "Si ya diste datos o hiciste un pago, llama a tu banco ahora mismo y cambia tus claves. Todavía se puede hacer algo.",
+    ],
   },
   medio: {
-    titulo: "Algo no cuadra",
-    sub: "Hay señales sospechosas, pero no son concluyentes. Verifica por un canal oficial antes de hacer nada.",
+    titulo: "Con calma: hay algo que no cuadra.",
+    sub: "No es concluyente, pero conviene que lo verifiques antes de hacer nada.",
     icono: '<circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16.3" r=".9" fill="currentColor" stroke="none"/>',
+    pasos: [
+      "No uses los enlaces ni los números del mensaje.",
+      "Busca tú el contacto oficial de la empresa y pregunta directamente.",
+      "Si te apuran, desconfía más. La prisa es la herramienta del estafador.",
+    ],
   },
   bajo: {
-    titulo: "No encontré señales conocidas",
-    sub: "Eso no significa que sea seguro: significa que no reconocí ninguna de las señales que sé buscar. Desconfía igual si te piden dinero o datos.",
+    titulo: "No encontré señales conocidas.",
+    sub: "Eso no quiere decir que sea seguro. Quiere decir que no reconocí nada de lo que sé buscar.",
     icono: '<circle cx="12" cy="12" r="9"/><path d="m8.4 12.2 2.5 2.5 4.7-4.9"/>',
+    pasos: [
+      "Si te piden dinero, datos o una clave, desconfía igual.",
+      "Ante la duda, verifica por un canal que tú conozcas.",
+    ],
   },
 };
 
@@ -496,7 +534,6 @@ function pintar(texto, { riesgo, puntaje, hallazgos, avisos }) {
       <div style="flex:1;min-width:0">
         <h2>${v.titulo}</h2>
         <p>${v.sub}</p>
-        <div class="barra"><i style="width:${Math.max(puntaje, 3)}%"></i></div>
       </div>
     </div>
 
@@ -506,7 +543,12 @@ function pintar(texto, { riesgo, puntaje, hallazgos, avisos }) {
       <div class="mensaje-marcado">${marcado}</div>
     </div>` : ""}
 
-    ${tarjetas ? `<ul class="senales">${tarjetas}</ul>` : ""}
+    <div class="pasos-hacer">
+      <h3>Qué hacer ahora</h3>
+      <ol>${v.pasos.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>
+    </div>
+
+    ${tarjetas ? `<h3 class="titulo-senales">Por qué lo digo</h3><ul class="senales">${tarjetas}</ul>` : ""}
     <p class="remate">Constata da indicios, no certezas. La decisión sigue siendo tuya.</p>`;
 
   // Señal y subrayado se iluminan juntos, en los dos sentidos.
