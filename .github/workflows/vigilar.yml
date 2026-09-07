@@ -1,0 +1,43 @@
+name: Vigilar que no se caiga
+
+# Cada 48 horas. Si el sitio o el endpoint fallan, abre un aviso.
+# No debe depender de que alguien se acuerde de mirar.
+on:
+  schedule:
+    - cron: "0 13 */2 * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  revisar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comprobar sitio y endpoint
+        id: c
+        run: |
+          fallos=""
+          for u in https://constata.dev/ https://constata.dev/evaluacion.html https://constata.dev/dominios.html; do
+            c=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 "$u" || echo 000)
+            echo "$u -> $c"
+            [ "$c" = "200" ] || fallos="$fallos\n- $u devolvió $c"
+          done
+          # El endpoint se prueba en seco: OPTIONS no crea nada.
+          c=$(curl -s -o /dev/null -w "%{http_code}" -X OPTIONS --max-time 20 https://constata.dev/aportar || echo 000)
+          echo "endpoint -> $c"
+          [ "$c" = "200" ] || fallos="$fallos\n- el endpoint de aportes devolvió $c"
+          if [ -n "$fallos" ]; then
+            echo -e "detalle<<EOF\n$fallos\nEOF" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+      - name: Avisar si algo se cayó
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create --repo "$GITHUB_REPOSITORY" \
+            --title "Algo se cayó ($(date +%Y-%m-%d %H:%M) UTC)" \
+            --label "caida" \
+            --body "$(printf 'La comprobación automática encontró esto:\n%b\n\nSe revisa cada 48 horas. Si ya está resuelto, cierra este aviso.' "${{ steps.c.outputs.detalle }}")"

@@ -5,6 +5,13 @@ compatibility_date = "2026-09-01"
 # Sin URL de vista previa: un solo punto de entrada público, más fácil de vigilar.
 preview_urls = false
 
+# El endpoint vive en el propio dominio. En workers.dev lo bloquean las redes
+# móviles, porque ese dominio se usa tanto para phishing que muchas operadoras
+# lo filtran — de hecho está en nuestra propia lista de sospechosos.
+[[routes]]
+pattern = "constata.dev/aportar"
+zone_name = "constata.dev"
+
 [vars]
 # Repositorio donde aterrizan los issues. Separado del código a propósito:
 # si el corpus recibe una queja o una marca de seguridad, la biblioteca sigue viva.
