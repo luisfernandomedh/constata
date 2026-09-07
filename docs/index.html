@@ -434,7 +434,7 @@
       explica lo que hace la herramienta, dice qué hacer.
     -->
     <p class="lema"><strong>¿Crees que es una estafa?</strong> Constata.</p>
-    <p class="sublema">Pégalo aquí y lo revisamos juntos, con calma.</p>
+    <p class="sublema">Pégalo o súbelo. En segundos sabes qué es y cuál es tu siguiente paso.</p>
     <p class="promesa" id="promesa">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/>
@@ -444,7 +444,7 @@
   </header>
 
   <section id="vista-inicio">
-  <p class="instruccion">Con calma. Pon aquí el mensaje o la captura.</p>
+  <p class="instruccion">Pon aquí el mensaje o la captura. Te digo qué es y qué hacer.</p>
 
   <!--
     Adjuntar y revisar son dos actos separados, a propósito.
@@ -495,7 +495,8 @@
   <p class="aviso-envio">
     Al revisar, el mensaje sale de tu dispositivo y se analiza. No se guarda.
     <strong>Quita los nombres propios.</strong>
-    <a href="https://github.com/luisfernandomedh/constata/blob/main/ANALISIS.md" target="_blank" rel="noopener">Cómo funciona</a>
+    <a href="https://github.com/luisfernandomedh/constata/blob/main/ANALISIS.md" target="_blank" rel="noopener">Cómo funciona</a> ·
+    <a href="https://github.com/luisfernandomedh/constata/blob/main/INSTRUCCIONES.md" target="_blank" rel="noopener">Lo que le decimos al modelo</a>
   </p>
 
   <div class="ejemplos">
@@ -510,7 +511,7 @@
     <div class="analizando">
       <img id="miniaturaEspera" class="miniatura" alt="" hidden>
       <span class="rueda"></span>
-      <p id="textoAnalizando">Tómate un segundo. Estoy revisando el mensaje…</p>
+      <p id="textoAnalizando">Revisando el mensaje…</p>
     </div>
   </section>
 
@@ -1160,8 +1161,8 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     }
     $("miniaturaEspera").hidden = $("loAnalizado").hidden = !esImagen;
     $("textoAnalizando").textContent = esImagen
-      ? "Estoy mirando tu captura. Un momento…"
-      : "Tómate un segundo. Estoy revisando el mensaje…";
+      ? "Mirando tu captura…"
+      : "Revisando el mensaje…";
     mostrar("vista-analizando");
   }
   try {

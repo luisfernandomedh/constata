@@ -26,6 +26,15 @@ El modelo **se equivoca**. Puede marcar como estafa algo legítimo, y puede
 dejar pasar una estafa real. Es una ayuda para que decidas tú, no un
 veredicto.
 
+## Qué le decimos exactamente al modelo
+
+Está publicado, entero y sin recortar, en
+[INSTRUCCIONES.md](INSTRUCCIONES.md). No es un resumen: el archivo que ejecuta
+el servidor se genera desde ese documento, y hay una comprobación que falla si
+los dos dejan de coincidir. Lo que puedes leer es lo que corre.
+
+Puedes llevártelo y usarlo con el modelo que prefieras.
+
 ## Qué se guarda, y qué no
 
 **No se guarda:**
