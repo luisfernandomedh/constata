@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Constata — ¿este mensaje es una estafa?</title>
-<meta name="description" content="Pega un mensaje sospechoso y Constata te subraya exactamente qué parte es sospechosa, y por qué. Todo ocurre en tu navegador: el mensaje nunca sale de tu dispositivo.">
+<meta name="description" content="¿Te llegó un mensaje raro? Pégalo y te decimos si parece una estafa y qué hacer. Nadie más lo ve: se revisa en tu propio teléfono. Gratis y sin registrarse.">
 <meta property="og:title" content="Constata — ¿este mensaje es una estafa?">
-<meta property="og:description" content="Te subraya en el propio mensaje qué parte es sospechosa y por qué. Corre entero en tu navegador. Gratis, abierto y sin cuenta.">
+<meta property="og:description" content="Te señala qué parte del mensaje es sospechosa y te dice qué hacer. Nadie más lo ve. Gratis y sin registrarse.">
 <meta property="og:type" content="website">
 <style>
   :root {
@@ -151,6 +151,14 @@
   .ejemplos button:hover { border-color: var(--marca); color: var(--marca); opacity: 1; }
 
   /* ── Vistas: la respuesta ocupa su propia pantalla ──────── */
+  section { animation: aparecer .45s ease both; }
+  @keyframes aparecer {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    section, .rueda { animation: none; }
+  }
   .analizando { text-align: center; padding: 60px 20px; }
   .analizando p { font-size: 19px; color: var(--tenue); margin: 18px 0 0; }
   .rueda {
@@ -191,6 +199,23 @@
   .pasos-hacer ol { margin: 0; padding-left: 22px; }
   .pasos-hacer li { margin-bottom: 9px; font-size: 15.5px; line-height: 1.55; }
   .pasos-hacer li:last-child { margin-bottom: 0; }
+  .preguntas:not(:empty) {
+    margin-top: 16px; background: var(--papel); border: 1px solid var(--borde);
+    border-radius: 14px; padding: 18px 20px; box-shadow: var(--sombra);
+  }
+  .preguntas h3 { margin: 0 0 13px; font-size: 16.5px; letter-spacing: -0.01em; }
+  .preguntas .botones { display: flex; gap: 10px; flex-wrap: wrap; }
+  .preguntas .botones button {
+    flex: 1 1 auto; min-width: 150px; font-size: 15.5px; font-weight: 550;
+    padding: 13px 18px; background: var(--papel); color: var(--marca);
+    border: 1.5px solid var(--marca); border-radius: 10px; box-shadow: none;
+  }
+  .preguntas .respuesta p { margin: 0 0 11px; font-size: 15.5px; line-height: 1.6; }
+  .preguntas .respuesta p:last-child { margin-bottom: 0; }
+  .preguntas .respuesta.bien h3 { color: var(--marca); }
+  .preguntas .respuesta.urgente h3 { color: var(--alto); }
+  .preguntas .respuesta.ojo h3 { color: var(--medio); }
+
   .titulo-senales {
     font-size: 13px; text-transform: uppercase; letter-spacing: .07em;
     color: var(--tenue); font-weight: 700; margin: 26px 0 10px;
@@ -283,7 +308,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/>
       </svg>
-      <span><strong>Tu mensaje no sale de tu dispositivo.</strong> Todo ocurre en tu navegador, también la lectura de las capturas. Sin servidor, sin cuenta, sin cookies.</span>
+      <span><strong>Nadie más va a ver tu mensaje.</strong> Se revisa aquí mismo, en tu teléfono. No se envía a ninguna parte, no se guarda, y no hace falta registrarse.</span>
     </p>
   </header>
 
@@ -302,10 +327,10 @@
   </div>
   <input type="file" id="archivo" accept="image/*" hidden>
 
-  <p class="ayuda" id="ayudaPegar">Si no puedes copiar el mensaje, toma una captura de pantalla y súbela.</p>
+  <p class="ayuda" id="ayudaPegar">Si no logras copiar el mensaje, toma una foto de la pantalla y súbela.</p>
   <div id="progresoOcr" class="progreso" hidden><span></span><b id="textoOcr">Leyendo la imagen…</b></div>
 
-  <label class="etiqueta" for="mensaje">O escríbelo aquí</label>
+  <label class="etiqueta" for="mensaje">O escríbelo tú aquí</label>
   <textarea id="mensaje" placeholder="Pega o escribe aquí el mensaje…"></textarea>
 
   <div class="fila">
@@ -375,7 +400,7 @@
   </section>
 
   <footer>
-    Constata es software libre, gratuito y de código abierto. Sin cuenta, sin publicidad, sin rastreo.<br>
+    Constata es gratis y siempre lo será. Sin cuentas, sin publicidad, y sin guardar nada tuyo.<br>
     <a href="como-funciona.html">Cómo funciona</a> ·
     <a href="evaluacion.html">Qué detecta y qué no</a> ·
     <a href="dominios.html">Dominios verificados</a> ·
@@ -387,7 +412,7 @@
 </div>
 
 <script type="module">
-import { analizar, anonimizar } from "./lib/index.js";
+import { analizar, anonimizar, MARCAS } from "./lib/index.js";
 
 const ENDPOINT = "https://constata-aportes.luisfernandomedh.workers.dev";
 const REPO = "luisfernandomedh/constata";
@@ -539,7 +564,7 @@ function pintar(texto, { riesgo, puntaje, hallazgos, avisos }) {
 
     ${hayMarcas ? `
     <div class="lienzo">
-      <div class="titulo">Lo subrayado es lo sospechoso</div>
+      <div class="titulo">Lo subrayado es lo que me hizo sospechar</div>
       <div class="mensaje-marcado">${marcado}</div>
     </div>` : ""}
 
@@ -548,8 +573,54 @@ function pintar(texto, { riesgo, puntaje, hallazgos, avisos }) {
       <ol>${v.pasos.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>
     </div>
 
+    <div class="preguntas" id="preguntas"></div>
+
     ${tarjetas ? `<h3 class="titulo-senales">Por qué lo digo</h3><ul class="senales">${tarjetas}</ul>` : ""}
-    <p class="remate">Constata da indicios, no certezas. La decisión sigue siendo tuya.</p>`;
+    <p class="remate">Esto es una ayuda para que decidas tú. Ante la duda, pregunta a alguien de confianza.</p>`;
+
+  // ── Dos preguntas, ni una más ──────────────────────────────────
+  // Quien llega asustado no aguanta un formulario. Dos preguntas bastan
+  // para separar los tres casos que necesitan consejos distintos: quien
+  // todavía no hizo nada, quien dio datos sueltos, y quien entregó una
+  // clave o su tarjeta — que es el único caso con reloj corriendo.
+  const marca = MARCAS.find((m) => m.alias.some((a) => texto.toLowerCase().includes(a)));
+  const sitioReal = marca
+    ? `Escribe tú mismo <strong>${esc(marca.dominios[0])}</strong> en el navegador, o llama al número que está al reverso de tu tarjeta. Nunca uses el número ni el enlace que vienen en el mensaje.`
+    : "Busca tú el contacto oficial y llámalo. Nunca uses el número ni el enlace que vienen en el mensaje.";
+
+  const $preg = $("preguntas");
+  const preguntar = (titulo, opciones) => {
+    $preg.innerHTML = `<h3>${titulo}</h3><div class="botones">` +
+      opciones.map((o, i) => `<button data-i="${i}">${esc(o.texto)}</button>`).join("") + "</div>";
+    for (const b of $preg.querySelectorAll("button")) {
+      b.addEventListener("click", () => opciones[Number(b.dataset.i)].hacer());
+    }
+  };
+  const responder = (clase, titulo, cuerpo) => {
+    $preg.innerHTML = `<div class="respuesta ${clase}"><h3>${titulo}</h3>${cuerpo}</div>`;
+  };
+
+  if (riesgo !== "bajo") {
+    preguntar("¿Alcanzaste a responder, tocar el enlace o dar algún dato?", [
+      { texto: "No, todavía no", hacer: () => responder("bien",
+          "Entonces estás bien.",
+          `<p>No hiciste nada y no va a pasar nada. Borra el mensaje y bloquea el número.</p>
+           <p>Si te queda la duda de si era de verdad: ${sitioReal}</p>`) },
+      { texto: "Sí, algo hice", hacer: () => preguntar("¿Diste una clave, un código o datos de tu tarjeta?", [
+          { texto: "Sí", hacer: () => responder("urgente",
+              "Actúa ahora, todavía se puede.",
+              `<p><strong>Llama a tu banco de inmediato</strong> y pide que bloqueen la tarjeta o la cuenta. Cuanto antes llames, más se puede recuperar.</p>
+               <p>Después cambia esa clave, y también en cualquier otro sitio donde uses la misma.</p>
+               <p>${sitioReal}</p>`) },
+          { texto: "No, solo mi nombre o mi correo", hacer: () => responder("ojo",
+              "No es grave, pero mantente atento.",
+              `<p>Con eso no pueden sacarte dinero. Lo que sí van a hacer es insistir con más mensajes, y ahora sabiendo tu nombre.</p>
+               <p>Bloquea el número y desconfía de lo que llegue después, aunque parezca convincente.</p>`) },
+        ]) },
+    ]);
+  } else {
+    $preg.innerHTML = "";
+  }
 
   // Señal y subrayado se iluminan juntos, en los dos sentidos.
   const resaltar = (nums, on) => {
@@ -624,7 +695,7 @@ function volverAlInicio() {
   $resultado.innerHTML = "";
   $contribuir.hidden = true;
   $("abrirContribuir").hidden = true;
-  $("ayudaPegar").textContent = "Si no puedes copiar el mensaje, toma una captura de pantalla y súbela.";
+  $("ayudaPegar").textContent = "Si no logras copiar el mensaje, toma una foto de la pantalla y súbela.";
   mostrar("vista-inicio");
 }
 $("volver").addEventListener("click", volverAlInicio);
@@ -646,7 +717,7 @@ $("pegar").addEventListener("click", async () => {
   try {
     const texto = await navigator.clipboard.readText();
     if (!texto.trim()) {
-      $("ayudaPegar").textContent = "No encontré nada copiado. Copia primero el mensaje y vuelve a tocar aquí.";
+      $("ayudaPegar").textContent = "No encontré nada copiado. Copia primero el mensaje y vuelve a tocar este botón.";
       return;
     }
     $mensaje.value = texto;
@@ -654,7 +725,7 @@ $("pegar").addEventListener("click", async () => {
     revisar();
   } catch {
     // Sin permiso de portapapeles: se degrada al cuadro de texto de siempre.
-    $("ayudaPegar").innerHTML = "<strong>Tu navegador no me deja leer lo que copiaste.</strong> Pega el mensaje en el cuadro de abajo y toca «Revisar mensaje».";
+    $("ayudaPegar").innerHTML = "<strong>No pude tomar lo que copiaste.</strong> Pégalo en el cuadro de abajo y toca «Revisar mensaje».";
     $mensaje.focus();
     $mensaje.scrollIntoView({ behavior: "smooth", block: "center" });
   } finally {
@@ -697,7 +768,7 @@ const $progreso = $("progresoOcr"), $textoOcr = $("textoOcr");
 async function leerImagen(archivo) {
   if (!archivo || !archivo.type.startsWith("image/")) return;
   $progreso.hidden = false;
-  $textoOcr.textContent = "Preparando el lector…";
+  $textoOcr.textContent = "Preparando…";
   try {
     const T = await cargarOcr();
     const { data } = await T.recognize(archivo, "spa", {
@@ -705,21 +776,21 @@ async function leerImagen(archivo) {
         if (m.status === "recognizing text") {
           $textoOcr.textContent = `Leyendo la imagen… ${Math.round(m.progress * 100)}%`;
         } else if (m.status === "loading language traineddata") {
-          $textoOcr.textContent = "Descargando el lector, solo la primera vez…";
+          $textoOcr.textContent = "Esto tarda un poco la primera vez…";
         }
       },
     });
     const texto = (data.text || "").trim();
     $progreso.hidden = true;
     if (!texto) {
-      $("ayudaPegar").innerHTML = "<strong>No pude leer texto en esa imagen.</strong> Prueba con una captura más nítida, o escribe el mensaje en el cuadro de abajo.";
+      $("ayudaPegar").innerHTML = "<strong>No logré leer esa imagen.</strong> Prueba con una foto más clara, o escribe el mensaje en el cuadro de abajo.";
       return;
     }
     $mensaje.value = texto;
     revisar();
   } catch {
     $progreso.hidden = true;
-    $("ayudaPegar").innerHTML = "<strong>No pude leer la imagen.</strong> Escribe o pega el mensaje en el cuadro de abajo.";
+    $("ayudaPegar").innerHTML = "<strong>No logré leer esa imagen.</strong> Escribe o pega el mensaje en el cuadro de abajo.";
     $mensaje.focus();
   }
 }
