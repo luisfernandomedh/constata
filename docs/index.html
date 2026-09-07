@@ -298,6 +298,24 @@
   footer { margin-top: 52px; padding-top: 20px; border-top: 1px solid var(--borde); font-size: 13.5px; color: var(--tenue); line-height: 1.9; }
   footer a { color: var(--marca); text-decoration-color: color-mix(in srgb, var(--marca) 35%, transparent); }
   [hidden] { display: none !important; }
+
+/* Permiso para que la imagen salga del dispositivo. Se pregunta con calma,
+   sin alarma roja: no está pasando nada malo, solo hace falta un permiso. */
+.permiso {
+  margin: 18px 0;
+  padding: 18px 20px;
+  border: 1px solid var(--borde, #cfd9e6);
+  border-left: 4px solid var(--azul, #2f6fd0);
+  border-radius: 12px;
+  background: var(--suave, #f4f8fd);
+}
+.permiso h3 { margin: 0 0 8px; font-size: 1.05rem; }
+.permiso p  { margin: 0 0 10px; line-height: 1.55; }
+.permiso .fila { margin-top: 14px; }
+@media (max-width: 480px) {
+  .permiso .fila { flex-direction: column; }
+  .permiso .fila button { width: 100%; }
+}
 </style>
 </head>
 <body>
@@ -336,6 +354,23 @@
     </button>
   </div>
   <input type="file" id="archivo" accept="image/*" hidden>
+
+  <!--
+    La imagen sale del dispositivo, y eso rompe la promesa por defecto.
+    Así que se pregunta, con las dos opciones igual de visibles y ninguna
+    marcada de antemano. Quien dice que no sigue teniendo herramienta.
+  -->
+  <div id="permiso" class="permiso" hidden>
+    <h3>¿Reviso la captura a fondo?</h3>
+    <p>Para leer bien una captura necesito enviarla a un servicio de análisis.
+       <strong>Sale de tu teléfono.</strong> No la guardamos, ni nosotros ni ellos.</p>
+    <p>Si prefieres que no salga, la reviso igual aquí mismo. Es más limitado
+       con las imágenes, pero funciona y nada se mueve de tu dispositivo.</p>
+    <div class="fila">
+      <button id="permitoSi">Sí, revísala a fondo</button>
+      <button id="permitoNo" class="secundario">No, revísala solo aquí</button>
+    </div>
+  </div>
 
   <p class="ayuda" id="ayudaPegar">Si no logras copiar el mensaje, toma una foto de la pantalla y súbela.</p>
   <div id="progresoOcr" class="progreso" hidden><span></span><b id="textoOcr">Leyendo la imagen…</b></div>
@@ -425,6 +460,7 @@
 import { analizar, anonimizar, MARCAS } from "./lib/index.js";
 
 const ENDPOINT = "/aportar";
+const ANALISIS = "/analizar";
 const REPO = "luisfernandomedh/constata";
 
 const EJEMPLOS = [
@@ -740,6 +776,8 @@ function volverAlInicio() {
   $contribuir.hidden = true;
   $("abrirContribuir").hidden = true;
   $("ayudaPegar").textContent = "Si no logras copiar el mensaje, toma una foto de la pantalla y súbela.";
+  $("permiso").hidden = true;
+  imagenEnEspera = null;
   mostrar("vista-inicio");
 }
 $("volver").addEventListener("click", volverAlInicio);
@@ -881,8 +919,131 @@ async function leerImagen(archivo) {
   }
 }
 
+/**
+ * ── Análisis con modelo ───────────────────────────────────────────────
+ *
+ * Las reglas locales no leen intención. Con dos capturas reales de WhatsApp
+ * quedó demostrado: «mi banca móvil está bloqueada, ¿me haces el pago? te lo
+ * devuelvo» salía como riesgo BAJO, porque no hay enlace, ni marca, ni
+ * ninguna de las frases que las reglas buscan. El modelo la marca en alto.
+ *
+ * Por eso las imágenes van al modelo, que además ve lo que el texto pierde:
+ * si el contacto está guardado, si el número es desconocido, cómo se ve la
+ * conversación entera.
+ *
+ * Y por eso mismo se pide permiso. Si dice que no, o si el servicio no
+ * responde, se cae a la lectura local de siempre. Nunca se queda muda.
+ */
+
+/** Al modelo se le manda la imagen en color: el gris del OCR le quita contexto. */
+async function encogerImagen(archivo, ladoMax = 1200, calidad = 0.82) {
+  const bitmap = await createImageBitmap(archivo);
+  const escala = Math.min(1, ladoMax / Math.max(bitmap.width, bitmap.height));
+  const w = Math.round(bitmap.width * escala), h = Math.round(bitmap.height * escala);
+  const lienzo = document.createElement("canvas");
+  lienzo.width = w; lienzo.height = h;
+  lienzo.getContext("2d").drawImage(bitmap, 0, 0, w, h);
+  return lienzo.toDataURL("image/jpeg", calidad);
+}
+
+const VEREDICTO_MODELO = {
+  alto:  { titulo: "Esto tiene toda la pinta de una estafa", sub: "No respondas ni envíes nada. Aquí abajo te explico por qué." },
+  medio: { titulo: "Hay cosas que no me cuadran", sub: "No es seguro que sea estafa, pero conviene que lo confirmes antes de hacer nada." },
+  bajo:  { titulo: "No encontré señales conocidas de estafa", sub: "Eso no es lo mismo que decir que es seguro. Si algo te huele raro, hazle caso." },
+};
+
+function pintarModelo(d) {
+  const v = VEREDICTO_MODELO[d.riesgo] ?? VEREDICTO_MODELO.medio;
+  const icono = VEREDICTO[d.riesgo]?.icono ?? "";
+  const senales = (d.senales ?? []).map((x, i) => `
+    <li class="s-${d.riesgo === "alto" ? "alto" : "medio"}" data-n="${i + 1}">
+      <span class="insignia">${i + 1}</span>
+      <div class="senal-cuerpo">
+        <div class="nombre">${esc(x.que ?? "")}</div>
+        <div class="detalle">${esc(x.porque ?? "")}</div>
+      </div>
+    </li>`).join("");
+
+  $resultado.innerHTML = `
+    <div class="veredicto v-${d.riesgo}">
+      <div class="icono">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">${icono}</svg>
+      </div>
+      <div style="flex:1;min-width:0">
+        <h2>${esc(v.titulo)}</h2>
+        <p>${esc(d.resumen || v.sub)}</p>
+      </div>
+    </div>
+
+    ${d.pasos?.length ? `<div class="pasos-hacer"><h3>Qué hacer ahora</h3>
+      <ol>${d.pasos.map((x) => `<li>${esc(x)}</li>`).join("")}</ol></div>` : ""}
+
+    ${d.pregunta ? `<div class="lienzo"><div class="titulo">Una sola pregunta</div>
+      <div class="mensaje-marcado">${esc(d.pregunta)}</div></div>` : ""}
+
+    ${senales ? `<h3 class="titulo-senales">Por qué lo digo</h3><ul class="senales">${senales}</ul>` : ""}
+
+    <p class="remate">Esta captura la revisó un modelo de lenguaje, que se equivoca.
+      Es una ayuda para que decidas tú. Ante la duda, pregunta a alguien de confianza.</p>`;
+}
+
+/** Recuerda la respuesta para no volver a preguntar en cada captura. */
+const PERMISO = "constata-permiso-modelo";
+function permisoGuardado() {
+  try { return localStorage.getItem(PERMISO); } catch { return null; }
+}
+function guardarPermiso(v) {
+  try { localStorage.setItem(PERMISO, v); } catch { /* modo privado: se vuelve a preguntar */ }
+}
+
+let imagenEnEspera = null;
+
+async function conModelo(archivo) {
+  mostrar("vista-analizando");
+  try {
+    const imagen = await encogerImagen(archivo);
+    const r = await fetch(ANALISIS, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imagen }),
+      signal: AbortSignal.timeout(50000),
+    });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || "sin respuesta");
+    pintarModelo(d);
+    prepararContribucion("(captura de pantalla)", d.riesgo);
+    $contribuir.hidden = true;
+    $("abrirContribuir").hidden = false;
+    mostrar("vista-resultado");
+  } catch {
+    // Se cae a la lectura local sin dramatizar: la persona vino a que la ayuden.
+    mostrar("vista-inicio");
+    $("ayudaPegar").innerHTML = "<strong>El análisis a fondo no respondió.</strong> La reviso aquí mismo.";
+    await leerImagen(archivo);
+  }
+}
+
+function decidirImagen(archivo) {
+  if (!archivo || !archivo.type.startsWith("image/")) return;
+  const guardado = permisoGuardado();
+  if (guardado === "si") return conModelo(archivo);
+  if (guardado === "no") return leerImagen(archivo);
+  imagenEnEspera = archivo;
+  $("permiso").hidden = false;
+  $("permiso").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+$("permitoSi").addEventListener("click", () => {
+  guardarPermiso("si"); $("permiso").hidden = true;
+  const a = imagenEnEspera; imagenEnEspera = null; if (a) conModelo(a);
+});
+$("permitoNo").addEventListener("click", () => {
+  guardarPermiso("no"); $("permiso").hidden = true;
+  const a = imagenEnEspera; imagenEnEspera = null; if (a) leerImagen(a);
+});
+
 $("subir").addEventListener("click", () => $("archivo").click());
-$("archivo").addEventListener("change", (e) => leerImagen(e.target.files?.[0]));
+$("archivo").addEventListener("change", (e) => decidirImagen(e.target.files?.[0]));
 
 /**
  * Pegar una captura copiada también vale, no solo subir el archivo.
@@ -900,7 +1061,7 @@ document.addEventListener("paste", (e) => {
   const img = [...(datos.items ?? [])].find((i) => i.type.startsWith("image/"));
   if (!img) return;
   e.preventDefault();
-  leerImagen(img.getAsFile());
+  decidirImagen(img.getAsFile());
 });
 $("limpiar").addEventListener("click", () => { $mensaje.value = ""; $mensaje.focus(); });
 $mensaje.addEventListener("keydown", (e) => {

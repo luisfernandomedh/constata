@@ -12,6 +12,10 @@ preview_urls = false
 pattern = "constata.dev/aportar"
 zone_name = "constata.dev"
 
+[[routes]]
+pattern = "constata.dev/analizar"
+zone_name = "constata.dev"
+
 [vars]
 # Repositorio donde aterrizan los issues. Separado del código a propósito:
 # si el corpus recibe una queja o una marca de seguridad, la biblioteca sigue viva.

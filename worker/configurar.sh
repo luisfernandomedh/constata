@@ -6,14 +6,17 @@ set -u
 DESTINO="$HOME/.constata-secrets"
 
 pedir() {
-  local etiqueta="$1" pista="$2" valor=""
+  local etiqueta="$1" pista="$2" opcional="${3:-}" valor=""
   while [ -z "$valor" ]; do
     printf '\n%s\n  %s\n> ' "$etiqueta" "$pista" >&2
     IFS= read -rs valor
     printf '\n' >&2
     # Quita espacios y saltos que suelen colarse al pegar
     valor="$(printf '%s' "$valor" | tr -d '[:space:]')"
-    [ -z "$valor" ] && printf '  (vacío, inténtalo de nuevo)\n' >&2
+    if [ -z "$valor" ]; then
+      [ -n "$opcional" ] && break
+      printf '  (vacío, inténtalo de nuevo)\n' >&2
+    fi
   done
   printf '%s' "$valor"
 }
@@ -24,13 +27,16 @@ echo " Pega cada token y presiona Enter."
 echo " No vas a ver lo que escribes: es a propósito."
 echo "─────────────────────────────────────────────"
 
-CF="$(pedir "1/2 · Token de Cloudflare" "dash.cloudflare.com/profile/api-tokens → plantilla «Edit Cloudflare Workers»")"
-GH="$(pedir "2/2 · Token de GitHub" "github.com/settings/personal-access-tokens/new → solo constata-corpus, permiso Issues: Read and write")"
+CF="$(pedir "1/3 · Token de Cloudflare" "dash.cloudflare.com/profile/api-tokens → plantilla «Edit Cloudflare Workers»")"
+GH="$(pedir "2/3 · Token de GitHub" "github.com/settings/personal-access-tokens/new → solo constata-corpus, permiso Issues: Read and write")"
+
+GQ="$(pedir "3/3 · Clave de Groq (deja vacío si aún no la tienes)" "console.groq.com → API Keys" opcional)"
 
 umask 077
 {
   echo "export CLOUDFLARE_API_TOKEN=\"$CF\""
   echo "export GH_ISSUES_TOKEN=\"$GH\""
+  [ -n "$GQ" ] && echo "export GROQ_API_KEY=\"$GQ\""
 } > "$DESTINO"
 chmod 600 "$DESTINO"
 
@@ -38,6 +44,7 @@ echo
 echo "Guardado en $DESTINO"
 echo "  permisos:   $(stat -f '%Sp' "$DESTINO")"
 echo "  Cloudflare: ${#CF} caracteres"
+[ -n "$GQ" ] && echo "  Groq:       ${#GQ} caracteres" || echo "  Groq:       (sin configurar)"
 echo -n "  GitHub:     ${#GH} caracteres"
 case "$GH" in
   github_pat_*) echo "  (prefijo correcto)" ;;
