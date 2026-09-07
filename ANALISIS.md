@@ -38,16 +38,20 @@ veredicto.
   ni analítica.
 
 **Sí se guarda, y solo si tú lo pides:** cuando después de ver el resultado
-tocas *«Dona este ejemplo»*, el mensaje se añade a un
-[repositorio público de ejemplos](https://github.com/luisfernandomedh/constata-corpus)
-para mejorar la herramienta. Antes de enviarlo:
+tocas *«Enviar este ejemplo»*, el texto del mensaje se añade a una colección
+cerrada de ejemplos. **No es pública y no se publica.** Solo Constata la ve, y
+existe para una sola cosa: que la herramienta reconozca mejor los engaños que
+circulan en la región.
+
+Antes de que salga de tu navegador:
 
 - Se limpian automáticamente correos, teléfonos, montos, fechas y las rutas
-  de los enlaces, **en tu navegador**, antes de que nada salga.
-- Se te muestra el texto ya limpio para que lo revises con tus ojos.
+  de los enlaces, **en tu propio dispositivo**.
+- Se te muestra el texto ya limpio, desplegado, para que lo leas.
 - **La limpieza automática no detecta nombres propios.** Si aparece tu nombre
-  o el de alguien más, bórralo tú antes de enviar.
-- Cada aporte pasa por revisión humana antes de entrar al conjunto.
+  o el de alguien más, bórralo tú antes de enviar. Esto no es una
+  formalidad: ha pasado.
+- Nada entra a la colección sin revisión humana.
 
 Donar es siempre un segundo acto, separado y explícito. Nunca hay una casilla
 marcada de antemano.

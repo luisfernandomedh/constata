@@ -83,7 +83,9 @@ No es una promesa, es una propiedad de la arquitectura:
 
 ## Cómo contribuir
 
-**Lo más valioso son mensajes de estafa reales**, en español y de Latinoamérica. No existe un corpus público de eso, y llenar esa ausencia es el aporte principal de este proyecto. Ver [CORPUS.md](CORPUS.md).
+**Lo más valioso son mensajes de estafa reales**, en español y de Latinoamérica. No existe una colección de eso, y llenar esa ausencia es el aporte principal de este proyecto.
+
+La colección **es cerrada, no pública**, y esa decisión se tomó tras un incidente real: un aporte llegó con el nombre completo de una persona que nunca dio permiso. La limpieza automática no detecta nombres propios, así que publicar los aportes en bruto significa publicar datos de terceros. Lo que sí es y seguirá siendo público es el código, y las reglas que salen de esos ejemplos. Ver [CORPUS.md](CORPUS.md).
 
 Desde la [herramienta](https://luisfernandomedh.github.io/constata/): analiza tu mensaje, toca **Contribuir este ejemplo**, revisa el texto ya limpio —y edítalo, porque los nombres propios no se detectan solos— y confirma. Se abre un formulario de GitHub con todo puesto.
 
@@ -106,4 +108,5 @@ MIT
 ## Documentos
 
 - [SECURITY.md](SECURITY.md) — modelo de amenazas y decisiones de diseño
-- [CORPUS.md](CORPUS.md) — formato del corpus abierto y cómo se aporta
+- [CORPUS.md](CORPUS.md) — formato de la colección de ejemplos y cómo se aporta
+- [ANALISIS.md](ANALISIS.md) — qué pasa con tu mensaje, paso a paso

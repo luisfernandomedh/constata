@@ -353,6 +353,11 @@
   border-radius: 8px; border: 1px solid var(--borde); flex: none;
 }
 #verEnvio { margin: 4px 0 14px; }
+.reservado {
+  padding: 11px 13px; border-radius: 9px;
+  background: var(--marca-suave); border-left: 3px solid var(--marca);
+  font-size: .9rem;
+}
 #verEnvio summary {
   cursor: pointer; padding: 9px 0; font-size: .89rem; color: var(--marca);
 }
@@ -540,7 +545,8 @@
   <div id="contribuir" hidden>
     <div class="caja">
       <h3>¿Nos ayudas a mejorar esto?</h3>
-      <p>No existe un conjunto público de mensajes de estafa en español latinoamericano. Por eso ninguna herramienta extranjera reconoce al Banco Pichincha ni al SRI. Donar este ejemplo ayuda a llenar ese vacío — sin cuenta y sin registrarte.</p>
+      <p>Ninguna herramienta extranjera reconoce al Banco Pichincha ni al SRI, porque no existe una colección de estafas en español de la región. Tu ejemplo ayuda a llenar ese vacío — sin cuenta y sin registrarte.</p>
+      <p class="reservado"><strong>Esto no se publica.</strong> Va a una colección cerrada que solo ve Constata, y sirve para una cosa: que la herramienta reconozca mejor los engaños que circulan aquí.</p>
 
       <!--
         El texto va plegado, no fuera. Enseñar un muro de texto extraído
@@ -548,8 +554,8 @@
         a un toque, porque nadie debería enviar a un sitio público algo que
         no pudo mirar.
       -->
-      <details id="verEnvio">
-        <summary>Ver y editar exactamente lo que se enviaría</summary>
+      <details id="verEnvio" open>
+        <summary>Esto es exactamente lo que se enviaría</summary>
         <textarea id="limpio" spellcheck="false"></textarea>
         <p class="cambios" id="cambios"></p>
       </details>
@@ -570,7 +576,7 @@
         </label>
       </div>
 
-      <p class="ojo">Se envía solo el <strong>texto</strong>, nunca tu imagen. Ya se le quitaron correos, teléfonos, montos y fechas — pero <strong>la limpieza no detecta nombres propios</strong>. Si arriba aparece el tuyo o el de alguien más, ábrelo y bórralo.</p>
+      <p class="ojo">Se envía solo el <strong>texto</strong>, nunca tu imagen. Ya se le quitaron correos, teléfonos, montos y fechas — pero <strong>la limpieza no detecta nombres propios</strong>. Léelo antes de enviar y borra el tuyo o el de cualquier otra persona.</p>
 
       <div class="fila">
         <button id="enviar" class="grande">Enviar este ejemplo</button>
@@ -591,7 +597,7 @@
     <a href="dominios.html">Dominios verificados</a> ·
     <a href="https://github.com/luisfernandomedh/constata">Código en GitHub</a> ·
     <a href="https://github.com/luisfernandomedh/constata/blob/main/SECURITY.md">Modelo de amenazas</a> ·
-    <a href="https://github.com/luisfernandomedh/constata-corpus">El corpus abierto</a>
+    <a href="https://github.com/luisfernandomedh/constata/blob/main/CORPUS.md">Cómo se recogen los ejemplos</a>
   </footer>
 
 </div>
