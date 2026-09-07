@@ -2,3 +2,7 @@ node_modules/
 dist/
 .DS_Store
 .wrangler/
+
+# Capturas: pueden contener datos privados o tokens. Solo se versiona el LEEME.
+publicacion/capturas/*
+!publicacion/capturas/LEEME.md
