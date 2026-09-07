@@ -49,6 +49,18 @@ REGLAS QUE NO PUEDES ROMPER
 3. Como máximo UNA pregunta en tu respuesta, y solo si de verdad cambia el
    consejo. Si ya puedes concluir, no preguntes nada.
 
+SI TE HACEN UNA REPREGUNTA
+Cuando ya hay conversación previa, la persona te está preguntando algo
+concreto sobre lo que le dijiste. Respóndele eso y nada más, en "resumen".
+No repitas el diagnóstico entero. En "senales" pon solo lo nuevo, y si no hay
+nada nuevo, déjalo vacío. En "pasos", solo lo que cambie a partir de su
+pregunta. Mantén el mismo nivel de riesgo salvo que lo que te cuenten lo
+cambie de verdad — y si cambia, dilo con claridad.
+
+Si te dicen que ya enviaron dinero o ya dieron una clave, eso es lo urgente:
+deja el análisis y dile qué hacer ya, en orden, empezando por lo que tiene
+reloj corriendo.
+
 RESPONDE SOLO CON JSON, sin texto alrededor:
 {
   "transcripcion": "si te dieron una imagen, copia aquí el texto del mensaje tal como se lee, sin añadir nada; si te dieron texto, repite null",
@@ -81,15 +93,55 @@ async function huella(ip) {
   return [...new Uint8Array(h)].slice(0, 8).map((x) => x.toString(16).padStart(2, "0")).join("");
 }
 
-async function excedio(env, ip, esImagen) {
-  if (!env.LIMITES) return false;
-  const hora = Math.floor(Date.now() / 3_600_000);
-  const clave = `a:${esImagen ? "i" : "t"}:${await huella(ip)}:${hora}`;
+/**
+ * Cupo por hora, con enfriamiento creciente en vez de expulsión.
+ *
+ * NO se banea de forma permanente, y menos por IP. En Ecuador y en casi toda
+ * la región la gente entra desde el móvil, y las operadoras meten a cientos
+ * de personas detrás de una sola dirección. Bloquear esa dirección para
+ * siempre significa dejar fuera a víctimas reales en el momento exacto en que
+ * necesitan ayuda. Ese es el peor fallo posible para esta herramienta.
+ *
+ * Lo que sí se hace: si alguien insiste después de agotar su cupo, la espera
+ * crece —una hora, luego tres, luego doce— y ahí se queda. Siempre vuelve.
+ * A quien quiera agotar la cuota a propósito, esto le sale caro en tiempo;
+ * a la persona asustada que toca dos veces de más, apenas la roza.
+ */
+const ESPERAS = [1, 3, 12]; // horas
+
+async function cupo(env, ip, esImagen) {
   const tope = esImagen ? LIMITE_IMAGEN_HORA : LIMITE_TEXTO_HORA;
+  if (!env.LIMITES) return { excedido: false, restantes: tope, tope, espera: 0 };
+
+  const id = await huella(ip);
+  const hora = Math.floor(Date.now() / 3_600_000);
+
+  // ¿Hay un enfriamiento activo de una insistencia anterior?
+  const castigo = await env.LIMITES.get(`c:${id}`, { type: "json" });
+  if (castigo && castigo.hasta > Date.now()) {
+    return {
+      excedido: true, restantes: 0, tope,
+      espera: Math.ceil((castigo.hasta - Date.now()) / 3_600_000),
+    };
+  }
+
+  const clave = `a:${esImagen ? "i" : "t"}:${id}:${hora}`;
   const usados = Number(await env.LIMITES.get(clave)) || 0;
-  if (usados >= tope) return true;
+
+  if (usados >= tope) {
+    // Insiste con el cupo agotado: la espera sube un escalón, sin pasar del último.
+    const nivel = Math.min((castigo?.nivel ?? 0), ESPERAS.length - 1);
+    const horas = ESPERAS[nivel];
+    await env.LIMITES.put(
+      `c:${id}`,
+      JSON.stringify({ nivel: nivel + 1, hasta: Date.now() + horas * 3_600_000 }),
+      { expirationTtl: 86400 },
+    );
+    return { excedido: true, restantes: 0, tope, espera: horas };
+  }
+
   await env.LIMITES.put(clave, String(usados + 1), { expirationTtl: 7200 });
-  return false;
+  return { excedido: false, restantes: tope - usados - 1, tope, espera: 0 };
 }
 
 export async function analizar(peticion, env) {
@@ -109,8 +161,15 @@ export async function analizar(peticion, env) {
   if (imagen.length > 6_000_000) return json({ error: "La imagen es demasiado grande. Prueba con una más pequeña." }, 413);
 
   const ip = peticion.headers.get("CF-Connecting-IP") || "";
-  if (await excedio(env, ip, Boolean(imagen))) {
-    return json({ limite: true, error: "Ya revisaste varios mensajes en la última hora. Espera un rato y vuelve." }, 429);
+  const permiso = await cupo(env, ip, Boolean(imagen));
+  if (permiso.excedido) {
+    return json({
+      limite: true,
+      espera: permiso.espera,
+      error: permiso.espera > 1
+        ? `Has consultado muchas veces seguidas. Puedes volver en unas ${permiso.espera} horas. Mientras tanto sigo revisando aquí mismo, en tu dispositivo.`
+        : "Ya revisaste varios mensajes en la última hora. Vuelve en un rato. Mientras tanto sigo revisando aquí mismo, en tu dispositivo.",
+    }, 429);
   }
 
   // El mensaje va delimitado y precedido de un recordatorio: es material a
@@ -173,6 +232,7 @@ export async function analizar(peticion, env) {
   return json({
     ok: true,
     modelo: MODELO,
+    restantes: permiso.restantes,
     // La transcripción es lo que hace útil un aporte hecho desde una imagen.
     // Se anonimiza en el navegador antes de que la persona decida donarlo.
     transcripcion: typeof salida.transcripcion === "string" ? salida.transcripcion.slice(0, 4000) : "",

@@ -313,6 +313,35 @@
 }
 .aviso-envio strong { color: var(--texto, #22304a); font-weight: 600; }
 .aviso-envio a { color: var(--azul, #2f6fd0); white-space: nowrap; }
+
+/* Repreguntas. Se ofrecen sugerencias porque quien está nervioso no sabe qué
+   preguntar, y un cuadro de texto en blanco lo deja parado. */
+.conversar {
+  margin: 22px 0 0;
+  padding: 18px 20px;
+  border: 1px solid var(--borde, #cfd9e6);
+  border-radius: 12px;
+  background: var(--suave, #f4f8fd);
+}
+.conversar h3 { margin: 0 0 12px; font-size: 1rem; }
+.conversar .fila { gap: 8px; }
+.conversar input {
+  flex: 1; min-width: 0; padding: 11px 13px; font: inherit;
+  border: 1px solid var(--borde, #cfd9e6); border-radius: 9px; background: #fff;
+}
+.sugerencias { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.sugerencias button {
+  padding: 8px 13px; font-size: .87rem; font-family: inherit; cursor: pointer;
+  color: var(--azul, #2f6fd0); background: #fff;
+  border: 1px solid var(--borde, #cfd9e6); border-radius: 999px;
+}
+.sugerencias button:hover { border-color: var(--azul, #2f6fd0); }
+.cuota { margin: 12px 0 0; font-size: .84rem; color: var(--tenue, #55627a); }
+.cuota.ultima { color: #9a5b00; }
+@media (max-width: 480px) {
+  .conversar .fila { flex-direction: column; }
+  .conversar .fila button { width: 100%; }
+}
 </style>
 </head>
 <body>
@@ -393,6 +422,22 @@
   <section id="vista-resultado" hidden>
     <button id="volver" class="volver-arriba">← Revisar otro mensaje</button>
   <div id="resultado" aria-live="polite"></div>
+
+  <!--
+    Tres repreguntas y se acaba. No es tacañería: quien está asustado se
+    engancha a preguntar y no actúa, y cada vuelta consume cupo de todos.
+    Tres alcanzan para lo que de verdad cambia el consejo.
+  -->
+  <div id="conversar" class="conversar" hidden>
+    <h3>¿Quieres preguntarme algo más?</h3>
+    <div id="sugerencias" class="sugerencias"></div>
+    <div class="fila">
+      <input id="repregunta" type="text" autocomplete="off"
+             placeholder="Escribe tu pregunta…" maxlength="400">
+      <button id="preguntar">Preguntar</button>
+    </div>
+    <p class="cuota" id="cuota"></p>
+  </div>
 
   <p class="invitacion" id="abrirContribuir" hidden>
     <button class="enlace" id="botonContribuir">¿Nos ayudas? Dona este ejemplo para mejorar la herramienta</button>
@@ -762,6 +807,9 @@ function volverAlInicio() {
   $("abrirContribuir").hidden = true;
   $("ayudaPegar").textContent = "Si no logras copiar el mensaje, toma una foto de la pantalla y súbela.";
   ultimaTranscripcion = "";
+  historial = []; repreguntas = 0;
+  $("conversar").hidden = true;
+  $("repregunta").value = "";
   mostrar("vista-inicio");
 }
 $("volver").addEventListener("click", volverAlInicio);
@@ -974,6 +1022,7 @@ function pintarModelo(d) {
 
 /** Lo último que analizó el modelo: alimenta el aporte al corpus. */
 let ultimaTranscripcion = "";
+let ultimoRiesgo = "medio";
 
 /**
  * El modelo es el camino normal, no la excepción.
@@ -983,13 +1032,15 @@ let ultimaTranscripcion = "";
  * WhatsApp que probamos salían en riesgo bajo. Ahora el modelo va primero,
  * siempre, y las reglas quedan de red por si el servicio no responde.
  */
-async function conModelo(entrada) {
+async function conModelo(entrada, { seguimiento = false } = {}) {
   const esImagen = entrada instanceof Blob;
-  mostrar("vista-analizando");
+  if (!seguimiento) { historial = []; repreguntas = 0; }
+  if (!seguimiento) mostrar("vista-analizando");
   try {
     const cuerpo = esImagen
       ? { imagen: await encogerImagen(entrada) }
       : { texto: entrada };
+    if (historial.length) cuerpo.previas = historial;
     const r = await fetch(ANALISIS, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -999,16 +1050,37 @@ async function conModelo(entrada) {
     const d = await r.json();
     if (!d.ok) throw new Error(d.error || "sin respuesta");
 
+    // El modelo necesita recordar qué dijo, o la repregunta no tiene sentido.
+    if (!seguimiento) historial.push({ role: "user", content: esImagen ? "(captura de pantalla)" : entrada });
+    historial.push({ role: "assistant", content: d.resumen || "" });
+    ultimoRiesgo = d.riesgo;
+
     pintarModelo(d);
+    pintarConversacion(d.riesgo);
     // Para donar hace falta el texto del mensaje, no la imagen. Cuando vino
     // de una captura, se usa lo que el modelo transcribió; y se anonimiza
     // aquí, en el navegador, antes de que la persona decida.
-    ultimaTranscripcion = esImagen ? (d.transcripcion || "") : entrada;
-    prepararContribucion(ultimaTranscripcion, d.riesgo);
-    $("abrirContribuir").hidden = !ultimaTranscripcion.trim();
-    $contribuir.hidden = true;
+    if (!seguimiento) {
+      ultimaTranscripcion = esImagen ? (d.transcripcion || "") : entrada;
+      prepararContribucion(ultimaTranscripcion, d.riesgo);
+      $("abrirContribuir").hidden = !ultimaTranscripcion.trim();
+      $contribuir.hidden = true;
+    }
     mostrar("vista-resultado");
-  } catch {
+    if (seguimiento) $("conversar").scrollIntoView({ behavior: "smooth", block: "center" });
+  } catch (e) {
+    if (seguimiento) {
+      // A media conversación no se puede volver al inicio: se avisa y se deja
+      // el resultado que ya estaba en pantalla.
+      repreguntas--;
+      $("repregunta").disabled = $("preguntar").disabled = false;
+      $("cuota").className = "cuota ultima";
+      $("cuota").textContent = String(e.message || "").includes("horas") || String(e.message || "").includes("rato")
+        ? e.message
+        : "No pude responder esa pregunta ahora mismo. Inténtalo en un momento.";
+      historial.pop();
+      return;
+    }
     // Red de seguridad: nunca se queda muda. Las reglas locales siguen ahí.
     if (esImagen) {
       mostrar("vista-inicio");
@@ -1024,6 +1096,82 @@ async function conModelo(entrada) {
     }
   }
 }
+
+/**
+ * ── Repreguntas ───────────────────────────────────────────────────────
+ *
+ * El diagnóstico solo es la mitad. Lo que la gente pregunta después es lo
+ * que de verdad cambia el consejo: «ya le di mi clave», «el número es de mi
+ * hija», «¿llamo al banco?». Sin eso el modelo adivina el contexto.
+ *
+ * Tope de tres. Quien está asustado se engancha a preguntar en vez de
+ * actuar, y cada vuelta gasta cupo que es de todos.
+ */
+const TOPE_REPREGUNTAS = 3;
+let historial = [];
+let repreguntas = 0;
+
+/** Se ofrecen según el veredicto: en blanco, nadie sabe qué preguntar. */
+const SUGERENCIAS = {
+  alto: [
+    "Ya envié el dinero, ¿qué hago?",
+    "Ya di mi clave o mi código",
+    "¿Cómo denuncio esto?",
+    "¿Y si de verdad es mi conocido?",
+  ],
+  medio: [
+    "¿Cómo compruebo si es real?",
+    "¿Puedo responder para preguntar?",
+    "Ya di algunos datos, ¿es grave?",
+  ],
+  bajo: [
+    "Igual me da desconfianza, ¿por qué?",
+    "¿Qué señales debería mirar yo?",
+    "¿Y si me vuelven a escribir?",
+  ],
+};
+
+function pintarConversacion(riesgo) {
+  const quedan = TOPE_REPREGUNTAS - repreguntas;
+  const $c = $("conversar"), $q = $("cuota");
+
+  if (quedan <= 0) {
+    $("sugerencias").innerHTML = "";
+    $("repregunta").disabled = $("preguntar").disabled = true;
+    $q.className = "cuota ultima";
+    $q.textContent = "Hasta aquí llegan las preguntas de esta consulta. Es un límite para que la herramienta siga en pie y gratis para todos. Si necesitas más, revisa el mensaje de nuevo desde el inicio.";
+    $c.hidden = false;
+    return;
+  }
+
+  $("sugerencias").innerHTML = (SUGERENCIAS[riesgo] ?? SUGERENCIAS.medio)
+    .map((t) => `<button type="button">${esc(t)}</button>`).join("");
+  for (const b of $("sugerencias").children) {
+    b.addEventListener("click", () => enviarRepregunta(b.textContent));
+  }
+  $("repregunta").disabled = $("preguntar").disabled = false;
+  $q.className = quedan === 1 ? "cuota ultima" : "cuota";
+  $q.textContent = quedan === 1
+    ? "Te queda una pregunta. Aprovéchala para lo que más te preocupe."
+    : `Puedes hacerme ${quedan} preguntas más.`;
+  $c.hidden = false;
+}
+
+async function enviarRepregunta(texto) {
+  const q = (texto ?? "").trim();
+  if (!q || repreguntas >= TOPE_REPREGUNTAS) return;
+  $("repregunta").value = "";
+  $("repregunta").disabled = $("preguntar").disabled = true;
+  $("cuota").textContent = "Pensando…";
+  repreguntas++;
+  historial.push({ role: "user", content: q });
+  await conModelo(q, { seguimiento: true });
+}
+
+$("preguntar").addEventListener("click", () => enviarRepregunta($("repregunta").value));
+$("repregunta").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") enviarRepregunta($("repregunta").value);
+});
 
 function decidirImagen(archivo) {
   if (!archivo || !archivo.type.startsWith("image/")) return;
