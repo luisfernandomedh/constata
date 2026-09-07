@@ -51,6 +51,7 @@ REGLAS QUE NO PUEDES ROMPER
 
 RESPONDE SOLO CON JSON, sin texto alrededor:
 {
+  "transcripcion": "si te dieron una imagen, copia aquí el texto del mensaje tal como se lee, sin añadir nada; si te dieron texto, repite null",
   "riesgo": "alto" | "medio" | "bajo",
   "resumen": "una frase que abra con calma y diga lo esencial",
   "senales": [{"que": "nombre corto y claro", "porque": "explicación en una o dos frases llanas"}],
@@ -172,6 +173,9 @@ export async function analizar(peticion, env) {
   return json({
     ok: true,
     modelo: MODELO,
+    // La transcripción es lo que hace útil un aporte hecho desde una imagen.
+    // Se anonimiza en el navegador antes de que la persona decida donarlo.
+    transcripcion: typeof salida.transcripcion === "string" ? salida.transcripcion.slice(0, 4000) : "",
     riesgo: ["alto", "medio", "bajo"].includes(salida.riesgo) ? salida.riesgo : "medio",
     resumen: String(salida.resumen ?? "").slice(0, 400),
     senales: Array.isArray(salida.senales)

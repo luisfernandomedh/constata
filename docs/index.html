@@ -299,23 +299,20 @@
   footer a { color: var(--marca); text-decoration-color: color-mix(in srgb, var(--marca) 35%, transparent); }
   [hidden] { display: none !important; }
 
-/* Permiso para que la imagen salga del dispositivo. Se pregunta con calma,
-   sin alarma roja: no está pasando nada malo, solo hace falta un permiso. */
-.permiso {
-  margin: 18px 0;
-  padding: 18px 20px;
-  border: 1px solid var(--borde, #cfd9e6);
-  border-left: 4px solid var(--azul, #2f6fd0);
-  border-radius: 12px;
+/* Aviso de envío. Tiene que leerse, no esconderse: por eso va junto al
+   botón y no en el pie. Pero sin alarma — quien llega ya está asustado. */
+.aviso-envio {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  font-size: .86rem;
+  line-height: 1.55;
+  color: var(--tenue, #55627a);
   background: var(--suave, #f4f8fd);
+  border-left: 3px solid var(--azul, #2f6fd0);
+  border-radius: 0 8px 8px 0;
 }
-.permiso h3 { margin: 0 0 8px; font-size: 1.05rem; }
-.permiso p  { margin: 0 0 10px; line-height: 1.55; }
-.permiso .fila { margin-top: 14px; }
-@media (max-width: 480px) {
-  .permiso .fila { flex-direction: column; }
-  .permiso .fila button { width: 100%; }
-}
+.aviso-envio strong { color: var(--texto, #22304a); font-weight: 600; }
+.aviso-envio a { color: var(--azul, #2f6fd0); white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -355,21 +352,6 @@
   </div>
   <input type="file" id="archivo" accept="image/*" hidden>
 
-  <!--
-    La imagen sale del dispositivo, y eso rompe la promesa por defecto.
-    Así que se pregunta, con las dos opciones igual de visibles y ninguna
-    marcada de antemano. Quien dice que no sigue teniendo herramienta.
-  -->
-  <div id="permiso" class="permiso" hidden>
-    <h3>¿Reviso la captura a fondo?</h3>
-    <p>Para leer bien una captura necesito enviarla a un servicio de análisis.
-       <strong>Sale de tu teléfono.</strong> No la guardamos, ni nosotros ni ellos.</p>
-    <p>Si prefieres que no salga, la reviso igual aquí mismo. Es más limitado
-       con las imágenes, pero funciona y nada se mueve de tu dispositivo.</p>
-    <div class="fila">
-      <button id="permitoSi">Sí, revísala a fondo</button>
-      <button id="permitoNo" class="secundario">No, revísala solo aquí</button>
-    </div>
   </div>
 
   <p class="ayuda" id="ayudaPegar">Si no logras copiar el mensaje, toma una foto de la pantalla y súbela.</p>
@@ -382,6 +364,17 @@
     <button id="analizar">Revisar mensaje</button>
     <button id="limpiar" class="secundario">Borrar</button>
   </div>
+
+  <!--
+    El aviso va aquí, pegado al botón, y no escondido en un pie de página.
+    Se lee justo antes de decidir, que es cuando sirve de algo.
+  -->
+  <p class="aviso-envio">
+    Para revisarlo, <strong>el mensaje o la captura se envían a un servicio de análisis</strong>
+    y salen de tu dispositivo. No se guardan allí ni aquí: se analizan y se descartan.
+    <strong>Quita tu nombre y el de otras personas</strong> antes de enviarlo, si aparecen.
+    <a href="https://github.com/luisfernandomedh/constata/blob/main/ANALISIS.md" target="_blank" rel="noopener">Cómo funciona el análisis</a>
+  </p>
 
   <div class="ejemplos">
     <p>O prueba con un ejemplo real</p>
@@ -759,15 +752,7 @@ function mostrar(cual) {
 function revisar() {
   const texto = $mensaje.value.trim();
   if (!texto) return;
-  mostrar("vista-analizando");
-  setTimeout(() => {
-    const r = analizar(texto);
-    pintar(texto, r);
-    prepararContribucion(texto, r.riesgo);
-    $contribuir.hidden = true;
-    $("abrirContribuir").hidden = false;
-    mostrar("vista-resultado");
-  }, 550);
+  conModelo(texto);
 }
 
 function volverAlInicio() {
@@ -776,8 +761,7 @@ function volverAlInicio() {
   $contribuir.hidden = true;
   $("abrirContribuir").hidden = true;
   $("ayudaPegar").textContent = "Si no logras copiar el mensaje, toma una foto de la pantalla y súbela.";
-  $("permiso").hidden = true;
-  imagenEnEspera = null;
+  ultimaTranscripcion = "";
   mostrar("vista-inicio");
 }
 $("volver").addEventListener("click", volverAlInicio);
@@ -931,8 +915,9 @@ async function leerImagen(archivo) {
  * si el contacto está guardado, si el número es desconocido, cómo se ve la
  * conversación entera.
  *
- * Y por eso mismo se pide permiso. Si dice que no, o si el servicio no
- * responde, se cae a la lectura local de siempre. Nunca se queda muda.
+ * Que el mensaje salga del dispositivo se avisa en la propia pantalla, junto
+ * al botón. Si el servicio no responde, se cae a la lectura local de
+ * siempre: la herramienta nunca se queda muda.
  */
 
 /** Al modelo se le manda la imagen en color: el gris del OCR le quita contexto. */
@@ -987,60 +972,63 @@ function pintarModelo(d) {
       Es una ayuda para que decidas tú. Ante la duda, pregunta a alguien de confianza.</p>`;
 }
 
-/** Recuerda la respuesta para no volver a preguntar en cada captura. */
-const PERMISO = "constata-permiso-modelo";
-function permisoGuardado() {
-  try { return localStorage.getItem(PERMISO); } catch { return null; }
-}
-function guardarPermiso(v) {
-  try { localStorage.setItem(PERMISO, v); } catch { /* modo privado: se vuelve a preguntar */ }
-}
+/** Lo último que analizó el modelo: alimenta el aporte al corpus. */
+let ultimaTranscripcion = "";
 
-let imagenEnEspera = null;
-
-async function conModelo(archivo) {
+/**
+ * El modelo es el camino normal, no la excepción.
+ *
+ * Antes las reglas decidían y el modelo entraba solo en la duda. Se invirtió
+ * porque las reglas fallan justo donde más duele: los dos casos reales de
+ * WhatsApp que probamos salían en riesgo bajo. Ahora el modelo va primero,
+ * siempre, y las reglas quedan de red por si el servicio no responde.
+ */
+async function conModelo(entrada) {
+  const esImagen = entrada instanceof Blob;
   mostrar("vista-analizando");
   try {
-    const imagen = await encogerImagen(archivo);
+    const cuerpo = esImagen
+      ? { imagen: await encogerImagen(entrada) }
+      : { texto: entrada };
     const r = await fetch(ANALISIS, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ imagen }),
+      body: JSON.stringify(cuerpo),
       signal: AbortSignal.timeout(50000),
     });
     const d = await r.json();
     if (!d.ok) throw new Error(d.error || "sin respuesta");
+
     pintarModelo(d);
-    prepararContribucion("(captura de pantalla)", d.riesgo);
+    // Para donar hace falta el texto del mensaje, no la imagen. Cuando vino
+    // de una captura, se usa lo que el modelo transcribió; y se anonimiza
+    // aquí, en el navegador, antes de que la persona decida.
+    ultimaTranscripcion = esImagen ? (d.transcripcion || "") : entrada;
+    prepararContribucion(ultimaTranscripcion, d.riesgo);
+    $("abrirContribuir").hidden = !ultimaTranscripcion.trim();
     $contribuir.hidden = true;
-    $("abrirContribuir").hidden = false;
     mostrar("vista-resultado");
   } catch {
-    // Se cae a la lectura local sin dramatizar: la persona vino a que la ayuden.
-    mostrar("vista-inicio");
-    $("ayudaPegar").innerHTML = "<strong>El análisis a fondo no respondió.</strong> La reviso aquí mismo.";
-    await leerImagen(archivo);
+    // Red de seguridad: nunca se queda muda. Las reglas locales siguen ahí.
+    if (esImagen) {
+      mostrar("vista-inicio");
+      $("ayudaPegar").innerHTML = "<strong>El análisis a fondo no respondió.</strong> La reviso aquí mismo, con lo que tengo en tu dispositivo.";
+      await leerImagen(entrada);
+    } else {
+      const local = analizar(entrada);
+      pintar(entrada, local);
+      prepararContribucion(entrada, local.riesgo);
+      $contribuir.hidden = true;
+      $("abrirContribuir").hidden = false;
+      mostrar("vista-resultado");
+    }
   }
 }
 
 function decidirImagen(archivo) {
   if (!archivo || !archivo.type.startsWith("image/")) return;
-  const guardado = permisoGuardado();
-  if (guardado === "si") return conModelo(archivo);
-  if (guardado === "no") return leerImagen(archivo);
-  imagenEnEspera = archivo;
-  $("permiso").hidden = false;
-  $("permiso").scrollIntoView({ behavior: "smooth", block: "center" });
+  conModelo(archivo);
 }
-
-$("permitoSi").addEventListener("click", () => {
-  guardarPermiso("si"); $("permiso").hidden = true;
-  const a = imagenEnEspera; imagenEnEspera = null; if (a) conModelo(a);
-});
-$("permitoNo").addEventListener("click", () => {
-  guardarPermiso("no"); $("permiso").hidden = true;
-  const a = imagenEnEspera; imagenEnEspera = null; if (a) leerImagen(a);
-});
 
 $("subir").addEventListener("click", () => $("archivo").click());
 $("archivo").addEventListener("change", (e) => decidirImagen(e.target.files?.[0]));
