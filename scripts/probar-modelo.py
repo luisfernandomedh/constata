@@ -33,6 +33,11 @@ CASOS = [
     ("LEGITIMO trabajo", "El presupuesto del proyecto es de 2.5 millones y el cliente aprobo la propuesta."),
     ("LEGITIMO banco", "Banco Pichincha: consumo aprobado por 45.20 en SUPERMAXI. Si no lo reconoce llame al 1700 100 100."),
     ("LEGITIMO cita", "Recordatorio: tu cita medica es el jueves a las 3 de la tarde."),
+    # Controles: si un modelo sano ve esto, sus salidas deben moverse mucho.
+    # Si devuelve lo mismo que para todo lo demas, no esta clasificando nada.
+    ("CONTROL  ruido", "asdkjh qwe zxc mnbv poiu lkjh 8273 aaaa bbbb"),
+    ("CONTROL  vacio", "hola"),
+    ("CONTROL  spam ingles", "URGENT!!! You have WON $1,000,000 CLICK HERE NOW to claim your PRIZE money transfer bank account verify immediately!!!"),
 ]
 
 for etiqueta, texto in CASOS:
