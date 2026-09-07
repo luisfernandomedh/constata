@@ -351,9 +351,60 @@ const dominioFinancieroGenerico: Detector = {
   },
 };
 
+/**
+ * Fraude de pago por adelantado: el "príncipe nigeriano" y toda su familia.
+ *
+ * Lo encontró Luis probando el fraude más famoso del mundo, y no lo
+ * detectábamos. Ni en inglés, ni en español, ni la variante de la herencia.
+ *
+ * Se nos escapaba porque no tiene nada de lo que buscábamos: ni enlace, ni
+ * marca suplantada, ni urgencia. Es una historia larga y amable. Lo que sí
+ * tiene, siempre, son tres cosas juntas: una cantidad enorme de dinero, una
+ * excusa para que te toque a ti, y una petición para seguir adelante.
+ *
+ * Ninguna de las tres basta sola. Un correo del trabajo puede hablar de
+ * millones; una herencia real existe. Es la combinación la que delata.
+ */
+const RE_DINERO_ENORME = [
+  /\b(usd|us\$|eur|\$)\s?\d{1,3}(?:[.,]\d{3}){2,}/,
+  /\b\d+([.,]\d+)?\s?(millones?|million|billones?)\b/,
+  /\b(herencia|inheritance|fondos? no reclamad|unclaimed fund|beneficiari[oa] de un fondo)\b/,
+];
+const RE_EXCUSA = [
+  /\b(principe|prince|jeque|sheikh|viuda|widow|abogad[oa]|barrister|solicitor|lawyer)\b/,
+  /\b(cliente|client)\b.{0,60}\b(fallecid|deceased|murio|died)\b/s,
+  /\b(comparte su apellido|same (last ?)?name|su mismo apellido)\b/,
+  /\b(banco central|central bank|reserve bank|fondo monetario)\b/,
+  /\b(transferir estos? fondos?|transfer (this|these) fund)\b/,
+  /\b(next of kin|pariente mas cercano|heredero legal)\b/,
+];
+const RE_PIDE_SEGUIR = [
+  /\b(datos bancarios|bank details|account details|numero de cuenta)\b/,
+  /\b(tarifa|honorarios|fee|comision|gastos? de (gestion|tramite|transferencia))\b/,
+  /\b(contacte?me|contact me|responda a este|reply to this|escribame)\b/,
+  /\b\d{1,3}\s?(%|por ?ciento|percent)\b/,
+];
+
+const pagoPorAdelantado: Detector = {
+  id: "fraude-pago-adelantado",
+  detectar(ctx) {
+    const dinero = fragmento(ctx, RE_DINERO_ENORME);
+    if (!dinero) return null;
+    const excusa = RE_EXCUSA.some((re) => re.test(ctx.normalizado));
+    const pide = RE_PIDE_SEGUIR.some((re) => re.test(ctx.normalizado));
+    if (!excusa || !pide) return null;
+    return riesgo(
+      "fraude-pago-adelantado", 65,
+      "El mensaje ofrece una suma enorme de dinero con una excusa para que te toque a ti, y a cambio te pide datos o un pago. Es el fraude más viejo de internet y sigue funcionando. Nadie regala millones a un desconocido.",
+      dinero,
+    );
+  },
+};
+
 /** Todos los detectores, en el orden en que se evalúan. */
 export const DETECTORES: Detector[] = [
   pideSecreto,
+  pagoPorAdelantado,
   entregaCodigo,
   desajusteMarca,
   dominioImitador,

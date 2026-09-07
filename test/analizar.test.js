@@ -29,6 +29,11 @@ const ESTAFAS = [
   // Abuso de servicios legítimos y dominios genéricos
   "Su cuenta sera cerrada. Complete el formulario: https://docs.google.com/forms/d/e/1FAIpQL/viewform",
   "Estimado cliente, hemos actualizado nuestra politica de privacidad. Revise los cambios en https://banco-actualizaciones.com/politica",
+  // Fraude de pago por adelantado: lo encontró un usuario probando el
+  // fraude más famoso del mundo, y no lo detectábamos en ningún idioma.
+  "Dear Friend, I am Prince Abacha of Nigeria. I have USD 25,000,000 deposited in a bank and I need your assistance to transfer this fund. You will receive 30% for your help. Please send me your bank details and a small processing fee of $500.",
+  "Estimado amigo, soy el principe Abacha de Nigeria. Tengo 25 millones de dolares depositados y necesito su ayuda para transferir estos fondos. Usted recibira el 30 por ciento. Envieme sus datos bancarios y una pequeña tarifa de 500 dolares.",
+  "Le escribo desde el bufete de abogados Smith. Un cliente fallecido comparte su apellido y le corresponde una herencia de 4.5 millones. Contacteme para los tramites.",
   // Caracteres engañosos
   "Ingrese a su cuenta: https://xn--pypal-4ve.com/login",
   "Verifique su cuenta en раypal.com ahora mismo",
@@ -43,6 +48,8 @@ const LEGITIMOS = [
   "Tu paquete de Amazon llega manana. Sigue el envio en https://www.amazon.com/progress-tracker",
   "Hola, te confirmo la reunion de manana a las 10. El link es https://meet.google.com/abc-defg-hij",
   "Recordatorio: tu cita medica es el jueves a las 3 de la tarde.",
+  // Hablar de millones no es delito: sin excusa ni petición, no se marca.
+  "El presupuesto del proyecto es de 2.5 millones y el cliente aprobo la propuesta. Te paso los detalles manana.",
 ];
 
 test("detecta las estafas conocidas", () => {
