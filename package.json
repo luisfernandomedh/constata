@@ -19,7 +19,8 @@
     "test": "node --test test/*.test.js",
     "medir": "node scripts/medir.mjs",
     "verificar": "node scripts/verificar-dominios.mjs",
-    "verificar:json": "node scripts/verificar-dominios.mjs --json"
+    "verificar:json": "node scripts/verificar-dominios.mjs --json",
+    "cobertura": "node scripts/cobertura.mjs"
   },
   "keywords": [
     "phishing",
