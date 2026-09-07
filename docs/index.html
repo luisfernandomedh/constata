@@ -11,13 +11,13 @@
 <style>
   :root {
     color-scheme: light dark;
-    --fondo: #faf9f7;
+    --fondo: #f7f9fb;
     --papel: #ffffff;
-    --texto: #17191c;
+    --texto: #15202b;
     --tenue: #64686e;
     --borde: #e4e1dc;
-    --marca: #0d5c4a;
-    --marca-suave: #e6f2ee;
+    --marca: #2f6690;
+    --marca-suave: #e8f0f7;
 
     --alto: #a8442f;
     --alto-fondo: #fbeee9;
@@ -25,23 +25,23 @@
     --medio: #8a6320;
     --medio-fondo: #fdf3e2;
     --medio-marca: #f8dfae;
-    --bajo: #0d5c4a;
-    --bajo-fondo: #e6f2ee;
-    --info: #1e4fa3;
-    --info-fondo: #e8effb;
-    --info-marca: #c2d5f5;
+    --bajo: #2f6690;
+    --bajo-fondo: #e8f0f7;
+    --info: #3d6a94;
+    --info-fondo: #eaf1f8;
+    --info-marca: #cadcec;
 
     --sombra: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px -12px rgba(0,0,0,.10);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --fondo: #131518;
-      --papel: #1c1f23;
-      --texto: #eeece8;
-      --tenue: #9a9ea5;
-      --borde: #2f3338;
-      --marca: #5fd3b2;
-      --marca-suave: #13312a;
+      --fondo: #111820;
+      --papel: #19222c;
+      --texto: #e8eef4;
+      --tenue: #94a5b5;
+      --borde: #2a3744;
+      --marca: #7fb3d9;
+      --marca-suave: #17293a;
 
       --alto: #eda08c;
       --alto-fondo: #2e211d;
@@ -49,11 +49,11 @@
       --medio: #f2c274;
       --medio-fondo: #332715;
       --medio-marca: #6b4d1c;
-      --bajo: #5fd3b2;
-      --bajo-fondo: #13312a;
-      --info: #8fb4f5;
-      --info-fondo: #1a2540;
-      --info-marca: #2f4a80;
+      --bajo: #7fb3d9;
+      --bajo-fondo: #17293a;
+      --info: #8fb4d9;
+      --info-fondo: #182634;
+      --info-marca: #2c4459;
 
       --sombra: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.6);
     }
@@ -71,7 +71,7 @@
   .marca-fila { display: flex; align-items: center; gap: 11px; margin-bottom: 10px; }
   .escudo {
     width: 38px; height: 38px; border-radius: 11px; flex: none;
-    background: linear-gradient(145deg, var(--marca), color-mix(in srgb, var(--marca) 62%, #2bb894));
+    background: linear-gradient(145deg, var(--marca), color-mix(in srgb, var(--marca) 60%, #5b9bc9));
     display: grid; place-items: center; box-shadow: var(--sombra);
   }
   .escudo svg { width: 21px; height: 21px; }
@@ -215,6 +215,16 @@
   .preguntas .respuesta.bien h3 { color: var(--marca); }
   .preguntas .respuesta.urgente h3 { color: var(--alto); }
   .preguntas .respuesta.ojo h3 { color: var(--medio); }
+  .preguntas .sin-culpa {
+    margin-top: 14px; padding: 12px 14px; background: var(--marca-suave);
+    border-radius: 9px; font-size: 15px;
+  }
+  button.atras {
+    display: block; margin: 14px auto 0; background: none; border: 0;
+    color: var(--tenue); font: inherit; font-size: 14px; text-decoration: underline;
+    cursor: pointer; padding: 6px; box-shadow: none; font-weight: 400;
+  }
+  button.atras:hover { color: var(--marca); }
 
   .titulo-senales {
     font-size: 13px; text-transform: uppercase; letter-spacing: .07em;
@@ -589,38 +599,72 @@ function pintar(texto, { riesgo, puntaje, hallazgos, avisos }) {
     : "Busca tú el contacto oficial y llámalo. Nunca uses el número ni el enlace que vienen en el mensaje.";
 
   const $preg = $("preguntas");
-  const preguntar = (titulo, opciones) => {
-    $preg.innerHTML = `<h3>${titulo}</h3><div class="botones">` +
-      opciones.map((o, i) => `<button data-i="${i}">${esc(o.texto)}</button>`).join("") + "</div>";
-    for (const b of $preg.querySelectorAll("button")) {
+
+  /**
+   * Nadie queda atrapado en su respuesta.
+   *
+   * Reconocer que uno cayó da vergüenza, y la vergüenza hace que la gente
+   * mienta o abandone. Por eso siempre hay una salida para volver atrás,
+   * siempre existe la opción de "no estoy seguro", y ninguna respuesta
+   * recibe un reproche. Si alguien se arrepiente de haber dicho la verdad,
+   * lo perdemos justo cuando más nos necesita.
+   */
+  const preguntar = (titulo, opciones, volver) => {
+    $preg.innerHTML =
+      `<h3>${titulo}</h3><div class="botones">` +
+      opciones.map((o, i) => `<button data-i="${i}">${esc(o.texto)}</button>`).join("") +
+      `</div>${volver ? '<button class="atras">← Volver a la pregunta anterior</button>' : ""}`;
+    for (const b of $preg.querySelectorAll("button[data-i]")) {
       b.addEventListener("click", () => opciones[Number(b.dataset.i)].hacer());
     }
-  };
-  const responder = (clase, titulo, cuerpo) => {
-    $preg.innerHTML = `<div class="respuesta ${clase}"><h3>${titulo}</h3>${cuerpo}</div>`;
+    $preg.querySelector(".atras")?.addEventListener("click", volver);
   };
 
-  if (riesgo !== "bajo") {
+  const responder = (clase, titulo, cuerpo, volver) => {
+    $preg.innerHTML =
+      `<div class="respuesta ${clase}"><h3>${titulo}</h3>${cuerpo}</div>` +
+      '<button class="atras">← Me equivoqué, quiero cambiar mi respuesta</button>';
+    $preg.querySelector(".atras").addEventListener("click", volver);
+  };
+
+  const nadaAun = (volver) => responder("bien",
+    "Entonces estás bien.",
+    `<p>No hiciste nada y no va a pasar nada. Borra el mensaje y bloquea el número.</p>
+     <p>Si te queda la duda de si era de verdad: ${sitioReal}</p>`, volver);
+
+  const dioClave = (volver) => responder("urgente",
+    "Actúa ahora. Todavía se puede.",
+    `<p><strong>Llama a tu banco de inmediato</strong> y pide que bloqueen la tarjeta o la cuenta. Cuanto antes llames, más se recupera.</p>
+     <p>Después cambia esa clave, y también en cualquier otro sitio donde uses la misma.</p>
+     <p>${sitioReal}</p>
+     <p class="sin-culpa">Y algo que importa: <strong>esto le pasa a muchísima gente</strong>, incluidas personas que trabajan en tecnología. Están diseñados para engañar. No es tu culpa y no tienes nada de qué avergonzarte.</p>`, volver);
+
+  const dioPoco = (volver) => responder("ojo",
+    "No es grave, pero mantente atento.",
+    `<p>Con tu nombre o tu correo no pueden sacarte dinero. Lo que sí van a hacer es insistir con más mensajes, y ahora sabiendo cómo te llamas.</p>
+     <p>Bloquea el número y desconfía de lo que llegue después, aunque parezca convincente.</p>`, volver);
+
+  const noSabe = (volver) => responder("ojo",
+    "No pasa nada, vamos por lo seguro.",
+    `<p>Si no estás seguro, actúa como si sí hubiera pasado algo. Es lo prudente y no cuesta nada.</p>
+     <p>Revisa los movimientos de tu cuenta y cambia la clave si la usaste hace poco.</p>
+     <p>${sitioReal}</p>`, volver);
+
+  const segunda = () => preguntar("¿Diste una clave, un código o datos de tu tarjeta?", [
+    { texto: "Sí", hacer: () => dioClave(segunda) },
+    { texto: "No, solo mi nombre o correo", hacer: () => dioPoco(segunda) },
+    { texto: "No estoy seguro", hacer: () => noSabe(segunda) },
+  ], primera);
+
+  function primera() {
     preguntar("¿Alcanzaste a responder, tocar el enlace o dar algún dato?", [
-      { texto: "No, todavía no", hacer: () => responder("bien",
-          "Entonces estás bien.",
-          `<p>No hiciste nada y no va a pasar nada. Borra el mensaje y bloquea el número.</p>
-           <p>Si te queda la duda de si era de verdad: ${sitioReal}</p>`) },
-      { texto: "Sí, algo hice", hacer: () => preguntar("¿Diste una clave, un código o datos de tu tarjeta?", [
-          { texto: "Sí", hacer: () => responder("urgente",
-              "Actúa ahora, todavía se puede.",
-              `<p><strong>Llama a tu banco de inmediato</strong> y pide que bloqueen la tarjeta o la cuenta. Cuanto antes llames, más se puede recuperar.</p>
-               <p>Después cambia esa clave, y también en cualquier otro sitio donde uses la misma.</p>
-               <p>${sitioReal}</p>`) },
-          { texto: "No, solo mi nombre o mi correo", hacer: () => responder("ojo",
-              "No es grave, pero mantente atento.",
-              `<p>Con eso no pueden sacarte dinero. Lo que sí van a hacer es insistir con más mensajes, y ahora sabiendo tu nombre.</p>
-               <p>Bloquea el número y desconfía de lo que llegue después, aunque parezca convincente.</p>`) },
-        ]) },
+      { texto: "No, todavía no", hacer: () => nadaAun(primera) },
+      { texto: "Sí, algo hice", hacer: segunda },
+      { texto: "No estoy seguro", hacer: segunda },
     ]);
-  } else {
-    $preg.innerHTML = "";
   }
+
+  if (riesgo !== "bajo") primera(); else $preg.innerHTML = "";
 
   // Señal y subrayado se iluminan juntos, en los dos sentidos.
   const resaltar = (nums, on) => {
