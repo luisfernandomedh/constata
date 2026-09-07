@@ -87,6 +87,11 @@ No es una promesa, es una propiedad de la arquitectura:
 
 La colección **es cerrada, no pública**, y esa decisión se tomó tras un incidente real: un aporte llegó con el nombre completo de una persona que nunca dio permiso. La limpieza automática no detecta nombres propios, así que publicar los aportes en bruto significa publicar datos de terceros. Lo que sí es y seguirá siendo público es el código, y las reglas que salen de esos ejemplos. Ver [CORPUS.md](CORPUS.md).
 
+**¿Investigas, enseñas o construyes algo con esto?** Si necesitas acceso a los
+ejemplos, escribe al autor del repositorio y lo hablamos. No hay una tarifa ni
+un formulario: hay una conversación, porque son mensajes que gente real envió
+confiando en que se usarían para protegerla.
+
 Desde la [herramienta](https://luisfernandomedh.github.io/constata/): analiza tu mensaje, toca **Contribuir este ejemplo**, revisa el texto ya limpio —y edítalo, porque los nombres propios no se detectan solos— y confirma. Se abre un formulario de GitHub con todo puesto.
 
 **La segunda contribución más útil, y la más fácil: agregar una institución** al registro de [`src/marcas.ts`](src/marcas.ts). Es una línea, y mejora la detección sin tocar el motor. Hay una [plantilla de issue](https://github.com/luisfernandomedh/constata/issues/new?template=agregar-marca.yml) para eso.
