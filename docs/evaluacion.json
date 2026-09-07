@@ -1,0 +1,132 @@
+{
+  "medido": "2026-09-07T19:16:50.507Z",
+  "total": 18,
+  "detectadas": 5,
+  "categorias": [
+    {
+      "categoria": "Inversión / cripto",
+      "detectada": false,
+      "riesgo": "bajo",
+      "senales": []
+    },
+    {
+      "categoria": "Pig butchering",
+      "detectada": false,
+      "riesgo": "bajo",
+      "senales": []
+    },
+    {
+      "categoria": "Romance",
+      "detectada": false,
+      "riesgo": "bajo",
+      "senales": []
+    },
+    {
+      "categoria": "Soporte técnico",
+      "detectada": false,
+      "riesgo": "bajo",
+      "senales": [
+        "urgencia-artificial"
+      ]
+    },
+    {
+      "categoria": "Suplantación gobierno",
+      "detectada": false,
+      "riesgo": "bajo",
+      "senales": []
+    },
+    {
+      "categoria": "Extorsión / sextorsión",
+      "detectada": false,
+      "riesgo": "bajo",
+      "senales": []
+    },
+    {
+      "categoria": "Arresto digital",
+      "detectada": false,
+      "riesgo": "bajo",
+      "senales": []
+    },
+    {
+      "categoria": "Lotería / premio",
+      "detectada": true,
+      "riesgo": "medio",
+      "senales": [
+        "premio-inesperado"
+      ]
+    },
+    {
+      "categoria": "Factura falsa",
+      "detectada": false,
+      "riesgo": "bajo",
+      "senales": []
+    },
+    {
+      "categoria": "Alquiler falso",
+      "detectada": false,
+      "riesgo": "bajo",
+      "senales": []
+    },
+    {
+      "categoria": "Caridad falsa",
+      "detectada": false,
+      "riesgo": "bajo",
+      "senales": []
+    },
+    {
+      "categoria": "Reembolso falso",
+      "detectada": false,
+      "riesgo": "bajo",
+      "senales": []
+    },
+    {
+      "categoria": "Empleo / tareas",
+      "detectada": false,
+      "riesgo": "bajo",
+      "senales": []
+    },
+    {
+      "categoria": "Abuelito / emergencia",
+      "detectada": false,
+      "riesgo": "bajo",
+      "senales": [
+        "urgencia-artificial"
+      ]
+    },
+    {
+      "categoria": "Pago adelantado",
+      "detectada": true,
+      "riesgo": "alto",
+      "senales": [
+        "fraude-pago-adelantado"
+      ]
+    },
+    {
+      "categoria": "Phishing bancario",
+      "detectada": true,
+      "riesgo": "alto",
+      "senales": [
+        "desajuste-marca-enlace",
+        "dominio-imitador",
+        "dominio-generico-financiero"
+      ]
+    },
+    {
+      "categoria": "Robo de codigo",
+      "detectada": true,
+      "riesgo": "alto",
+      "senales": [
+        "pide-credenciales"
+      ]
+    },
+    {
+      "categoria": "Paquete retenido",
+      "detectada": true,
+      "riesgo": "alto",
+      "senales": [
+        "desajuste-marca-enlace",
+        "enlace-desconocido-accion-sensible"
+      ]
+    }
+  ]
+}

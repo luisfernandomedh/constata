@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qué detecta y qué no — Constata</title>
+<meta name="description" content="La medición honesta de qué tipos de estafa detecta Constata y cuáles todavía no. Publicada porque una herramienta de seguridad que esconde sus fallos no merece confianza.">
+<style>
+  :root {
+    color-scheme: light dark;
+    --fondo:#faf9f7; --papel:#fff; --texto:#17191c; --tenue:#6a6e74;
+    --borde:#e6e3de; --marca:#0d5c4a; --marca-suave:#e6f2ee; --falla:#c02718; --falla-suave:#fdecea;
+    --sombra:0 1px 2px rgba(0,0,0,.04), 0 8px 24px -14px rgba(0,0,0,.10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --fondo:#131518; --papel:#1c1f23; --texto:#eeece8; --tenue:#9a9ea5;
+      --borde:#2f3338; --marca:#5fd3b2; --marca-suave:#13312a; --falla:#ff9186; --falla-suave:#351d1a;
+      --sombra:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -14px rgba(0,0,0,.6); }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--texto);
+    font:17px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .envoltura{max-width:720px;margin:0 auto;padding:40px 20px 80px}
+  .volver{font-size:14px;color:var(--marca);text-decoration:none;display:inline-block;margin-bottom:24px}
+  h1{font-size:29px;letter-spacing:-.03em;margin:0 0 10px;font-weight:680}
+  .entrada{font-size:17px;color:var(--tenue);margin:0 0 24px;max-width:58ch}
+  .marcador{background:var(--papel);border:1px solid var(--borde);border-radius:14px;
+    padding:22px;margin-bottom:12px;box-shadow:var(--sombra);text-align:center}
+  .marcador .n{font-size:46px;font-weight:700;letter-spacing:-.04em;line-height:1;color:var(--marca)}
+  .marcador .de{font-size:16px;color:var(--tenue);margin-top:6px}
+  .barra{height:8px;border-radius:5px;background:var(--falla-suave);margin-top:16px;overflow:hidden;display:flex}
+  .barra i{display:block;height:100%;background:var(--marca)}
+  .nota{font-size:14.5px;color:var(--tenue);margin:0 0 28px;line-height:1.6}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--tenue);font-weight:700;margin:30px 0 10px}
+  .lista{display:grid;gap:7px}
+  .f{background:var(--papel);border:1px solid var(--borde);border-radius:10px;padding:12px 15px;
+    display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .f.no{background:var(--falla-suave);border-color:var(--falla)}
+  .f .cat{font-weight:600;min-width:210px;flex:none}
+  .f .det{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--tenue)}
+  .cierre{margin-top:34px;background:var(--papel);border:1px solid var(--borde);
+    border-radius:12px;padding:18px 20px;box-shadow:var(--sombra);font-size:15px;line-height:1.65;color:var(--tenue)}
+  .cierre b{color:var(--texto)}
+  footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--borde);font-size:13.5px;color:var(--tenue);line-height:1.9}
+  footer a,a{color:var(--marca)}
+</style>
+</head>
+<body>
+<div class="envoltura">
+
+  <a class="volver" href="./">← Volver</a>
+
+  <h1>Qué detecta y qué no</h1>
+  <p class="entrada">
+    Esta es la medición real de Constata contra la lista de tipos de estafa documentados
+    por la FTC y el FBI. Incluye lo que todavía no detectamos.
+  </p>
+
+  <div class="marcador">
+    <div class="n" id="cifra">—</div>
+    <div class="de" id="detalle">cargando…</div>
+    <div class="barra"><i id="barra" style="width:0%"></i></div>
+  </div>
+  <p class="nota" id="fecha"></p>
+
+  <div id="salida"></div>
+
+  <div class="cierre">
+    <p style="margin:0 0 12px">
+      <b>Por qué publicamos esto.</b> Una herramienta de seguridad que esconde sus fallos
+      te pide fe, no confianza. Si sabes exactamente en qué no puedes apoyarte, puedes
+      apoyarte de verdad en el resto.
+    </p>
+    <p style="margin:0">
+      <b>Qué significa un fallo.</b> Que ante ese tipo de mensaje Constata dirá que no
+      encontró señales conocidas. Nunca dirá que es seguro — esa diferencia es el corazón
+      del proyecto. Cada fallo de esta lista es trabajo pendiente, y la lista se vuelve a
+      medir con cada cambio del código.
+    </p>
+  </div>
+
+  <footer>
+    <a href="./">Volver a la herramienta</a> ·
+    <a href="como-funciona.html">Cómo funciona</a> ·
+    <a href="dominios.html">Dominios verificados</a> ·
+    <a href="https://github.com/luisfernandomedh/constata">Código en GitHub</a>
+  </footer>
+
+</div>
+
+<script type="module">
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
+  ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" })[c]);
+
+const r = await fetch("evaluacion.json", { cache: "no-store" });
+const d = await r.json();
+
+document.getElementById("cifra").textContent = `${d.detectadas} de ${d.total}`;
+document.getElementById("detalle").textContent =
+  `tipos de estafa detectados · ${d.total - d.detectadas} todavía no`;
+document.getElementById("barra").style.width = `${(d.detectadas / d.total) * 100}%`;
+document.getElementById("fecha").textContent =
+  "Medido el " + new Date(d.medido).toLocaleDateString("es-EC", { day:"numeric", month:"long", year:"numeric" }) +
+  ". Se vuelve a medir con cada cambio del código.";
+
+const fila = (c) => `
+  <div class="f ${c.detectada ? "" : "no"}">
+    <span class="cat">${c.detectada ? "✓" : "✕"} ${esc(c.categoria)}</span>
+    <span class="det">${c.detectada ? esc(c.senales.join(", ")) : "sin señales"}</span>
+  </div>`;
+
+const si = d.categorias.filter((c) => c.detectada);
+const no = d.categorias.filter((c) => !c.detectada);
+
+document.getElementById("salida").innerHTML =
+  (no.length ? `<h2>Todavía no las detectamos (${no.length})</h2><div class="lista">${no.map(fila).join("")}</div>` : "") +
+  (si.length ? `<h2>Sí las detectamos (${si.length})</h2><div class="lista">${si.map(fila).join("")}</div>` : "");
+</script>
+</body>
+</html>

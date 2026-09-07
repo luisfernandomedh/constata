@@ -36,6 +36,7 @@ const CASOS = [
 ["Paquete retenido", "Su paquete esta retenido en aduana. Pague la tasa: https://dhl-envios-ec.com/pago"],
 ];
 
+const comoJson = process.argv.includes("--json");
 let fallan = [];
 for (const [cat, msg] of CASOS) {
   const r = analizar(msg);
@@ -44,3 +45,20 @@ for (const [cat, msg] of CASOS) {
   console.log(`${ok ? "✔" : "✖"} ${cat.padEnd(24)} ${r.riesgo.padEnd(6)} ${r.hallazgos.map(h=>h.id).join(", ") || "—"}`);
 }
 console.log(`\n${CASOS.length - fallan.length}/${CASOS.length} detectadas · FALLAN ${fallan.length}: ${fallan.join(", ")}`);
+
+// La misma medición, publicada. Que la herramienta diga en qué falla no es
+// una concesión: es lo único que permite a alguien confiar en lo que sí dice.
+if (comoJson) {
+  const { writeFileSync } = await import("node:fs");
+  const filas = CASOS.map(([categoria, mensaje]) => {
+    const r = analizar(mensaje);
+    return { categoria, detectada: r.riesgo !== "bajo", riesgo: r.riesgo, senales: r.hallazgos.map((h) => h.id) };
+  });
+  writeFileSync("docs/evaluacion.json", JSON.stringify({
+    medido: new Date().toISOString(),
+    total: filas.length,
+    detectadas: filas.filter((f) => f.detectada).length,
+    categorias: filas,
+  }, null, 2) + "\n");
+  console.log("docs/evaluacion.json escrito");
+}
