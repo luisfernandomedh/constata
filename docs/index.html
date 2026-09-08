@@ -947,6 +947,17 @@ async function leerTextoDeImagen(archivo) {
  * foto tomada en vertical llega de lado y ni el modelo ni el lector la leen.
  */
 async function decodificar(archivo) {
+  // Un data: URL no es un Blob: se abre por el camino del <img>, que también
+  // es el que sabe con los HEIC de iPhone.
+  if (typeof archivo === "string") {
+    const img = new Image();
+    await new Promise((listo, falla) => {
+      img.onload = listo;
+      img.onerror = () => falla(new Error("no se pudo abrir la imagen preparada"));
+      img.src = archivo;
+    });
+    return { width: img.naturalWidth, height: img.naturalHeight, fuente: img };
+  }
   if (typeof createImageBitmap === "function") {
     try { return await createImageBitmap(archivo, { imageOrientation: "from-image" }); }
     catch { /* la opción no está en todos: se prueba sin ella */ }
@@ -971,44 +982,7 @@ async function decodificar(archivo) {
   }
 }
 
-/** ¿Es esto una imagen que podamos usar? Se decide decodificando. */
-async function medidas(archivo) {
-  const d = await decodificar(archivo);
-  const r = { ancho: d.width, alto: d.height };
-  if (d.close) d.close();
-  return r;
-}
 
-async function encogerImagen(archivo, ladoMax = 1200, calidad = 0.82) {
-  const fuente = await decodificar(archivo);
-  const dibujable = fuente.fuente ?? fuente;
-  const escala = Math.min(1, ladoMax / Math.max(fuente.width, fuente.height));
-  const w = Math.max(1, Math.round(fuente.width * escala));
-  const h = Math.max(1, Math.round(fuente.height * escala));
-
-  const lienzo = document.createElement("canvas");
-  lienzo.width = w; lienzo.height = h;
-  const ctx = lienzo.getContext("2d");
-  // Fondo blanco: un PNG con transparencia sobre JPEG saldría negro.
-  ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, w, h);
-  ctx.drawImage(dibujable, 0, 0, w, h);
-  if (fuente.close) fuente.close();
-
-  // toDataURL falla en algunos Android con imágenes grandes; toBlob no.
-  try {
-    const url = lienzo.toDataURL("image/jpeg", calidad);
-    if (url && url.length > 100) return url;
-  } catch { /* se prueba con toBlob */ }
-
-  const trozo = await new Promise((r) => lienzo.toBlob(r, "image/jpeg", calidad));
-  if (!trozo) throw new Error("no se pudo preparar la imagen");
-  return await new Promise((listo, falla) => {
-    const lector = new FileReader();
-    lector.onload = () => listo(lector.result);
-    lector.onerror = () => falla(new Error("no se pudo leer la imagen"));
-    lector.readAsDataURL(trozo);
-  });
-}
 
 
 /*
@@ -1142,9 +1116,10 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
       if (mensajeOriginal.texto) cuerpo.texto = mensajeOriginal.texto;
       else cuerpo.imagen = mensajeOriginal.imagen;
     } else if (esImagen) {
-      let img;
-      try { img = await encogerImagen(entrada); }
-      catch (fallo) { throw new Error(`no pude preparar la imagen: ${fallo?.message || "desconocido"}`); }
+      // Ya está decodificada y reducida desde que se adjuntó. No se vuelve a
+      // tocar la foto original: ahí es donde se quedaba sin memoria.
+      const img = adjuntaLista?.url;
+      if (!img) throw new Error("la imagen no llegó preparada");
       cuerpo = { imagen: img };
       mensajeOriginal = { imagen: img };
     } else {
@@ -1235,7 +1210,7 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     let texto = entrada;
     if (esImagen) {
       $("textoAnalizando").textContent = "El análisis a fondo no respondió. Lo estoy leyendo aquí, en tu dispositivo…";
-      texto = await leerTextoDeImagen(entrada).catch(() => "");
+      texto = await leerTextoDeImagen(adjuntaLista?.url ?? entrada).catch(() => "");
       if (!textoUtil(texto)) texto = "";
     }
     if (!texto) {
@@ -1475,6 +1450,21 @@ $("repregunta").addEventListener("keydown", (e) => {
  */
 let adjunta = null;
 
+/**
+ * Adjuntar decodifica la imagen UNA vez y se queda con la versión pequeña.
+ *
+ * Antes se decodificaba dos veces: al adjuntar, para medirla y mostrar la
+ * miniatura, y otra vez al analizar, para encogerla. En un móvil con poca
+ * memoria libre la segunda vez fallaba —«no se pudo decodificar»— porque la
+ * segunda pasada necesita el mapa de bits Y el lienzo a la vez. Una foto de
+ * 12 megapíxeles son casi 50 MB de memoria solo para el mapa de bits.
+ *
+ * Ahora se decodifica al adjuntar, se guarda el JPEG ya reducido, y de ahí
+ * salen la miniatura, el análisis y el lector local. La foto original no se
+ * vuelve a tocar nunca.
+ */
+let adjuntaLista = null;
+
 async function adjuntar(archivo) {
   if (!archivo) return;
 
@@ -1482,30 +1472,71 @@ async function adjuntar(archivo) {
   // esto se rendía sin decir nada. Se intenta decodificar, y si no es una
   // imagen se dice con palabras.
   $("ayudaPegar").textContent = "Preparando la imagen…";
-  let tam;
+  let listo;
   try {
-    tam = await medidas(archivo);
-  } catch {
+    listo = await prepararAdjunta(archivo);
+  } catch (fallo) {
     $("zonaVacia").hidden = false;
     $("zonaImagen").hidden = true;
-    $("ayudaPegar").innerHTML = "<strong>No pude abrir ese archivo como imagen.</strong> Prueba con una captura de pantalla en JPG o PNG, o escribe el mensaje en el cuadro de arriba.";
+    adjunta = null; adjuntaLista = null;
+    $("ayudaPegar").innerHTML = `<strong>No pude abrir ese archivo como imagen.</strong>
+      Prueba con una captura de pantalla, o escribe el mensaje en el cuadro de arriba.
+      <br><small>Detalle: ${esc(String(fallo?.message || "desconocido").slice(0, 90))}</small>`;
+    refrescarBoton();
     return;
   }
 
   if (miniatura) URL.revokeObjectURL(miniatura);
+  miniatura = listo.url;              // ya es un data: URL, no hay nada que liberar
   adjunta = archivo;
-  miniatura = URL.createObjectURL(archivo);
-  $("previa").src = miniatura;
-  $("pesoImagen").textContent = `${tam.ancho}×${tam.alto} · ${Math.max(1, Math.round((archivo.size || 0) / 1024))} KB`;
+  adjuntaLista = listo;
+  $("previa").src = listo.url;
+  $("pesoImagen").textContent = `${listo.ancho}×${listo.alto} · ${Math.max(1, Math.round((archivo.size || 0) / 1024))} KB`;
   $("zonaVacia").hidden = true;
   $("zonaImagen").hidden = false;
   $("ayudaPegar").textContent = "Comprueba que es la captura correcta y toca Revisar.";
   refrescarBoton();
 }
 
+/** Decodifica, encoge y devuelve el JPEG listo. Un solo paso, una sola vez. */
+async function prepararAdjunta(archivo, ladoMax = 1200, calidad = 0.82) {
+  const fuente = await decodificar(archivo);
+  const dibujable = fuente.fuente ?? fuente;
+  const escala = Math.min(1, ladoMax / Math.max(fuente.width, fuente.height));
+  const w = Math.max(1, Math.round(fuente.width * escala));
+  const h = Math.max(1, Math.round(fuente.height * escala));
+
+  const lienzo = document.createElement("canvas");
+  lienzo.width = w; lienzo.height = h;
+  const ctx = lienzo.getContext("2d");
+  // Fondo blanco: un PNG con transparencia sobre JPEG saldría negro.
+  ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(dibujable, 0, 0, w, h);
+  // Se libera el mapa de bits en cuanto está dibujado: es lo que ocupa.
+  if (fuente.close) fuente.close();
+  if (fuente.fuente) fuente.fuente.src = "";
+
+  let url = "";
+  try {
+    url = lienzo.toDataURL("image/jpeg", calidad);
+  } catch { /* en algunos Android falla con imágenes grandes: se usa toBlob */ }
+  if (!url || url.length < 100) {
+    const trozo = await new Promise((r) => lienzo.toBlob(r, "image/jpeg", calidad));
+    if (!trozo) throw new Error("no se pudo comprimir la imagen");
+    url = await new Promise((ok, falla) => {
+      const lector = new FileReader();
+      lector.onload = () => ok(lector.result);
+      lector.onerror = () => falla(new Error("no se pudo leer la imagen"));
+      lector.readAsDataURL(trozo);
+    });
+  }
+  return { url, ancho: w, alto: h };
+}
+
+
 
 function soltarAdjunta() {
-  adjunta = null;
+  adjunta = null; adjuntaLista = null;
   if (miniatura) { URL.revokeObjectURL(miniatura); miniatura = null; }
   $("previa").removeAttribute("src");
   $("zonaVacia").hidden = false;
