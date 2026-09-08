@@ -424,7 +424,17 @@ footer a { color: var(--azul-medio); }
         </div>
       </div>
     </div>
-    <input type="file" id="archivo" accept="image/*" hidden>
+    <!--
+      No lleva `hidden`. Un input con display:none no siempre acepta un
+      .click() desde código en WebViews de Android, y ahí la galería no se
+      abría nunca. Se esconde moviéndolo fuera de la vista, que sí funciona.
+
+      El `accept` lleva también las extensiones: hay selectores de Android
+      que filtran por extensión y no por tipo, y con solo `image/*` dejaban
+      las fotos en gris.
+    -->
+    <input type="file" id="archivo" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif,.gif,.bmp"
+           style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px">
 
     <div class="fila">
       <button id="analizar" class="principal" disabled>Revisar</button>
@@ -828,13 +838,14 @@ async function cargarOcr() {
  * tamaño y las capturas de teléfono suelen venir justas.
  */
 async function prepararImagen(archivo) {
-  const bitmap = await createImageBitmap(archivo);
+  const bitmap = await decodificar(archivo);
   const escala = Math.min(3, Math.max(1, 1400 / bitmap.width));
   const w = Math.round(bitmap.width * escala), h = Math.round(bitmap.height * escala);
   const lienzo = document.createElement("canvas");
   lienzo.width = w; lienzo.height = h;
   const ctx = lienzo.getContext("2d", { willReadFrequently: true });
-  ctx.drawImage(bitmap, 0, 0, w, h);
+  ctx.drawImage(bitmap.fuente ?? bitmap, 0, 0, w, h);
+  if (bitmap.close) bitmap.close();
 
   const img = ctx.getImageData(0, 0, w, h);
   const d = img.data;
@@ -861,7 +872,7 @@ async function prepararImagen(archivo) {
  * dispositivo. Solo devuelve el texto; quien la llama decide qué hacer.
  */
 async function leerTextoDeImagen(archivo) {
-  if (!archivo || !archivo.type.startsWith("image/")) return "";
+  if (!archivo) return "";
   const T = await cargarOcr();
   const limpia = await prepararImagen(archivo).catch(() => archivo);
   const { data } = await T.recognize(limpia, "spa", {
@@ -894,15 +905,86 @@ async function leerTextoDeImagen(archivo) {
  */
 
 /** Al modelo se le manda la imagen en color: el gris del OCR le quita contexto. */
+/**
+ * Decodifica una imagen sin fiarse del tipo MIME.
+ *
+ * En Android, muchos proveedores de archivos —Drive, Archivos, algunas
+ * galerías— entregan la foto con `type` vacío o «application/octet-stream».
+ * El código comprobaba `type.startsWith("image/")` y se rendía en silencio:
+ * la persona elegía su captura y no pasaba absolutamente nada.
+ *
+ * La única prueba fiable de que algo es una imagen es que se pueda decodificar.
+ * Se intenta por los dos caminos, porque ninguno funciona en todas partes:
+ * `createImageBitmap` no existe en WebViews viejos, y el elemento <img> es el
+ * que sabe abrir los HEIC de iPhone.
+ *
+ * `imageOrientation: "from-image"` aplica la rotación del EXIF. Sin eso, una
+ * foto tomada en vertical llega de lado y ni el modelo ni el lector la leen.
+ */
+async function decodificar(archivo) {
+  if (typeof createImageBitmap === "function") {
+    try { return await createImageBitmap(archivo, { imageOrientation: "from-image" }); }
+    catch { /* la opción no está en todos: se prueba sin ella */ }
+    try { return await createImageBitmap(archivo); }
+    catch { /* toca el camino del <img> */ }
+  }
+  const url = URL.createObjectURL(archivo);
+  try {
+    const img = new Image();
+    img.decoding = "sync";
+    await new Promise((listo, falla) => {
+      img.onload = listo;
+      img.onerror = () => falla(new Error("no se pudo decodificar"));
+      img.src = url;
+    });
+    if (typeof img.decode === "function") { try { await img.decode(); } catch { /* ya cargó */ } }
+    if (!img.naturalWidth) throw new Error("imagen vacía");
+    return { width: img.naturalWidth, height: img.naturalHeight, fuente: img };
+  } finally {
+    // Se libera después, cuando el dibujo en el lienzo ya terminó.
+    setTimeout(() => URL.revokeObjectURL(url), 20000);
+  }
+}
+
+/** ¿Es esto una imagen que podamos usar? Se decide decodificando. */
+async function medidas(archivo) {
+  const d = await decodificar(archivo);
+  const r = { ancho: d.width, alto: d.height };
+  if (d.close) d.close();
+  return r;
+}
+
 async function encogerImagen(archivo, ladoMax = 1200, calidad = 0.82) {
-  const bitmap = await createImageBitmap(archivo);
-  const escala = Math.min(1, ladoMax / Math.max(bitmap.width, bitmap.height));
-  const w = Math.round(bitmap.width * escala), h = Math.round(bitmap.height * escala);
+  const fuente = await decodificar(archivo);
+  const dibujable = fuente.fuente ?? fuente;
+  const escala = Math.min(1, ladoMax / Math.max(fuente.width, fuente.height));
+  const w = Math.max(1, Math.round(fuente.width * escala));
+  const h = Math.max(1, Math.round(fuente.height * escala));
+
   const lienzo = document.createElement("canvas");
   lienzo.width = w; lienzo.height = h;
-  lienzo.getContext("2d").drawImage(bitmap, 0, 0, w, h);
-  return lienzo.toDataURL("image/jpeg", calidad);
+  const ctx = lienzo.getContext("2d");
+  // Fondo blanco: un PNG con transparencia sobre JPEG saldría negro.
+  ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(dibujable, 0, 0, w, h);
+  if (fuente.close) fuente.close();
+
+  // toDataURL falla en algunos Android con imágenes grandes; toBlob no.
+  try {
+    const url = lienzo.toDataURL("image/jpeg", calidad);
+    if (url && url.length > 100) return url;
+  } catch { /* se prueba con toBlob */ }
+
+  const trozo = await new Promise((r) => lienzo.toBlob(r, "image/jpeg", calidad));
+  if (!trozo) throw new Error("no se pudo preparar la imagen");
+  return await new Promise((listo, falla) => {
+    const lector = new FileReader();
+    lector.onload = () => listo(lector.result);
+    lector.onerror = () => falla(new Error("no se pudo leer la imagen"));
+    lector.readAsDataURL(trozo);
+  });
 }
+
 
 /*
   El resultado sigue el orden del diseño SOS, y ese orden es el argumento:
@@ -1301,18 +1383,34 @@ $("repregunta").addEventListener("keydown", (e) => {
  */
 let adjunta = null;
 
-function adjuntar(archivo) {
-  if (!archivo || !archivo.type.startsWith("image/")) return;
+async function adjuntar(archivo) {
+  if (!archivo) return;
+
+  // Nada de comprobar el tipo MIME: en Android llega vacío muy a menudo y
+  // esto se rendía sin decir nada. Se intenta decodificar, y si no es una
+  // imagen se dice con palabras.
+  $("ayudaPegar").textContent = "Preparando la imagen…";
+  let tam;
+  try {
+    tam = await medidas(archivo);
+  } catch {
+    $("zonaVacia").hidden = false;
+    $("zonaImagen").hidden = true;
+    $("ayudaPegar").innerHTML = "<strong>No pude abrir ese archivo como imagen.</strong> Prueba con una captura de pantalla en JPG o PNG, o escribe el mensaje en el cuadro de arriba.";
+    return;
+  }
+
   if (miniatura) URL.revokeObjectURL(miniatura);
   adjunta = archivo;
   miniatura = URL.createObjectURL(archivo);
   $("previa").src = miniatura;
-  $("pesoImagen").textContent = `${Math.round(archivo.size / 1024)} KB`;
+  $("pesoImagen").textContent = `${tam.ancho}×${tam.alto} · ${Math.max(1, Math.round((archivo.size || 0) / 1024))} KB`;
   $("zonaVacia").hidden = true;
   $("zonaImagen").hidden = false;
   $("ayudaPegar").textContent = "Comprueba que es la captura correcta y toca Revisar.";
   refrescarBoton();
 }
+
 
 function soltarAdjunta() {
   adjunta = null;
@@ -1342,7 +1440,7 @@ $("pegarImagen").addEventListener("click", async () => {
     const items = await navigator.clipboard.read();
     for (const it of items) {
       const tipo = it.types.find((t) => t.startsWith("image/"));
-      if (tipo) { adjuntar(new File([await it.getType(tipo)], "captura", { type: tipo })); return; }
+      if (tipo) { await adjuntar(new File([await it.getType(tipo)], "captura", { type: tipo })); return; }
     }
     $("ayudaPegar").textContent = "No encontré ninguna imagen copiada. Copia la captura y vuelve a tocar aquí.";
   } catch {
@@ -1351,7 +1449,18 @@ $("pegarImagen").addEventListener("click", async () => {
 });
 $("cambiarImagen").addEventListener("click", () => $("archivo").click());
 $("quitarImagen").addEventListener("click", soltarAdjunta);
-$("archivo").addEventListener("change", (e) => { adjuntar(e.target.files?.[0]); e.target.value = ""; });
+$("archivo").addEventListener("change", async (e) => {
+  const f = e.target.files?.[0];
+  if (!f) {
+    // Pasa en Android cuando el selector se cierra sin elegir nada.
+    $("ayudaPegar").textContent = "No elegiste ninguna imagen. Toca «Elegir una captura» y prueba otra vez.";
+    return;
+  }
+  await adjuntar(f);
+  // Se limpia DESPUÉS de leer el archivo: hacerlo antes deja la lista vacía
+  // en algunos Android, y volver a elegir la misma foto no disparaba nada.
+  e.target.value = "";
+});
 $mensaje.addEventListener("input", refrescarBoton);
 
 // Arrastrar y soltar. El recuadro se marca al pasar por encima, o no se
@@ -1365,7 +1474,8 @@ for (const ev of ["dragleave", "drop"]) {
 }
 $zona.addEventListener("drop", (e) => {
   e.preventDefault();
-  const f = [...(e.dataTransfer?.files ?? [])].find((x) => x.type.startsWith("image/"));
+  // Aquí tampoco se filtra por tipo: se coge el primer archivo y se intenta.
+  const f = [...(e.dataTransfer?.files ?? [])][0];
   if (f) adjuntar(f);
 });
 $zona.addEventListener("click", (e) => { if (e.target === $zona) $("archivo").click(); });
@@ -1385,10 +1495,11 @@ document.addEventListener("paste", (e) => {
   if (!datos) return;
   if ((datos.getData("text/plain") ?? "").trim()) return; // hay texto: no tocar nada
 
-  const img = [...(datos.items ?? [])].find((i) => i.type.startsWith("image/"));
+  const img = [...(datos.items ?? [])].find((i) => i.kind === "file");
   if (!img) return;
   e.preventDefault();
-  adjuntar(img.getAsFile());
+  const f = img.getAsFile();
+  if (f) adjuntar(f);
 });
 $("limpiar").addEventListener("click", () => {
   $mensaje.value = ""; soltarAdjunta(); refrescarBoton(); $mensaje.focus();
