@@ -214,6 +214,9 @@ button { font-family: var(--sans); cursor: pointer; }
 .veredicto p { margin: 0; font: 400 15.5px/1.6 var(--sans); text-wrap: pretty; }
 .ceja { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 .ceja svg { width: 18px; height: 18px; flex: none; }
+/* Cualquier icono dentro de un veredicto: sin esto un SVG sin ancho se
+   dibuja a tamaño natural y ocupa media pantalla. Pasó de verdad. */
+.veredicto .icono svg, #resultado .icono svg { width: 42px; height: 42px; display: block; margin-bottom: 12px; }
 .ceja span { font: 600 11.5px/1 var(--sans); letter-spacing: .07em; text-transform: uppercase; }
 
 .v-alto  { background: var(--alto-fondo);  border-color: var(--alto-borde); }
@@ -871,6 +874,28 @@ async function prepararImagen(archivo) {
  * cuando el modelo no responde: peor que él, pero funciona sin salir del
  * dispositivo. Solo devuelve el texto; quien la llama decide qué hacer.
  */
+/**
+ * ¿Se puede confiar en lo que el lector sacó de la imagen?
+ *
+ * El lector local nunca devuelve nada: devuelve basura. Y una basura
+ * ilegible pasa por el motor de reglas sin disparar ninguna señal, así que
+ * la pantalla acaba diciendo «no encontré señales de estafa» sobre una
+ * captura que nadie llegó a leer. Eso es tranquilizar a alguien por error, y
+ * es lo peor que esta herramienta puede hacer.
+ *
+ * Así que se exige un mínimo de texto con forma de texto: letras suficientes,
+ * varias palabras de verdad, y que no sea casi todo símbolos.
+ */
+function textoUtil(t) {
+  const limpio = (t || "").trim();
+  if (limpio.length < 25) return false;
+  const letras = (limpio.match(/[\p{L}]/gu) || []).length;
+  if (letras < 20) return false;
+  if (letras / limpio.length < 0.55) return false;          // casi todo símbolos
+  const palabras = limpio.split(/\s+/).filter((p) => /^[\p{L}]{3,}$/u.test(p));
+  return palabras.length >= 4;
+}
+
 async function leerTextoDeImagen(archivo) {
   if (!archivo) return "";
   const T = await cargarOcr();
@@ -1087,6 +1112,7 @@ let preguntaEnCurso = "";
  */
 async function conModelo(entrada, { seguimiento = false } = {}) {
   const esImagen = entrada instanceof Blob;
+  let reintentado = false;
   if (!seguimiento) { historial = []; repreguntas = 0; mensajeOriginal = {}; }
   if (!seguimiento) {
     if (miniatura) { URL.revokeObjectURL(miniatura); miniatura = null; }
@@ -1116,8 +1142,11 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
       if (mensajeOriginal.texto) cuerpo.texto = mensajeOriginal.texto;
       else cuerpo.imagen = mensajeOriginal.imagen;
     } else if (esImagen) {
-      cuerpo = { imagen: await encogerImagen(entrada) };
-      mensajeOriginal = { imagen: cuerpo.imagen };
+      let img;
+      try { img = await encogerImagen(entrada); }
+      catch (fallo) { throw new Error(`no pude preparar la imagen: ${fallo?.message || "desconocido"}`); }
+      cuerpo = { imagen: img };
+      mensajeOriginal = { imagen: img };
     } else {
       cuerpo = { texto: entrada };
       mensajeOriginal = { texto: entrada };
@@ -1128,8 +1157,29 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
       body: JSON.stringify(cuerpo),
       signal: AbortSignal.timeout(50000),
     });
-    const d = await r.json();
-    if (!d.ok) throw new Error(d.error || "sin respuesta");
+    let d = await r.json();
+
+    /*
+      Si el servicio está al tope por minuto, se espera y se reintenta aquí
+      mismo. Antes se caía directo al lector local, que en el móvil significa
+      descargar cinco megas por datos: el peor plan posible justo cuando la
+      red va mal. El servidor ya reintenta una vez; esta es la segunda
+      oportunidad, con la espera del lado de quien puede permitírsela.
+    */
+    if (d.limite && !reintentado) {
+      reintentado = true;
+      $("textoAnalizando").textContent = "Hay mucha gente ahora mismo. Lo intento otra vez…";
+      mostrar("vista-analizando");
+      await new Promise((listo) => setTimeout(listo, 7000));
+      const r2 = await fetch(ANALISIS, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(cuerpo),
+        signal: AbortSignal.timeout(50000),
+      });
+      d = await r2.json();
+    }
+    if (!d.ok) throw new Error(`${d.error || "sin respuesta"} (${r.status})`);
 
     // El modelo necesita recordar qué dijo, o la repregunta no tiene sentido.
     if (!seguimiento) {
@@ -1161,7 +1211,7 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
       try {
         ultimaTranscripcion = esImagen ? (d.transcripcion || "") : entrada;
         prepararContribucion(ultimaTranscripcion, d.riesgo);
-        $("abrirContribuir").hidden = !ultimaTranscripcion.trim();
+        $("abrirContribuir").hidden = !textoUtil(ultimaTranscripcion);
         $contribuir.hidden = true;
       } catch { $("abrirContribuir").hidden = true; }
     }
@@ -1186,23 +1236,65 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     if (esImagen) {
       $("textoAnalizando").textContent = "El análisis a fondo no respondió. Lo estoy leyendo aquí, en tu dispositivo…";
       texto = await leerTextoDeImagen(entrada).catch(() => "");
+      if (!textoUtil(texto)) texto = "";
     }
     if (!texto) {
+      // Antes esto era un callejón sin salida: «no pude, prueba otra vez» y
+      // el único botón volvía al inicio. Ahora se dice qué pasó de verdad y
+      // se puede reintentar sin volver a buscar la captura.
+      const detalle = String(e?.message || "").slice(0, 160);
+      const esLimite = /rato|horas|mucha gente|l[íi]mite/i.test(detalle);
       $resultado.innerHTML = `
-        <div class="veredicto v-medio">
-          <div class="icono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">${VEREDICTO.medio?.icono ?? ""}</svg></div>
-          <div style="flex:1;min-width:0">
-            <h2>No pude revisarlo esta vez</h2>
-            <p>El análisis no respondió y tampoco logré leer la imagen. No es culpa tuya.
-               Prueba a subirla otra vez, o escribe el mensaje a mano en el cuadro.</p>
+        ${bloqueVeredicto("medio", esLimite ? "Ahora mismo hay mucha gente." : "No pude revisarlo esta vez.",
+          esLimite
+            ? "El análisis está al límite en este momento. Espera unos segundos y vuelve a intentarlo: tu captura sigue cargada."
+            : "No es culpa tuya ni de tu captura. Puedes reintentar, o escribir el mensaje a mano.")}
+        <div class="acolchado">
+          <div class="fila" style="margin-top:0">
+            <button type="button" id="reintentar" class="principal">Reintentar</button>
+            <button type="button" id="aMano" class="secundario">Escribirlo a mano</button>
           </div>
+          <p class="remate">Detalle técnico: <code>${esc(detalle || "sin detalle")}</code>. Si te vuelve a pasar, cuéntanoslo con esta línea.</p>
         </div>`;
       $("conversar").hidden = true;
       $("abrirContribuir").hidden = true;
       mostrar("vista-resultado");
+      $("reintentar").addEventListener("click", () => conModelo(entrada));
+      $("aMano").addEventListener("click", () => { soltarAdjunta(); volverAlInicio(); $mensaje.focus(); });
       return;
     }
     const local = analizar(texto);
+
+    /*
+      Regla: de una imagen leída aquí, se cree lo que ENCUENTRA, nunca lo que
+      NO encuentra.
+
+      El lector local no falla en silencio: devuelve basura con palabras
+      sueltas dentro («TELCEL tre ui E) 599 E * Mario Gtrrz»). Esa basura pasa
+      por el motor sin disparar nada, y la pantalla acabaría diciendo «no
+      encontré señales de estafa» sobre una captura que nadie leyó. Si encontró
+      algo, ese algo es real y vale mostrarlo; si no encontró nada, lo honesto
+      es decir que no se pudo revisar.
+    */
+    if (esImagen && local.riesgo === "bajo") {
+      $resultado.innerHTML = `
+        ${bloqueVeredicto("medio", "No pude leer bien tu captura.",
+          "El análisis completo no respondió y aquí solo logré leer partes de la imagen. No he encontrado señales en lo poco que leí, pero eso no significa que sea seguro: significa que no la revisé.")}
+        <div class="acolchado">
+          <div class="fila" style="margin-top:0">
+            <button type="button" id="reintentar" class="principal">Reintentar el análisis</button>
+            <button type="button" id="aMano" class="secundario">Escribirlo a mano</button>
+          </div>
+          <p class="remate">Escribir el mensaje a mano funciona siempre, incluso con la red mal.</p>
+        </div>`;
+      $("conversar").hidden = true;
+      $("abrirContribuir").hidden = true;
+      mostrar("vista-resultado");
+      $("reintentar").addEventListener("click", () => conModelo(entrada));
+      $("aMano").addEventListener("click", () => { soltarAdjunta(); volverAlInicio(); $mensaje.focus(); });
+      return;
+    }
+
     pintar(texto, local);
     mostrar("vista-resultado");
     $("conversar").hidden = true;
