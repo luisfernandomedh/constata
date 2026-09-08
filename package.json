@@ -16,13 +16,14 @@
   ],
   "scripts": {
     "build": "tsc && rm -rf docs/lib && cp -R dist docs/lib",
-    "test": "node --test test/*.test.js && node scripts/instrucciones.mjs --verificar",
+    "test": "node --test && node scripts/instrucciones.mjs --verificar && npm run build --silent && node scripts/marcas-worker.mjs --verificar",
     "medir": "node scripts/medir.mjs",
     "verificar": "node scripts/verificar-dominios.mjs",
     "verificar:json": "node scripts/verificar-dominios.mjs --json",
     "cobertura": "node scripts/cobertura.mjs",
     "cobertura:json": "node scripts/cobertura.mjs --json",
-    "instrucciones": "node scripts/instrucciones.mjs"
+    "instrucciones": "node scripts/instrucciones.mjs",
+    "marcas": "node scripts/marcas-worker.mjs"
   },
   "keywords": [
     "phishing",
