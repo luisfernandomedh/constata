@@ -8,621 +8,529 @@
 <meta property="og:title" content="Constata — ¿este mensaje es una estafa?">
 <meta property="og:description" content="Te señala qué parte del mensaje es sospechosa y te dice qué hacer. Nadie más lo ve. Gratis y sin registrarse.">
 <meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    color-scheme: light dark;
-    --fondo: #f7f9fb;
-    --papel: #ffffff;
-    --texto: #15202b;
-    --tenue: #64686e;
-    --borde: #e4e1dc;
-    --marca: #2f6690;
-    --marca-suave: #e8f0f7;
+/*
+  Paleta y tipografía del rediseño SOS (mockup «Constata SOS», 8 sept 2026).
 
-    --alto: #a8442f;
-    --alto-fondo: #fbeee9;
-    --alto-marca: #f2d5cb;
-    --medio: #8a6320;
-    --medio-fondo: #fdf3e2;
-    --medio-marca: #f8dfae;
-    --bajo: #2f6690;
-    --bajo-fondo: #e8f0f7;
-    --info: #3d6a94;
-    --info-fondo: #eaf1f8;
-    --info-marca: #cadcec;
+  Dos familias con papeles distintos: Newsreader, serif, para los veredictos y
+  las preguntas — lo que hay que leer despacio. IBM Plex Sans para todo lo
+  demás. El fondo es arena, no blanco: baja el contraste general para que el
+  bloque del veredicto destaque solo, sin gritar.
+*/
+:root {
+  --arena:      #eceae5;
+  --papel:      #ffffff;
+  --papel-tenue:#faf9f7;
+  --papel-suave:#fcfcfb;
+  --borde:      #e4e1dc;
+  --borde-tenue:#eeece8;
 
-    --sombra: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px -12px rgba(0,0,0,.10);
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --fondo: #111820;
-      --papel: #19222c;
-      --texto: #e8eef4;
-      --tenue: #94a5b5;
-      --borde: #2a3744;
-      --marca: #7fb3d9;
-      --marca-suave: #17293a;
+  --texto:      #15202b;
+  --texto-medio:#3d4650;
+  --tenue:      #5a6570;
+  --tenue-mas:  #6b7480;
+  --etiqueta:   #666e77;
+  --marcador:   #7b838c;
 
-      --alto: #eda08c;
-      --alto-fondo: #2e211d;
-      --alto-marca: #61362c;
-      --medio: #f2c274;
-      --medio-fondo: #332715;
-      --medio-marca: #6b4d1c;
-      --bajo: #7fb3d9;
-      --bajo-fondo: #17293a;
-      --info: #8fb4d9;
-      --info-fondo: #182634;
-      --info-marca: #2c4459;
+  --azul:       #2f6690;
+  --azul-hondo: #1f4a6b;
+  --azul-medio: #3d6a94;
+  --azul-suave: #e8f0f7;
+  --azul-panel: #f7fafc;
+  --azul-borde: #cadcec;
+  --azul-linea: #cfd6dd;
+  --azul-texto: #2c4f6d;
 
-      --sombra: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.6);
-    }
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--fondo); color: var(--texto);
-    font: 17px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-    -webkit-font-smoothing: antialiased;
-  }
-  .envoltura { max-width: 720px; margin: 0 auto; padding: 44px 20px 80px; }
+  --alto:        #a8442f;
+  --alto-fondo:  #fbeee9;
+  --alto-borde:  #f2d5cb;
+  --alto-tarjeta:#fdf6f3;
+  --alto-texto:  #6b3a2c;
 
-  /* ── Encabezado ─────────────────────────────────────────── */
-  header { margin-bottom: 28px; }
-  .marca-fila { display: flex; align-items: center; gap: 11px; margin-bottom: 10px; }
-  .escudo {
-    width: 38px; height: 38px; border-radius: 11px; flex: none;
-    background: linear-gradient(145deg, var(--marca), color-mix(in srgb, var(--marca) 60%, #5b9bc9));
-    display: grid; place-items: center; box-shadow: var(--sombra);
-  }
-  .escudo svg { width: 21px; height: 21px; }
-  h1 { font-size: 31px; letter-spacing: -0.03em; margin: 0; font-weight: 680; }
-  .lema { color: var(--texto); margin: 0 0 4px; font-size: 21px; max-width: 54ch; }
-  .lema strong { font-weight: 700; }
-  .sublema { color: var(--tenue); margin: 0; font-size: 16px; max-width: 54ch; }
-  .promesa {
-    margin-top: 18px; padding: 12px 15px; font-size: 14px; line-height: 1.55;
-    background: var(--marca-suave); border-radius: 10px;
-    display: flex; gap: 10px; align-items: flex-start;
-  }
-  .promesa svg { width: 17px; height: 17px; flex: none; margin-top: 2px; color: var(--marca); }
-  .promesa strong { color: var(--marca); }
+  --medio:        #8a6320;
+  --medio-fondo:  #fdf8ee;
+  --medio-borde:  #f8dfae;
 
-  /* ── Pasos, para quien nunca ha usado algo así ──────────── */
-  .instruccion {
-    font-size: 21px; font-weight: 620; letter-spacing: -0.02em;
-    margin: 0 0 16px; text-align: center;
-  }
-  .opciones { display: grid; gap: 11px; grid-template-columns: 1fr 1fr; }
-  @media (max-width: 520px) { .opciones { grid-template-columns: 1fr; } }
-  button.grande {
-    width: 100%; font-size: 17px; font-weight: 640; padding: 17px 16px;
-    border-radius: 12px; box-shadow: var(--sombra); letter-spacing: -0.01em;
-    display: flex; align-items: center; justify-content: center; gap: 9px;
-  }
-  button.grande svg { width: 21px; height: 21px; flex: none; }
-  button.grande.secundaria {
-    background: var(--papel); color: var(--marca); border: 1.5px solid var(--marca);
-  }
-  .progreso {
-    margin-top: 14px; padding: 13px 15px; border-radius: 10px;
-    background: var(--marca-suave); font-size: 14.5px;
-    display: flex; align-items: center; gap: 11px;
-  }
-  .progreso span {
-    width: 17px; height: 17px; flex: none; border-radius: 50%;
-    border: 2.5px solid color-mix(in srgb, var(--marca) 30%, transparent);
-    border-top-color: var(--marca); animation: gira .8s linear infinite;
-  }
-  @keyframes gira { to { transform: rotate(360deg); } }
-  .invitacion { margin: 18px 0 0; text-align: center; }
-  button.enlace {
-    background: none; border: 0; color: var(--marca); font: inherit; font-size: 14.5px;
-    text-decoration: underline; cursor: pointer; padding: 6px; box-shadow: none;
-  }
-  .ayuda { font-size: 13.5px; color: var(--tenue); margin: 10px 0 26px; text-align: center; }
+  --apagado:      #e9ecef;
+  --apagado-texto:#a5adb6;
 
-  /* ── Entrada ────────────────────────────────────────────── */
-  .etiqueta { display: block; font-size: 13px; color: var(--tenue); margin-bottom: 7px; font-weight: 500; }
-  textarea {
-    width: 100%; padding: 14px; font: inherit; font-size: 15px;
-    background: var(--papel); color: var(--texto);
-    border: 1px solid var(--borde); border-radius: 12px; resize: vertical;
-    box-shadow: var(--sombra);
-  }
-  #mensaje { min-height: 110px; font-size: 16px; }
-  textarea:focus { outline: 2px solid var(--marca); outline-offset: 1px; }
-  .fila { display: flex; gap: 9px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
-  button {
-    font: inherit; font-weight: 600; font-size: 15px; padding: 11px 22px;
-    border-radius: 9px; border: 1px solid var(--marca);
-    background: var(--marca); color: var(--fondo); cursor: pointer;
-    transition: transform .06s, opacity .15s;
-  }
-  button:hover { opacity: .9; }
-  button:active { transform: translateY(1px); }
-  button.secundario { background: transparent; color: var(--marca); font-weight: 500; }
-  button:disabled { opacity: .5; cursor: default; }
+  --sombra:      0 1px 2px rgba(0,0,0,.04), 0 10px 28px -14px rgba(0,0,0,.16);
+  --sombra-boton:0 6px 16px -8px rgba(47,102,144,.7);
 
-  .ejemplos { margin-top: 24px; }
-  .ejemplos p { font-size: 12px; color: var(--tenue); margin: 0 0 8px; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
-  .ejemplos button {
-    background: var(--papel); color: var(--texto); border: 1px solid var(--borde);
-    font-weight: 450; font-size: 13.5px; padding: 7px 13px; margin: 0 6px 6px 0;
-    border-radius: 18px; box-shadow: none;
-  }
-  .ejemplos button:hover { border-color: var(--marca); color: var(--marca); opacity: 1; }
-
-  /* ── Vistas: la respuesta ocupa su propia pantalla ──────── */
-  section { animation: aparecer .45s ease both; }
-  @keyframes aparecer {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: none; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    section, .rueda { animation: none; }
-  }
-  .analizando { text-align: center; padding: 60px 20px; }
-  .analizando p { font-size: 19px; color: var(--tenue); margin: 18px 0 0; }
-  .rueda {
-    display: inline-block; width: 38px; height: 38px; border-radius: 50%;
-    border: 4px solid color-mix(in srgb, var(--marca) 22%, transparent);
-    border-top-color: var(--marca); animation: gira 1.4s linear infinite;
-  }
-  .volver-arriba {
-    background: none; border: 0; color: var(--marca); font: inherit; font-size: 15px;
-    padding: 0 0 18px; cursor: pointer; box-shadow: none; font-weight: 500;
-  }
-  #vista-resultado #otro { margin-top: 30px; }
-
-  /* ── Veredicto ──────────────────────────────────────────── */
-  #resultado { margin-top: 34px; }
-  .veredicto {
-    border-radius: 14px; padding: 18px 20px; display: flex; gap: 15px;
-    align-items: center; box-shadow: var(--sombra); border: 1px solid transparent;
-  }
-  .veredicto .icono { width: 40px; height: 40px; flex: none; display: grid; place-items: center; border-radius: 50%; }
-  .veredicto .icono svg { width: 23px; height: 23px; }
-  .veredicto h2 { margin: 0; font-size: 20px; letter-spacing: -0.015em; }
-  .veredicto p { margin: 3px 0 0; font-size: 14px; line-height: 1.5; opacity: .92; }
-  .barra { height: 5px; border-radius: 3px; background: currentColor; opacity: .18; margin-top: 12px; overflow: hidden; }
-  .barra i { display: block; height: 100%; background: currentColor; opacity: 1; border-radius: 3px; }
-
-  .v-alto  { background: var(--alto-fondo);  border-color: var(--alto-marca);  color: var(--alto); }
-  .v-medio { background: var(--medio-fondo); border-color: var(--medio-marca); color: var(--medio); }
-  .v-bajo  { background: var(--bajo-fondo);  border-color: var(--marca);       color: var(--bajo); }
-  .veredicto .icono { background: color-mix(in srgb, currentColor 16%, transparent); }
-  .veredicto h2, .veredicto p { color: var(--texto); }
-
-  .pasos-hacer {
-    margin-top: 18px; background: var(--papel); border: 1px solid var(--borde);
-    border-radius: 14px; padding: 18px 20px; box-shadow: var(--sombra);
-  }
-  .pasos-hacer h3 { margin: 0 0 12px; font-size: 16.5px; letter-spacing: -0.01em; }
-  .pasos-hacer ol { margin: 0; padding-left: 22px; }
-  .pasos-hacer li { margin-bottom: 9px; font-size: 15.5px; line-height: 1.55; }
-  .pasos-hacer li:last-child { margin-bottom: 0; }
-  .preguntas:not(:empty) {
-    margin-top: 16px; background: var(--papel); border: 1px solid var(--borde);
-    border-radius: 14px; padding: 18px 20px; box-shadow: var(--sombra);
-  }
-  .preguntas h3 { margin: 0 0 13px; font-size: 16.5px; letter-spacing: -0.01em; }
-  .preguntas .botones { display: flex; gap: 10px; flex-wrap: wrap; }
-  .preguntas .botones button {
-    flex: 1 1 auto; min-width: 150px; font-size: 15.5px; font-weight: 550;
-    padding: 13px 18px; background: var(--papel); color: var(--marca);
-    border: 1.5px solid var(--marca); border-radius: 10px; box-shadow: none;
-  }
-  .preguntas .respuesta p { margin: 0 0 11px; font-size: 15.5px; line-height: 1.6; }
-  .preguntas .respuesta p:last-child { margin-bottom: 0; }
-  .preguntas .respuesta.bien h3 { color: var(--marca); }
-  .preguntas .respuesta.urgente h3 { color: var(--alto); }
-  .preguntas .respuesta.ojo h3 { color: var(--medio); }
-  .preguntas .sin-culpa {
-    margin-top: 14px; padding: 12px 14px; background: var(--marca-suave);
-    border-radius: 9px; font-size: 15px;
-  }
-  button.atras {
-    display: block; margin: 14px auto 0; background: none; border: 0;
-    color: var(--tenue); font: inherit; font-size: 14px; text-decoration: underline;
-    cursor: pointer; padding: 6px; box-shadow: none; font-weight: 400;
-  }
-  button.atras:hover { color: var(--marca); }
-
-  .titulo-senales {
-    font-size: 13px; text-transform: uppercase; letter-spacing: .07em;
-    color: var(--tenue); font-weight: 700; margin: 26px 0 10px;
-  }
-
-  /* ── El mensaje con las señales subrayadas ──────────────── */
-  .lienzo {
-    margin-top: 18px; background: var(--papel); border: 1px solid var(--borde);
-    border-radius: 14px; padding: 18px 20px; box-shadow: var(--sombra);
-  }
-  .lienzo > .titulo {
-    font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em;
-    color: var(--tenue); font-weight: 700; margin-bottom: 12px;
-  }
-  .mensaje-marcado {
-    font-size: 15.5px; line-height: 2.1; white-space: pre-wrap; word-break: break-word;
-  }
-  mark {
-    background: var(--alto-marca); color: inherit; padding: 3px 2px 2px;
-    border-radius: 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;
-    cursor: pointer; transition: box-shadow .15s, filter .15s;
-  }
-  mark.m-medio { background: var(--medio-marca); }
-  mark.m-aviso { background: var(--info-marca); }
-  mark .num {
-    font-size: 10px; font-weight: 800; vertical-align: super;
-    margin-left: 3px; opacity: .75; letter-spacing: 0;
-  }
-  mark.activa { box-shadow: 0 0 0 2px currentColor; filter: brightness(1.04); }
-
-  /* ── Tarjetas de señal ──────────────────────────────────── */
-  ul.senales { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 9px; }
-  ul.senales li {
-    background: var(--papel); border: 1px solid var(--borde); border-left: 4px solid var(--alto);
-    border-radius: 11px; padding: 13px 15px; display: flex; gap: 12px;
-    cursor: pointer; transition: border-color .15s, transform .06s;
-  }
-  ul.senales li.s-medio { border-left-color: var(--medio); }
-  ul.senales li.s-aviso { border-left-color: var(--info); background: var(--info-fondo); }
-  ul.senales li:hover, ul.senales li.activa { border-color: var(--marca); transform: translateX(2px); }
-  .insignia {
-    width: 22px; height: 22px; flex: none; border-radius: 50%; display: grid; place-items: center;
-    font-size: 11.5px; font-weight: 800; background: var(--alto-marca); color: var(--alto);
-  }
-  li.s-medio .insignia { background: var(--medio-marca); color: var(--medio); }
-  li.s-aviso .insignia { background: var(--info-marca); color: var(--info); }
-  .senal-cuerpo { flex: 1; min-width: 0; }
-  .senal-cuerpo .nombre { font-weight: 620; font-size: 14.5px; margin-bottom: 2px; }
-  .senal-cuerpo .detalle { font-size: 14px; line-height: 1.55; color: var(--tenue); }
-  .senal-cuerpo .fuente {
-    font: 12.5px ui-monospace, SFMono-Regular, Menlo, monospace;
-    color: var(--tenue); margin-top: 6px; word-break: break-all; display: block;
-  }
-  .remate { margin-top: 16px; font-size: 14px; color: var(--tenue); line-height: 1.6; }
-
-  /* ── Contribuir ─────────────────────────────────────────── */
-  #contribuir { margin-top: 26px; }
-  .caja { background: var(--papel); border: 1px solid var(--borde); border-radius: 14px; padding: 18px 20px; box-shadow: var(--sombra); }
-  .caja h3 { margin: 0 0 6px; font-size: 15.5px; }
-  .caja > p { margin: 0 0 14px; font-size: 14px; color: var(--tenue); line-height: 1.55; }
-  #limpio { min-height: 96px; font: 13.5px/1.65 ui-monospace, SFMono-Regular, Menlo, monospace; }
-  .cambios { font-size: 13px; color: var(--tenue); margin: 9px 0 0; padding: 9px 12px; background: var(--marca-suave); border-radius: 8px; }
-  .ojo { font-size: 13px; line-height: 1.55; margin: 11px 0 0; padding: 10px 12px; background: var(--medio-fondo); border-radius: 8px; }
-  .campos { display: flex; gap: 13px; flex-wrap: wrap; margin-top: 13px; }
-  .campos label { font-size: 13px; color: var(--tenue); display: flex; flex-direction: column; gap: 5px; }
-  .campos select { font: inherit; font-size: 14px; color: var(--texto); background: var(--papel); border: 1px solid var(--borde); border-radius: 8px; padding: 7px 10px; }
-  .exito { margin-top: 13px; padding: 11px 14px; border-radius: 9px; background: var(--marca-suave); font-size: 14px; line-height: 1.55; }
-  .fallo { margin-top: 13px; padding: 11px 14px; border-radius: 9px; background: var(--alto-fondo); font-size: 14px; line-height: 1.55; }
-
-  footer { margin-top: 52px; padding-top: 20px; border-top: 1px solid var(--borde); font-size: 13.5px; color: var(--tenue); line-height: 1.9; }
-  footer a { color: var(--marca); text-decoration-color: color-mix(in srgb, var(--marca) 35%, transparent); }
-  [hidden] { display: none !important; }
-
-/* Aviso de envío. Tiene que leerse, no esconderse: por eso va junto al
-   botón y no en el pie. Pero sin alarma — quien llega ya está asustado. */
-.aviso-envio {
-  margin: 14px 0 0;
-  padding: 12px 14px;
-  font-size: .86rem;
-  line-height: 1.55;
-  color: var(--tenue);
-  background: var(--marca-suave);
-  border-left: 3px solid var(--marca);
-  border-radius: 0 8px 8px 0;
+  --serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --sans:  "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
-.aviso-envio strong { color: var(--texto); font-weight: 600; }
-.aviso-envio a { color: var(--marca); white-space: nowrap; }
 
-/* Repreguntas. Se ofrecen sugerencias porque quien está nervioso no sabe qué
-   preguntar, y un cuadro de texto en blanco lo deja parado. */
-.conversar {
-  margin: 22px 0 0;
-  padding: 18px 20px;
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--arena);
+  color: var(--texto);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--azul); text-decoration: none; }
+a:hover { color: var(--azul-hondo); text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--azul); outline-offset: 2px; border-radius: 4px; }
+
+.envoltura { max-width: 540px; margin: 0 auto; padding: 22px 16px 40px; }
+
+/* La tarjeta es el microsite entero: fondo blanco sobre la arena. */
+.tarjeta {
+  background: var(--papel);
   border: 1px solid var(--borde);
-  border-radius: 12px;
-  background: var(--marca-suave);
+  border-radius: 14px;
+  box-shadow: var(--sombra);
+  overflow: hidden;
 }
-.conversar h3 { margin: 0 0 12px; font-size: 1rem; }
-.conversar .fila { gap: 8px; }
-.conversar input {
-  flex: 1; min-width: 0; padding: 11px 13px; font: inherit;
-  color: var(--texto); background: var(--papel);
-  border: 1px solid var(--borde); border-radius: 9px;
+.acolchado { padding: 26px 24px 24px; }
+
+/* ── Cabecera ────────────────────────────────────────────────── */
+header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+.marca-fila { display: flex; align-items: center; gap: 10px; }
+.marca-fila svg { width: 26px; height: 26px; color: var(--azul); flex: none; }
+h1 { margin: 0; font: 500 27px/1 var(--serif); letter-spacing: -.01em; }
+.lema { margin: 0 0 22px; font: 400 16px/1.5 var(--sans); color: #4b5560; text-wrap: pretty; }
+.lema strong { font-weight: 600; color: var(--texto); }
+
+/* ── Entrada ─────────────────────────────────────────────────── */
+textarea#mensaje {
+  display: block; width: 100%; min-height: 104px; resize: vertical;
+  border: 1px solid var(--borde); border-radius: 12px; padding: 15px 16px;
+  background: var(--papel-suave); color: var(--texto);
+  font: 400 16px/1.55 var(--sans);
 }
-.conversar input::placeholder { color: var(--tenue); }
-.sugerencias { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.sugerencias button {
-  padding: 8px 13px; font-size: .87rem; font-family: inherit; cursor: pointer;
-  color: var(--marca); background: var(--papel);
-  border: 1px solid var(--borde); border-radius: 999px;
+textarea#mensaje::placeholder { color: var(--marcador); }
+textarea#mensaje:focus {
+  outline: none; border: 1.5px solid var(--azul); background: var(--papel);
+  box-shadow: 0 0 0 3px var(--azul-suave);
 }
-.sugerencias button:hover { border-color: var(--marca); }
-.miniatura {
-  display: block; margin: 0 auto 22px; max-width: 190px; max-height: 240px;
-  border-radius: 12px; border: 1px solid var(--borde); box-shadow: var(--sombra);
+
+.contador { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+.contador span { font: 400 12.5px/1 var(--sans); color: var(--etiqueta); }
+.enlace {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font: 500 13px/1 var(--sans); color: var(--azul);
 }
-.lo-analizado {
-  display: flex; align-items: center; gap: 12px;
-  margin: 4px 0 18px; padding: 10px 12px;
-  border: 1px solid var(--borde); border-radius: 12px; background: var(--marca-suave);
-  font-size: .87rem; color: var(--tenue);
-}
-.lo-analizado img {
-  width: 46px; height: 46px; object-fit: cover; object-position: top;
-  border-radius: 8px; border: 1px solid var(--borde); flex: none;
-}
-#verEnvio { margin: 4px 0 14px; }
-.reservado {
-  padding: 11px 13px; border-radius: 9px;
-  background: var(--marca-suave); border-left: 3px solid var(--marca);
-  font-size: .9rem;
-}
-#verEnvio summary {
-  cursor: pointer; padding: 9px 0; font-size: .89rem; color: var(--marca);
-}
-#verEnvio[open] summary { margin-bottom: 8px; }
-#enviar.grande { flex: 2 1 200px; }
-/* Zona de entrada. Un solo sitio donde arrastrar, pegar o tocar. */
+.enlace:hover { color: var(--azul-hondo); text-decoration: underline; }
+
 .zona {
-  margin: 4px 0 18px; padding: 26px 20px;
-  border: 2px dashed var(--borde); border-radius: 16px;
-  background: var(--marca-suave); text-align: center;
+  margin-top: 12px; padding: 16px; text-align: center;
+  border: 1px dashed #d8d4ce; border-radius: 12px; background: var(--papel-tenue);
   transition: border-color .15s, background .15s;
 }
-.zona.encima { border-color: var(--marca); border-style: solid; }
-.zona-icono { width: 40px; height: 40px; color: var(--marca); opacity: .75; }
-.zona-titulo { margin: 8px 0 2px; font-size: 1.02rem; font-weight: 600; color: var(--texto); }
-.zona-sub { margin: 0 0 16px; font-size: .88rem; color: var(--tenue); }
-.zona .opciones { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 0; }
-#zonaImagen { display: flex; align-items: center; gap: 16px; text-align: left; }
-#previa {
-  width: 84px; height: 84px; flex: none; object-fit: cover; object-position: top;
-  border-radius: 10px; border: 1px solid var(--borde);
-}
-.zona-datos b { display: block; color: var(--texto); }
-.zona-datos span { font-size: .85rem; color: var(--tenue); }
-.zona-acciones { display: flex; gap: 14px; margin-top: 8px; }
-#analizar.principal { flex: 2 1 220px; font-size: 1.05rem; }
-#analizar:disabled { opacity: .45; cursor: not-allowed; }
+.zona.encima { border-color: var(--azul); border-style: solid; background: var(--azul-panel); }
+.zona p { margin: 0 0 12px; font: 400 13.5px/1.5 var(--sans); color: var(--tenue-mas); }
+.zona .opciones { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
 
-/* Hilo de repreguntas: cada intercambio se queda, no reemplaza al anterior. */
-.intercambio { margin: 16px 0 0; }
-.intercambio .yo {
-  margin: 0 0 8px; padding: 10px 14px;
-  background: var(--marca-suave); border-radius: 14px 14px 14px 4px;
-  font-weight: 600; color: var(--texto); display: inline-block; max-width: 90%;
+#zonaImagen { display: flex; align-items: center; gap: 14px; text-align: left; }
+#previa {
+  width: 74px; height: 74px; flex: none; object-fit: cover; object-position: top;
+  border-radius: 9px; border: 1px solid var(--borde);
 }
-.intercambio .el {
-  margin: 0; padding: 14px 16px;
-  background: var(--papel); border: 1px solid var(--borde); border-radius: 12px;
-  line-height: 1.6;
+.zona-datos b { display: block; font: 600 14.5px/1.3 var(--sans); }
+.zona-datos span { font: 400 12.5px/1.4 var(--sans); color: var(--etiqueta); }
+.zona-acciones { display: flex; gap: 14px; margin-top: 7px; }
+
+/* ── Botones ─────────────────────────────────────────────────── */
+button { font-family: var(--sans); cursor: pointer; }
+
+.principal {
+  flex: 1; padding: 17px; border: none; border-radius: 11px;
+  font: 600 17px/1 var(--sans);
+  background: var(--azul); color: #fff; box-shadow: var(--sombra-boton);
 }
-.intercambio .el ol { margin: 10px 0 0; padding-left: 20px; }
-.intercambio .el li { margin: 5px 0; }
-/* Lo que el modelo necesita saber. Va destacado porque contestarlo es lo
-   que convierte un consejo genérico en uno que sirve. */
+.principal:hover:not(:disabled) { background: var(--azul-hondo); }
+.principal:disabled { background: var(--apagado); color: var(--apagado-texto); box-shadow: none; cursor: not-allowed; }
+
+.secundario {
+  padding: 17px 18px; border: 1px solid var(--borde); border-radius: 11px;
+  font: 500 15px/1 var(--sans); background: var(--papel); color: var(--tenue-mas);
+}
+.secundario:hover { border-color: var(--azul-linea); color: var(--texto); }
+
+.pastilla {
+  padding: 13px 16px; border: 1px solid var(--azul-linea); border-radius: 9px;
+  font: 500 14px/1 var(--sans); background: var(--papel); color: var(--azul);
+}
+.pastilla:hover { background: var(--azul-panel); border-color: var(--azul); }
+.pastilla.grave { border-color: var(--alto-borde); color: var(--alto); }
+.pastilla.grave:hover { background: var(--alto-fondo); border-color: var(--alto); }
+
+.fila { display: flex; gap: 10px; margin-top: 16px; }
+
+/* ── Promesa y avisos ────────────────────────────────────────── */
+.promesa {
+  display: flex; align-items: flex-start; gap: 9px;
+  margin: 18px 0 0; padding-top: 16px; border-top: 1px solid var(--borde-tenue);
+}
+.promesa svg { width: 17px; height: 17px; flex: none; margin-top: 3px; color: var(--azul); }
+.promesa p { margin: 0; font: 400 13.5px/1.55 var(--sans); color: var(--tenue); text-wrap: pretty; }
+.promesa strong { color: var(--azul); font-weight: 600; }
+
+.rotulo {
+  margin: 0 0 8px;
+  font: 700 12.5px/1 var(--sans); letter-spacing: .06em; text-transform: uppercase;
+  color: var(--etiqueta);
+}
+
+/* ── Ejemplos ────────────────────────────────────────────────── */
+.ejemplos { margin-top: 20px; }
+.ejemplos .fichas { display: flex; flex-wrap: wrap; gap: 7px; }
+.ejemplos button {
+  padding: 9px 12px; border: 1px solid var(--borde); border-radius: 20px;
+  font: 400 13px/1 var(--sans); background: var(--papel); color: #4b5560;
+}
+.ejemplos button:hover { border-color: var(--azul); color: var(--azul); }
+
+/* ── Revisando ───────────────────────────────────────────────── */
+.revisando { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 38px 10px 30px; }
+.puntos { display: flex; gap: 7px; margin-bottom: 22px; }
+.puntos span { width: 10px; height: 10px; border-radius: 50%; background: var(--azul); animation: pulso 1.2s ease-in-out infinite; }
+.puntos span:nth-child(2) { animation-delay: .2s; }
+.puntos span:nth-child(3) { animation-delay: .4s; }
+@keyframes pulso { 0%, 100% { opacity: .35 } 50% { opacity: 1 } }
+.revisando h2 { margin: 0 0 10px; font: 400 22px/1.35 var(--serif); color: var(--texto); }
+.revisando p { margin: 0; max-width: 280px; font: 400 14px/1.6 var(--sans); color: var(--tenue-mas); text-wrap: pretty; }
+#miniaturaEspera { max-width: 140px; max-height: 180px; border-radius: 10px; border: 1px solid var(--borde); margin-bottom: 22px; }
+.mientras { margin-top: 4px; padding-top: 16px; border-top: 1px solid var(--borde-tenue); }
+.mientras p { margin: 0; font: 400 13.5px/1.6 var(--sans); color: var(--tenue); text-wrap: pretty; }
+.mientras strong { font-weight: 600; }
+
+/* ── Veredicto ───────────────────────────────────────────────── */
+.salidas { padding: 18px 24px 0; display: flex; flex-wrap: wrap; gap: 16px; }
+
+.veredicto { margin: 16px 0 0; padding: 22px 24px; border-top: 1px solid; border-bottom: 1px solid; }
+.veredicto h2 { margin: 0 0 10px; font: 500 26px/1.22 var(--serif); color: var(--texto); letter-spacing: -.01em; text-wrap: pretty; }
+.veredicto p { margin: 0; font: 400 15.5px/1.6 var(--sans); text-wrap: pretty; }
+.ceja { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.ceja svg { width: 18px; height: 18px; flex: none; }
+.ceja span { font: 600 11.5px/1 var(--sans); letter-spacing: .07em; text-transform: uppercase; }
+
+.v-alto  { background: var(--alto-fondo);  border-color: var(--alto-borde); }
+.v-alto  p, .v-alto .ceja span, .v-alto .ceja svg { color: var(--alto-texto); }
+.v-alto  .ceja span, .v-alto .ceja svg { color: var(--alto); }
+.v-medio { background: var(--medio-fondo); border-color: var(--medio-borde); }
+.v-medio p { color: #6b5220; }
+.v-medio .ceja span, .v-medio .ceja svg { color: var(--medio); }
+.v-bajo  { background: var(--azul-suave);  border-color: var(--azul-borde); }
+.v-bajo  p { color: var(--azul-texto); }
+.v-bajo  .ceja span, .v-bajo .ceja svg { color: var(--azul-medio); }
+
+/* ── Lo revisado, con lo sospechoso subrayado ────────────────── */
+.revisado {
+  border: 1px solid var(--borde); border-radius: 11px; padding: 14px 15px;
+  background: var(--papel-tenue);
+  font: 400 14.5px/1.7 var(--sans); color: var(--texto-medio);
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.revisado mark { color: var(--texto); border-radius: 2px; padding: 0 2px; }
+.revisado mark.m-alto  { background: var(--alto-fondo); border-bottom: 2px solid #d08c76; }
+.revisado mark.m-medio { background: #fdf3e2; border-bottom: 2px solid #d6ab5e; }
+.revisado mark.m-aviso { background: var(--azul-suave); border-bottom: 2px solid #7ba3c6; }
+.con-miniatura { display: flex; gap: 12px; align-items: flex-start; }
+.con-miniatura img {
+  width: 56px; height: 56px; flex: none; object-fit: cover; object-position: top;
+  border-radius: 8px; border: 1px solid var(--borde);
+}
+
+/* ── Señales ─────────────────────────────────────────────────── */
+.senales { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.senales li { border: 1px solid; border-left-width: 3px; border-radius: 10px; padding: 14px 15px; }
+.senales .nombre { margin: 0 0 5px; font: 600 15px/1.35 var(--sans); color: var(--texto); }
+.senales .detalle { margin: 0; font: 400 14px/1.6 var(--sans); color: var(--tenue); text-wrap: pretty; }
+.senales li.s-alto  { border-color: var(--alto-borde);  border-left-color: var(--alto);       background: var(--alto-tarjeta); }
+.senales li.s-medio { border-color: var(--medio-borde); border-left-color: var(--medio);      background: var(--medio-fondo); }
+.senales li.s-aviso { border-color: var(--azul-borde);  border-left-color: var(--azul-medio); background: #f4f8fc; }
+.insignia {
+  display: inline-block; margin-right: 7px; vertical-align: 1px;
+  font: 600 10px/1 var(--sans); letter-spacing: .07em; text-transform: uppercase;
+  color: var(--azul-medio); border: 1px solid var(--azul-borde); border-radius: 4px; padding: 3px 5px;
+}
+
+/* ── Pasos ───────────────────────────────────────────────────── */
+.pasos { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.pasos li { display: flex; gap: 12px; }
+.pasos .num {
+  flex: none; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--azul); color: #fff;
+  font: 600 13px/26px var(--sans); text-align: center;
+}
+.pasos p { margin: 0; font: 400 15px/1.55 var(--sans); color: var(--texto-medio); text-wrap: pretty; }
+.urgente .num { background: var(--alto); }
+
+/* ── Pregunta del modelo, con respuestas de un toque ─────────── */
 .pide {
-  margin: 18px 0; padding: 16px 18px;
-  border: 1px solid var(--borde); border-left: 4px solid var(--marca);
-  border-radius: 0 12px 12px 0; background: var(--marca-suave);
+  margin-top: 24px; border: 1px solid var(--azul-linea); border-radius: 12px;
+  padding: 18px 17px; background: var(--azul-panel);
 }
-.pide h3 { margin: 0 0 8px; font-size: 1rem; }
-.pide ul, .pide-hilo { margin: 0; padding-left: 20px; }
-.pide li, .pide-hilo li { margin: 6px 0; font-weight: 600; color: var(--texto); }
-.pide-hilo { margin-top: 10px; }
-.salidas { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
-.salidas button { flex: 1 1 auto; }
-.cuota { margin: 12px 0 0; font-size: .84rem; color: var(--tenue); }
-.cuota.ultima { color: var(--medio); font-weight: 600; }
-@media (max-width: 480px) {
-  .conversar .fila { flex-direction: column; }
-  .conversar .fila button { width: 100%; }
+.pide .rotulo { color: var(--azul-medio); font-weight: 600; font-size: 11.5px; }
+.pide .cuestion { margin: 0 0 15px; font: 400 19px/1.4 var(--serif); color: var(--texto); text-wrap: pretty; }
+.pide .cuestion + .cuestion { margin-top: -6px; }
+.respuestas { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.caja-responder { display: flex; gap: 8px; }
+.caja-responder input {
+  flex: 1; min-width: 0; padding: 14px; border: 1px solid #dfe4e9; border-radius: 9px;
+  background: var(--papel); color: var(--texto); font: 400 14.5px/1 var(--sans);
+}
+.caja-responder input::placeholder { color: var(--marcador); }
+.caja-responder button {
+  padding: 14px 16px; border: none; border-radius: 9px;
+  font: 600 14.5px/1 var(--sans); background: var(--azul); color: #fff;
+}
+.caja-responder button:disabled { background: var(--apagado); color: var(--apagado-texto); cursor: not-allowed; }
+.cuota { margin: 12px 0 0; font: 400 13px/1.55 var(--sans); color: var(--tenue); text-wrap: pretty; }
+.cuota.ultima { color: var(--medio); font-weight: 500; }
+
+/* ── Hilo de la conversación ─────────────────────────────────── */
+.intercambio { margin-top: 22px; }
+.dicho { display: flex; justify-content: flex-end; margin-bottom: 18px; }
+.dicho span {
+  max-width: 78%; padding: 12px 15px; border-radius: 14px 14px 4px 14px;
+  background: var(--azul-suave); color: var(--texto);
+  font: 400 15px/1.5 var(--sans);
+}
+
+/* ── Aportar ─────────────────────────────────────────────────── */
+.aportar { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--borde-tenue); }
+.aportar > p { margin: 0 0 12px; font: 400 14px/1.6 var(--sans); color: var(--tenue); text-wrap: pretty; }
+.reservado {
+  margin: 0 0 14px; padding: 11px 13px; border-radius: 9px;
+  background: var(--azul-suave); border-left: 3px solid var(--azul-medio);
+  font: 400 13.5px/1.55 var(--sans); color: var(--azul-texto);
+}
+.reservado strong { color: var(--texto); font-weight: 600; }
+#limpio {
+  display: block; width: 100%; min-height: 110px; resize: vertical;
+  border: 1px solid var(--borde); border-radius: 10px; padding: 12px 13px;
+  background: var(--papel-suave); color: var(--texto-medio);
+  font: 400 14px/1.6 var(--sans);
+}
+.cambios { margin: 8px 0 0; font: 400 13px/1.5 var(--sans); color: var(--etiqueta); }
+.campos { display: flex; gap: 10px; margin: 14px 0; flex-wrap: wrap; }
+.campos label { flex: 1 1 140px; font: 500 13px/1.4 var(--sans); color: var(--etiqueta); }
+.campos select {
+  display: block; width: 100%; margin-top: 5px; padding: 10px 11px;
+  border: 1px solid var(--borde); border-radius: 9px;
+  background: var(--papel); color: var(--texto); font: 400 14.5px/1 var(--sans);
+}
+.ojo { margin: 0 0 14px; font: 400 13.5px/1.55 var(--sans); color: var(--tenue); text-wrap: pretty; }
+.ojo strong { color: var(--texto); font-weight: 600; }
+.remate { margin: 12px 0 0; font: 400 13px/1.55 var(--sans); color: var(--etiqueta); text-wrap: pretty; }
+.remate.fallo { color: var(--alto); }
+.remate.exito { color: #2c6e49; }
+
+footer {
+  margin: 22px 4px 0;
+  font: 400 12.5px/1.7 var(--sans); color: var(--tenue-mas); text-wrap: pretty;
+}
+footer a { color: var(--azul-medio); }
+
+[hidden] { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+@media (max-width: 460px) {
+  .envoltura { padding: 14px 10px 30px; }
+  .acolchado { padding: 22px 18px 20px; }
+  .veredicto { padding: 20px 18px; }
+  .salidas { padding: 16px 18px 0; }
+  .fila { flex-wrap: wrap; }
+  .fila .secundario { flex: 1; }
+  .veredicto h2 { font-size: 23px; }
+  .caja-responder { flex-direction: column; }
+  .caja-responder button { width: 100%; }
 }
 </style>
 </head>
 <body>
 <div class="envoltura">
+<div class="tarjeta">
 
-  <header>
-    <div class="marca-fila">
-      <!--
-        Un solo trazo: empieza como la C de Constata y termina en el visto de
-        algo comprobado. Sin relleno y sin color propio, hereda el del texto,
-        así que sirve igual en claro, en oscuro y en blanco y negro.
-      -->
-      <div class="escudo" aria-hidden="true">
-        <svg viewBox="0 0 100 100" fill="none" stroke="#fff" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- ═══ INICIO ═══════════════════════════════════════════════ -->
+  <section id="vista-inicio" class="acolchado">
+    <header>
+      <div class="marca-fila">
+        <!--
+          Un solo trazo: empieza como la C de Constata y termina en el visto
+          de algo comprobado. Sin relleno y sin color propio, hereda el del
+          texto, así que sirve en claro, en oscuro y en blanco y negro.
+        -->
+        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M76 28a31 31 0 1 0-14 51l9 11 21-27"/>
         </svg>
+        <h1>Constata</h1>
       </div>
-      <h1>Constata</h1>
+    </header>
+
+    <p class="lema"><strong>¿Crees que es una estafa?</strong> Pégalo aquí y te digo qué es y qué hacer.</p>
+
+    <label class="rotulo" for="mensaje" hidden>El mensaje</label>
+    <textarea id="mensaje" placeholder="Pega o escribe aquí el mensaje…"></textarea>
+
+    <div class="contador">
+      <span id="cuentaLetras"></span>
+      <button type="button" class="enlace" id="pegar">Pegar del portapapeles</button>
     </div>
+
     <!--
-      El nombre es también el verbo, y por eso la frase cierra sola: no
-      explica lo que hace la herramienta, dice qué hacer.
+      Adjuntar y revisar son dos actos separados. Antes, elegir una captura
+      disparaba el análisis solo: no se veía qué se había subido y el botón
+      quedaba sin sentido porque ya había pasado todo.
     -->
-    <p class="lema"><strong>¿Crees que es una estafa?</strong> Constata.</p>
-    <p class="sublema">Pégalo o súbelo. En segundos sabes qué es y cuál es tu siguiente paso.</p>
-    <p class="promesa" id="promesa">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/>
-      </svg>
-      <span><strong>Nadie más va a ver tu mensaje.</strong> Se revisa aquí mismo, en tu teléfono. No se envía a ninguna parte, no se guarda, y no hace falta registrarse.</span>
-    </p>
-  </header>
-
-  <section id="vista-inicio">
-  <p class="instruccion">Pon aquí el mensaje o la captura. Te digo qué es y qué hacer.</p>
-
-  <!--
-    Adjuntar y revisar son dos actos separados, a propósito.
-    Antes, elegir una captura disparaba el análisis solo: no se veía qué se
-    había subido, y el botón «Revisar» quedaba sin sentido porque ya había
-    pasado todo. Ahora primero se ve la miniatura, se comprueba que es la
-    correcta, y después se decide.
-  -->
-  <div id="zona" class="zona">
-    <div id="zonaVacia">
-      <svg class="zona-icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.6"/><path d="m4 17 5-4.5 4 3.5 3-2.5 4 3.5"/></svg>
-      <p class="zona-titulo">Arrastra aquí tu captura</p>
-      <p class="zona-sub">o pégala, o tócala para buscarla</p>
-      <div class="opciones">
-        <button id="subir" type="button" class="grande">Elegir una captura</button>
-        <button id="pegar" type="button" class="grande secundaria">Pegar</button>
+    <div id="zona" class="zona">
+      <div id="zonaVacia">
+        <p id="ayudaPegar">Si no logras copiar el mensaje, sube una foto de la pantalla.</p>
+        <div class="opciones">
+          <button type="button" class="pastilla" id="subir">Elegir una captura</button>
+          <button type="button" class="pastilla" id="pegarImagen">Pegar imagen</button>
+        </div>
       </div>
-    </div>
-
-    <div id="zonaImagen" hidden>
-      <img id="previa" alt="Captura que vas a revisar">
-      <div class="zona-datos">
-        <b>Captura lista</b>
-        <span id="pesoImagen"></span>
-        <div class="zona-acciones">
-          <button id="cambiarImagen" type="button" class="enlace">Cambiar</button>
-          <button id="quitarImagen" type="button" class="enlace">Quitar</button>
+      <div id="zonaImagen" hidden>
+        <img id="previa" alt="Captura que vas a revisar">
+        <div class="zona-datos">
+          <b>Captura lista</b>
+          <span id="pesoImagen"></span>
+          <div class="zona-acciones">
+            <button type="button" class="enlace" id="cambiarImagen">Cambiar</button>
+            <button type="button" class="enlace" id="quitarImagen">Quitar</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  <input type="file" id="archivo" accept="image/*" hidden>
+    <input type="file" id="archivo" accept="image/*" hidden>
 
-  <p class="ayuda" id="ayudaPegar">Si no logras copiar el mensaje, toma una foto de la pantalla y súbela.</p>
-
-  <label class="etiqueta" for="mensaje">O escribe el mensaje aquí</label>
-  <textarea id="mensaje" placeholder="Pega o escribe aquí el mensaje…"></textarea>
-
-  <div class="fila">
-    <button id="analizar" class="principal" disabled>Revisar</button>
-    <button id="limpiar" class="secundario">Borrar</button>
-  </div>
-
-  <!--
-    El aviso va pegado al botón, no escondido en un pie de página.
-    Se lee justo antes de decidir, que es cuando sirve de algo.
-  -->
-  <p class="aviso-envio">
-    Al revisar, el mensaje sale de tu dispositivo y se analiza. No se guarda.
-    <strong>Quita los nombres propios.</strong>
-    <a href="https://github.com/luisfernandomedh/constata/blob/main/ANALISIS.md" target="_blank" rel="noopener">Cómo funciona</a> ·
-    <a href="https://github.com/luisfernandomedh/constata/blob/main/INSTRUCCIONES.md" target="_blank" rel="noopener">Lo que le decimos al modelo</a>
-  </p>
-
-  <div class="ejemplos">
-    <p>O prueba con un ejemplo real</p>
-    <div id="ejemplos"></div>
-  </div>
-
-  </section>
-
-
-  <section id="vista-analizando" hidden>
-    <div class="analizando">
-      <img id="miniaturaEspera" class="miniatura" alt="" hidden>
-      <span class="rueda"></span>
-      <p id="textoAnalizando">Revisando el mensaje…</p>
-    </div>
-  </section>
-
-  <section id="vista-resultado" hidden>
-    <!--
-      Estas dos salidas van arriba y siempre visibles. Quien acaba de ver un
-      veredicto suele tener otra captura en la mano, y obligarle a bajar hasta
-      el final para encontrar cómo seguir es hacerle perder el hilo.
-    -->
-    <div class="salidas">
-      <button id="volver" class="volver-arriba">← Revisar otro mensaje</button>
-      <button id="subirOtra" class="volver-arriba">Subir otra captura</button>
-    </div>
-  <!-- Se ve qué se analizó. Sin esto no hay forma de saber si subió la
-       captura correcta, y con varias en el carrete es fácil equivocarse. -->
-  <div id="loAnalizado" class="lo-analizado" hidden>
-    <img id="miniaturaResultado" alt="Captura que se analizó">
-    <span>Esto es lo que revisé</span>
-  </div>
-  <div id="resultado" aria-live="polite"></div>
-  <div id="hilo"></div>
-
-  <!--
-    Tres repreguntas y se acaba. No es tacañería: quien está asustado se
-    engancha a preguntar y no actúa, y cada vuelta consume cupo de todos.
-    Tres alcanzan para lo que de verdad cambia el consejo.
-  -->
-  <div id="conversar" class="conversar" hidden>
-    <h3>¿Quieres preguntarme algo más?</h3>
-    <div id="sugerencias" class="sugerencias"></div>
     <div class="fila">
-      <input id="repregunta" type="text" autocomplete="off"
-             placeholder="Escribe tu pregunta…" maxlength="400">
-      <button id="preguntar">Preguntar</button>
+      <button id="analizar" class="principal" disabled>Revisar</button>
+      <button id="limpiar" class="secundario">Borrar</button>
     </div>
-    <p class="cuota" id="cuota"></p>
-  </div>
 
-  <p class="invitacion" id="abrirContribuir" hidden>
-    <button class="enlace" id="botonContribuir">¿Nos ayudas? Dona este ejemplo para mejorar la herramienta</button>
-  </p>
+    <div class="promesa" id="promesa">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+      </svg>
+      <p><strong>Sin cuenta y sin registro.</strong> Para revisarlo, el mensaje se manda a un servicio de análisis y no se guarda en ningún lado. Quita los nombres propios antes.
+        <a href="https://github.com/luisfernandomedh/constata/blob/main/ANALISIS.md" target="_blank" rel="noopener">Cómo funciona</a> ·
+        <a href="https://github.com/luisfernandomedh/constata/blob/main/INSTRUCCIONES.md" target="_blank" rel="noopener">Lo que le decimos al modelo</a>
+      </p>
+    </div>
 
-  <div id="contribuir" hidden>
-    <div class="caja">
-      <h3>¿Nos ayudas a mejorar esto?</h3>
-      <p>Ninguna herramienta extranjera reconoce al Banco Pichincha ni al SRI, porque no existe una colección de estafas en español de la región. Tu ejemplo ayuda a llenar ese vacío — sin cuenta y sin registrarte.</p>
-      <p class="reservado"><strong>Esto no se publica.</strong> Va a una colección cerrada que solo ve Constata, y sirve para una cosa: que la herramienta reconozca mejor los engaños que circulan aquí.</p>
+    <div class="ejemplos">
+      <p class="rotulo">O prueba con un ejemplo</p>
+      <div class="fichas" id="ejemplos"></div>
+    </div>
+  </section>
 
+  <!-- ═══ REVISANDO ════════════════════════════════════════════ -->
+  <section id="vista-analizando" class="acolchado" hidden>
+    <header><div class="marca-fila">
+      <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M76 28a31 31 0 1 0-14 51l9 11 21-27"/></svg>
+      <h1>Constata</h1>
+    </div></header>
+
+    <div class="revisando">
+      <img id="miniaturaEspera" alt="" hidden>
+      <div class="puntos" aria-hidden="true"><span></span><span></span><span></span></div>
+      <h2 id="textoAnalizando">Revisando el mensaje…</h2>
+      <p>Toma unos segundos.</p>
+    </div>
+
+    <div class="mientras">
+      <p>Mientras tanto: <strong>no contestes el mensaje</strong> ni toques ningún enlace que traiga.</p>
+    </div>
+  </section>
+
+  <!-- ═══ RESULTADO ════════════════════════════════════════════ -->
+  <section id="vista-resultado" hidden>
+    <div class="salidas">
+      <button type="button" class="enlace" id="volver">← Revisar otro mensaje</button>
+      <button type="button" class="enlace" id="subirOtra">Subir otra captura</button>
+    </div>
+
+    <div id="resultado" aria-live="polite"></div>
+    <div id="hilo"></div>
+
+    <div class="acolchado" style="padding-top:0">
       <!--
-        El texto va plegado, no fuera. Enseñar un muro de texto extraído
-        confunde y hace que la gente abandone el aporte. Pero sigue estando
-        a un toque, porque nadie debería enviar a un sitio público algo que
-        no pudo mirar.
+        Tres repreguntas y se acaba. Quien está asustado se engancha a
+        preguntar en vez de actuar, y cada vuelta gasta cupo de todos.
       -->
-      <details id="verEnvio" open>
-        <summary>Esto es exactamente lo que se enviaría</summary>
+      <div id="conversar" hidden>
+        <div class="pide">
+          <p class="rotulo" id="tituloConversar">¿Quieres preguntarme algo más?</p>
+          <div class="respuestas" id="sugerencias"></div>
+          <div class="caja-responder">
+            <input id="repregunta" type="text" autocomplete="off" placeholder="Escribe tu respuesta…" maxlength="400">
+            <button type="button" id="preguntar">Enviar</button>
+          </div>
+          <p class="cuota" id="cuota"></p>
+        </div>
+      </div>
+
+      <div class="aportar" id="abrirContribuir" hidden>
+        <p>¿Nos ayudas? Dona este ejemplo para que la herramienta reconozca mejor este tipo de mensaje. Verás el texto ya limpio antes de enviarlo.</p>
+        <button type="button" class="pastilla" id="botonContribuir">Donar este ejemplo</button>
+      </div>
+
+      <div class="aportar" id="contribuir" hidden>
+        <p class="reservado"><strong>Esto no se publica.</strong> Va a una colección cerrada que solo ve Constata, y sirve para una cosa: que la herramienta reconozca mejor los engaños que circulan aquí.</p>
+
+        <p class="rotulo">Esto es exactamente lo que se enviaría</p>
         <textarea id="limpio" spellcheck="false"></textarea>
         <p class="cambios" id="cambios"></p>
-      </details>
 
-      <div class="campos">
-        <label>Qué es
-          <select id="etiqueta">
-            <option value="estafa">Una estafa</option>
-            <option value="legitimo">Un mensaje legítimo</option>
-          </select>
-        </label>
-        <label>Por dónde llegó
-          <select id="canal">
-            <option value="sms">SMS</option><option value="whatsapp">WhatsApp</option>
-            <option value="correo">Correo</option><option value="llamada">Llamada</option>
-            <option value="red-social">Red social</option><option value="otro">Otro</option>
-          </select>
-        </label>
+        <div class="campos">
+          <label>Qué es
+            <select id="etiqueta">
+              <option value="estafa">Una estafa</option>
+              <option value="legitimo">Un mensaje legítimo</option>
+            </select>
+          </label>
+          <label>Por dónde llegó
+            <select id="canal">
+              <option value="sms">SMS</option><option value="whatsapp">WhatsApp</option>
+              <option value="correo">Correo</option><option value="llamada">Llamada</option>
+              <option value="red-social">Red social</option><option value="otro">Otro</option>
+            </select>
+          </label>
+        </div>
+
+        <p class="ojo">Se envía solo el <strong>texto</strong>, nunca tu imagen. Ya se le quitaron correos, teléfonos, montos y fechas — pero <strong>la limpieza no detecta nombres propios</strong>. Léelo y borra el tuyo o el de cualquier otra persona.</p>
+
+        <div class="fila" style="margin-top:0">
+          <button id="enviar" class="principal">Enviar este ejemplo</button>
+          <button id="cancelar" class="secundario">Ahora no</button>
+        </div>
+        <p class="remate" id="estadoEnvio">Nada entra a la colección sin que una persona lo revise.</p>
       </div>
-
-      <p class="ojo">Se envía solo el <strong>texto</strong>, nunca tu imagen. Ya se le quitaron correos, teléfonos, montos y fechas — pero <strong>la limpieza no detecta nombres propios</strong>. Léelo antes de enviar y borra el tuyo o el de cualquier otra persona.</p>
 
       <div class="fila">
-        <button id="enviar" class="grande">Enviar este ejemplo</button>
-        <button id="cancelar" class="secundario">Ahora no</button>
+        <button id="otro" class="principal">Revisar otro mensaje</button>
       </div>
-      <p class="remate" id="estadoEnvio">Se publica como propuesta pendiente. Una persona lo revisa antes de que entre al corpus.</p>
     </div>
-  </div>
-
-
-    <button id="otro" class="grande">Revisar otro mensaje</button>
   </section>
 
-  <footer>
-    Constata es gratis y siempre lo será. Sin cuentas, sin publicidad, y sin guardar nada tuyo.<br>
-    <a href="como-funciona.html">Cómo funciona</a> ·
-    <a href="evaluacion.html">Qué detecta y qué no</a> ·
-    <a href="dominios.html">Dominios verificados</a> ·
-    <a href="https://github.com/luisfernandomedh/constata">Código en GitHub</a> ·
-    <a href="https://github.com/luisfernandomedh/constata/blob/main/SECURITY.md">Modelo de amenazas</a> ·
-    <a href="https://github.com/luisfernandomedh/constata/blob/main/CORPUS.md">Cómo se recogen los ejemplos</a>
-  </footer>
+</div>
 
+<footer>
+  Constata es gratis y siempre lo será. Sin cuentas, sin publicidad y sin guardar nada tuyo.<br>
+  <a href="como-funciona.html">Cómo funciona</a> ·
+  <a href="evaluacion.html">Qué detecta y qué no</a> ·
+  <a href="dominios.html">Dominios verificados</a> ·
+  <a href="https://github.com/luisfernandomedh/constata">Código en GitHub</a> ·
+  <a href="https://github.com/luisfernandomedh/constata/blob/main/SECURITY.md">Modelo de amenazas</a>
+</footer>
 </div>
 
 <script type="module">
@@ -676,8 +584,8 @@ const NOMBRES = {
  */
 const VEREDICTO = {
   alto: {
-    titulo: "Respira. Esto parece una estafa.",
-    sub: "Mientras no respondas ni abras el enlace, no ha pasado nada. Tómate un minuto.",
+    titulo: "Esto es una estafa.",
+    sub: "Mientras no respondas ni abras el enlace, no ha pasado nada.",
     icono: '<circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16.3" r=".9" fill="currentColor" stroke="none"/>',
     pasos: [
       "No respondas y no abras los enlaces.",
@@ -686,8 +594,8 @@ const VEREDICTO = {
     ],
   },
   medio: {
-    titulo: "Con calma: hay algo que no cuadra.",
-    sub: "No es concluyente, pero conviene que lo verifiques antes de hacer nada.",
+    titulo: "Hay algo aquí que no cuadra.",
+    sub: "No es concluyente. Compruébalo por tu cuenta antes de hacer nada.",
     icono: '<circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16.3" r=".9" fill="currentColor" stroke="none"/>',
     pasos: [
       "No uses los enlaces ni los números del mensaje.",
@@ -696,8 +604,8 @@ const VEREDICTO = {
     ],
   },
   bajo: {
-    titulo: "No encontré señales conocidas.",
-    sub: "Eso no quiere decir que sea seguro. Quiere decir que no reconocí nada de lo que sé buscar.",
+    titulo: "No encontré señales conocidas de estafa.",
+    sub: "Eso no es lo mismo que decir que es seguro: significa que no reconocí nada de lo que sé buscar. Si algo te huele raro, hazle caso.",
     icono: '<circle cx="12" cy="12" r="9"/><path d="m8.4 12.2 2.5 2.5 4.7-4.9"/>',
     pasos: [
       "Si te piden dinero, datos o una clave, desconfía igual.",
@@ -743,155 +651,29 @@ function mensajeMarcado(texto, senales) {
   return html + esc(texto.slice(cursor));
 }
 
-function pintar(texto, { riesgo, puntaje, hallazgos, avisos }) {
-  // Numeración compartida entre el mensaje y las tarjetas: el número que ves
-  // subrayado en el texto es el mismo que encabeza su explicación.
-  let n = 0;
+function pintar(texto, { riesgo, hallazgos, avisos }) {
   const senales = [
-    ...hallazgos.map((h) => ({ ...h, n: ++n, clase: h.peso >= 45 ? "alto" : "medio" })),
-    ...avisos.map((a) => ({ ...a, n: ++n, clase: "aviso" })),
+    ...hallazgos.map((h) => ({ ...h, clase: h.peso >= 45 ? "alto" : "medio" })),
+    ...avisos.map((a) => ({ ...a, clase: "aviso" })),
   ];
-
   const v = VEREDICTO[riesgo];
-  const tarjetas = senales.map((s) => `
-    <li class="s-${s.clase}" data-n="${s.n}">
-      <span class="insignia">${s.n}</span>
-      <div class="senal-cuerpo">
-        <div class="nombre">${esc(NOMBRES[s.id] ?? s.id)}</div>
-        <div class="detalle">${esc(s.explicacion)}</div>
-        ${s.evidencia ? `<span class="fuente">${esc(s.evidencia)}</span>` : ""}
-      </div>
+  const tarjetas = senales.map((x) => `
+    <li class="s-${x.clase}">
+      <p class="nombre">${x.clase === "aviso" ? '<span class="insignia">Aviso</span>' : ""}${esc(NOMBRES[x.id] ?? x.id)}</p>
+      <p class="detalle">${esc(x.explicacion)}</p>
     </li>`).join("");
 
-  const marcado = mensajeMarcado(texto, senales);
-  const hayMarcas = senales.some((s) => s.posicion);
-
   $resultado.innerHTML = `
-    <div class="veredicto v-${riesgo}">
-      <div class="icono">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">${v.icono}</svg>
-      </div>
-      <div style="flex:1;min-width:0">
-        <h2>${v.titulo}</h2>
-        <p>${v.sub}</p>
-      </div>
-    </div>
-
-    ${hayMarcas ? `
-    <div class="lienzo">
-      <div class="titulo">Lo subrayado es lo que me hizo sospechar</div>
-      <div class="mensaje-marcado">${marcado}</div>
-    </div>` : ""}
-
-    <div class="pasos-hacer">
-      <h3>Qué hacer ahora</h3>
-      <ol>${v.pasos.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>
-    </div>
-
-    <div class="preguntas" id="preguntas"></div>
-
-    ${tarjetas ? `<h3 class="titulo-senales">Por qué lo digo</h3><ul class="senales">${tarjetas}</ul>` : ""}
-    <p class="remate">Esto es una ayuda para que decidas tú. Ante la duda, pregunta a alguien de confianza.</p>`;
-
-  // ── Dos preguntas, ni una más ──────────────────────────────────
-  // Quien llega asustado no aguanta un formulario. Dos preguntas bastan
-  // para separar los tres casos que necesitan consejos distintos: quien
-  // todavía no hizo nada, quien dio datos sueltos, y quien entregó una
-  // clave o su tarjeta — que es el único caso con reloj corriendo.
-  const marca = MARCAS.find((m) => m.alias.some((a) => texto.toLowerCase().includes(a)));
-  const sitioReal = marca
-    ? `Escribe tú mismo <strong>${esc(marca.dominios[0])}</strong> en el navegador, o llama al número que está al reverso de tu tarjeta. Nunca uses el número ni el enlace que vienen en el mensaje.`
-    : "Busca tú el contacto oficial y llámalo. Nunca uses el número ni el enlace que vienen en el mensaje.";
-
-  const $preg = $("preguntas");
-
-  /**
-   * Nadie queda atrapado en su respuesta.
-   *
-   * Reconocer que uno cayó da vergüenza, y la vergüenza hace que la gente
-   * mienta o abandone. Por eso siempre hay una salida para volver atrás,
-   * siempre existe la opción de "no estoy seguro", y ninguna respuesta
-   * recibe un reproche. Si alguien se arrepiente de haber dicho la verdad,
-   * lo perdemos justo cuando más nos necesita.
-   */
-  const preguntar = (titulo, opciones, volver) => {
-    $preg.innerHTML =
-      `<h3>${titulo}</h3><div class="botones">` +
-      opciones.map((o, i) => `<button data-i="${i}">${esc(o.texto)}</button>`).join("") +
-      `</div>${volver ? '<button class="atras">← Volver a la pregunta anterior</button>' : ""}`;
-    for (const b of $preg.querySelectorAll("button[data-i]")) {
-      b.addEventListener("click", () => opciones[Number(b.dataset.i)].hacer());
-    }
-    $preg.querySelector(".atras")?.addEventListener("click", volver);
-  };
-
-  const responder = (clase, titulo, cuerpo, volver) => {
-    $preg.innerHTML =
-      `<div class="respuesta ${clase}"><h3>${titulo}</h3>${cuerpo}</div>` +
-      '<button class="atras">← Me equivoqué, quiero cambiar mi respuesta</button>';
-    $preg.querySelector(".atras").addEventListener("click", volver);
-  };
-
-  const nadaAun = (volver) => responder("bien",
-    "Entonces estás bien.",
-    `<p>No hiciste nada y no va a pasar nada. Borra el mensaje y bloquea el número.</p>
-     <p>Si te queda la duda de si era de verdad: ${sitioReal}</p>`, volver);
-
-  const dioClave = (volver) => responder("urgente",
-    "Actúa ahora. Todavía se puede.",
-    `<p><strong>Llama a tu banco de inmediato</strong> y pide que bloqueen la tarjeta o la cuenta. Cuanto antes llames, más se recupera.</p>
-     <p>Después cambia esa clave, y también en cualquier otro sitio donde uses la misma.</p>
-     <p>${sitioReal}</p>
-     <p class="sin-culpa">Y algo que importa: <strong>esto le pasa a muchísima gente</strong>, incluidas personas que trabajan en tecnología. Están diseñados para engañar. No es tu culpa y no tienes nada de qué avergonzarte.</p>`, volver);
-
-  const dioPoco = (volver) => responder("ojo",
-    "No es grave, pero mantente atento.",
-    `<p>Con tu nombre o tu correo no pueden sacarte dinero. Lo que sí van a hacer es insistir con más mensajes, y ahora sabiendo cómo te llamas.</p>
-     <p>Bloquea el número y desconfía de lo que llegue después, aunque parezca convincente.</p>`, volver);
-
-  const noSabe = (volver) => responder("ojo",
-    "No pasa nada, vamos por lo seguro.",
-    `<p>Si no estás seguro, actúa como si sí hubiera pasado algo. Es lo prudente y no cuesta nada.</p>
-     <p>Revisa los movimientos de tu cuenta y cambia la clave si la usaste hace poco.</p>
-     <p>${sitioReal}</p>`, volver);
-
-  const segunda = () => preguntar("¿Diste una clave, un código o datos de tu tarjeta?", [
-    { texto: "Sí", hacer: () => dioClave(segunda) },
-    { texto: "No, solo mi nombre o correo", hacer: () => dioPoco(segunda) },
-    { texto: "No estoy seguro", hacer: () => noSabe(segunda) },
-  ], primera);
-
-  function primera() {
-    preguntar("¿Alcanzaste a responder, tocar el enlace o dar algún dato?", [
-      { texto: "No, todavía no", hacer: () => nadaAun(primera) },
-      { texto: "Sí, algo hice", hacer: segunda },
-      { texto: "No estoy seguro", hacer: segunda },
-    ]);
-  }
-
-  if (riesgo !== "bajo") primera(); else $preg.innerHTML = "";
-
-  // Señal y subrayado se iluminan juntos, en los dos sentidos.
-  const resaltar = (nums, on) => {
-    for (const num of nums) {
-      $resultado.querySelector(`li[data-n="${num}"]`)?.classList.toggle("activa", on);
-      for (const m of $resultado.querySelectorAll("mark")) {
-        if (m.dataset.senales.split(",").includes(String(num))) m.classList.toggle("activa", on);
-      }
-    }
-  };
-  for (const li of $resultado.querySelectorAll("li[data-n]")) {
-    li.addEventListener("mouseenter", () => resaltar([li.dataset.n], true));
-    li.addEventListener("mouseleave", () => resaltar([li.dataset.n], false));
-  }
-  for (const m of $resultado.querySelectorAll("mark")) {
-    const nums = m.dataset.senales.split(",");
-    m.addEventListener("mouseenter", () => resaltar(nums, true));
-    m.addEventListener("mouseleave", () => resaltar(nums, false));
-  }
+    ${bloqueVeredicto(riesgo, TITULAR[riesgo] ?? TITULAR.medio, v.sub)}
+    <div class="acolchado">
+      ${bloqueRevisado(mensajeMarcado(texto, senales), Boolean(miniatura))}
+      ${tarjetas ? `<p class="rotulo" style="margin-top:24px">Señales que encontré</p>
+        <ul class="senales">${tarjetas}</ul>` : ""}
+      ${bloquePasos(v.pasos, riesgo === "alto")}
+      <p class="remate">Esta revisión la hizo el motor de reglas de tu propio dispositivo, sin red.
+        Es más limitado que el análisis completo: no lee intenciones.</p>
+    </div>`;
 }
-
-const AVISO_PENDIENTE = "Se publica como propuesta pendiente. Una persona lo revisa antes de que entre al corpus.";
 
 function prepararContribucion(texto, riesgo) {
   const { texto: limpio, reemplazos } = anonimizar(texto);
@@ -947,7 +729,7 @@ function volverAlInicio() {
   $("repregunta").value = "";
   soltarAdjunta();
   if (miniatura) { URL.revokeObjectURL(miniatura); miniatura = null; }
-  $("loAnalizado").hidden = $("miniaturaEspera").hidden = true;
+  $("miniaturaEspera").hidden = true;
   mostrar("vista-inicio");
 }
 $("volver").addEventListener("click", volverAlInicio);
@@ -1107,51 +889,89 @@ async function encogerImagen(archivo, ladoMax = 1200, calidad = 0.82) {
   return lienzo.toDataURL("image/jpeg", calidad);
 }
 
-const VEREDICTO_MODELO = {
-  alto:  { titulo: "Esto tiene toda la pinta de una estafa", sub: "No respondas ni envíes nada. Aquí abajo te explico por qué." },
-  medio: { titulo: "Hay cosas que no me cuadran", sub: "No es seguro que sea estafa, pero conviene que lo confirmes antes de hacer nada." },
-  bajo:  { titulo: "No encontré señales conocidas de estafa", sub: "Eso no es lo mismo que decir que es seguro. Si algo te huele raro, hazle caso." },
+/*
+  El resultado sigue el orden del diseño SOS, y ese orden es el argumento:
+  veredicto en una frase → lo que se revisó, con lo sospechoso subrayado →
+  las señales una por una → qué hacer, numerado → la pregunta que falta.
+  Nunca un número de riesgo: un 78 sobre 100 no le dice nada a nadie.
+*/
+const CEJA = {
+  alto:  { texto: "No contestes ese chat", icono: '<path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4"/><path d="M12 17.2v.1"/>' },
+  medio: { texto: "Compruébalo antes de actuar", icono: '<circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.2v.1"/>' },
+  bajo:  { texto: "Sin señales conocidas", icono: '<circle cx="12" cy="12" r="9"/><path d="m8.4 12.2 2.5 2.5 4.7-4.9"/>' },
 };
 
-function pintarModelo(d) {
-  const v = VEREDICTO_MODELO[d.riesgo] ?? VEREDICTO_MODELO.medio;
-  const icono = VEREDICTO[d.riesgo]?.icono ?? "";
-  const senales = (d.senales ?? []).map((x, i) => `
-    <li class="s-${d.riesgo === "alto" ? "alto" : "medio"}" data-n="${i + 1}">
-      <span class="insignia">${i + 1}</span>
-      <div class="senal-cuerpo">
-        <div class="nombre">${esc(x.que ?? "")}</div>
-        <div class="detalle">${esc(x.porque ?? "")}</div>
+const TITULAR = {
+  alto:  "Esto es una estafa.",
+  medio: "Hay algo aquí que no cuadra.",
+  bajo:  "No encontré señales conocidas de estafa.",
+};
+
+function bloqueVeredicto(riesgo, titulo, cuerpo) {
+  const c = CEJA[riesgo] ?? CEJA.medio;
+  return `
+    <div class="veredicto v-${riesgo}">
+      <div class="ceja">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${c.icono}</svg>
+        <span>${esc(c.texto)}</span>
       </div>
-    </li>`).join("");
+      <h2>${esc(titulo)}</h2>
+      <p>${esc(cuerpo)}</p>
+    </div>`;
+}
+
+/** Lo que se revisó. Con miniatura si vino de una captura. */
+function bloqueRevisado(contenido, hayImagen) {
+  if (!contenido && !hayImagen) return "";
+  const caja = `<div class="revisado">${contenido || "<em>La captura que subiste</em>"}</div>`;
+  return `
+    <p class="rotulo">Esto es lo que revisé</p>
+    ${hayImagen
+      ? `<div class="con-miniatura"><img src="${miniatura}" alt="Captura revisada"><div style="flex:1;min-width:0">${caja}</div></div>`
+      : caja}`;
+}
+
+function bloquePasos(pasos, urgente) {
+  if (!pasos?.length) return "";
+  return `
+    <p class="rotulo" style="margin-top:24px">Qué hacer ahora</p>
+    <ol class="pasos${urgente ? " urgente" : ""}">
+      ${pasos.map((x, n) => `<li><span class="num">${n + 1}</span><p>${esc(x)}</p></li>`).join("")}
+    </ol>`;
+}
+
+function pintarModelo(d) {
+  const riesgo = d.riesgo ?? "medio";
+  const senales = (d.senales ?? []).map((x) => {
+    // El modelo marca como aviso lo que es cierto pero no es una acusación:
+    // «el mensaje del banco sí parece real». Va en azul, no en rojo.
+    const esAviso = /^\s*(aviso|nota|ojo)\b/i.test(x.que ?? "") || x.aviso === true;
+    const clase = esAviso ? "aviso" : riesgo === "alto" ? "alto" : "medio";
+    const nombre = String(x.que ?? "").replace(/^\s*(aviso|nota|ojo)\s*[:.\-—]\s*/i, "");
+    return `
+      <li class="s-${clase}">
+        <p class="nombre">${esAviso ? '<span class="insignia">Aviso</span>' : ""}${esc(nombre)}</p>
+        <p class="detalle">${esc(x.porque ?? "")}</p>
+      </li>`;
+  }).join("");
+
+  const transcrito = d.transcripcion?.trim();
+  const revisado = transcrito ? esc(transcrito) : (ultimaEntrada ? esc(ultimaEntrada) : "");
 
   $resultado.innerHTML = `
-    <div class="veredicto v-${d.riesgo}">
-      <div class="icono">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">${icono}</svg>
-      </div>
-      <div style="flex:1;min-width:0">
-        <h2>${esc(v.titulo)}</h2>
-        <p>${esc(d.resumen || v.sub)}</p>
-      </div>
-    </div>
-
-    ${d.pasos?.length ? `<div class="pasos-hacer"><h3>Qué hacer ahora</h3>
-      <ol>${d.pasos.map((x) => `<li>${esc(x)}</li>`).join("")}</ol></div>` : ""}
-
-    ${d.preguntas?.length ? `<div class="pide">
-      <h3>${d.preguntas.length > 1 ? "Contéstame esto y afino el consejo" : "Contéstame una cosa y afino el consejo"}</h3>
-      <ul>${d.preguntas.map((q) => `<li>${esc(q)}</li>`).join("")}</ul>
-    </div>` : ""}
-
-    ${senales ? `<h3 class="titulo-senales">Por qué lo digo</h3><ul class="senales">${senales}</ul>` : ""}
-
-    <p class="remate">Esta captura la revisó un modelo de lenguaje, que se equivoca.
-      Es una ayuda para que decidas tú. Ante la duda, pregunta a alguien de confianza.</p>`;
+    ${bloqueVeredicto(riesgo, TITULAR[riesgo] ?? TITULAR.medio, d.resumen || "")}
+    <div class="acolchado">
+      ${bloqueRevisado(revisado, Boolean(miniatura))}
+      ${senales ? `<p class="rotulo" style="margin-top:24px">Señales que encontré</p>
+        <ul class="senales">${senales}</ul>` : ""}
+      ${bloquePasos(d.pasos, riesgo === "alto")}
+    </div>`;
 }
 
 /** Lo último que analizó el modelo: alimenta el aporte al corpus. */
 let ultimaTranscripcion = "";
+/** El texto que la persona metió: se usa para mostrar qué se revisó. */
+let ultimaEntrada = "";
 let ultimoRiesgo = "medio";
 let miniatura = null;
 let ultimasPreguntas = [];
@@ -1171,9 +991,9 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     if (miniatura) { URL.revokeObjectURL(miniatura); miniatura = null; }
     if (esImagen) {
       miniatura = URL.createObjectURL(entrada);
-      $("miniaturaEspera").src = $("miniaturaResultado").src = miniatura;
+      $("miniaturaEspera").src = miniatura;
     }
-    $("miniaturaEspera").hidden = $("loAnalizado").hidden = !esImagen;
+    $("miniaturaEspera").hidden = !esImagen;
     $("textoAnalizando").textContent = esImagen
       ? "Mirando tu captura…"
       : "Revisando el mensaje…";
@@ -1198,6 +1018,7 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     historial.push({ role: "assistant", content: d.resumen || "" });
     ultimoRiesgo = d.riesgo;
     ultimasPreguntas = d.preguntas ?? [];
+    if (!seguimiento && !esImagen) ultimaEntrada = entrada;
 
     // Primero lo que la persona vino a ver. Todo lo demás es accesorio y va
     // aislado: si el preparado del aporte falla, el veredicto ya está en
@@ -1303,46 +1124,93 @@ const SUGERENCIAS = {
   ],
 };
 
-function anadirIntercambio(pregunta, d) {
+function anadirIntercambio(dicho, d) {
   const bloque = document.createElement("div");
   bloque.className = "intercambio";
+  const riesgo = d.riesgo ?? "medio";
   bloque.innerHTML = `
-    <p class="yo">${esc(pregunta)}</p>
-    <div class="el">
-      <p>${esc(d.resumen || "")}</p>
-      ${d.pasos?.length ? `<ol>${d.pasos.map((x) => `<li>${esc(x)}</li>`).join("")}</ol>` : ""}
-      ${d.preguntas?.length ? `<ul class="pide-hilo">${d.preguntas.map((q) => `<li>${esc(q)}</li>`).join("")}</ul>` : ""}
+    <div class="acolchado" style="padding-bottom:0">
+      <div class="dicho"><span>${esc(dicho)}</span></div>
+    </div>
+    ${bloqueVeredicto(riesgo, TITULAR[riesgo] ?? TITULAR.medio, d.resumen || "")}
+    <div class="acolchado">
+      ${(d.senales ?? []).length ? `<p class="rotulo">Lo que cambia con eso</p>
+        <ul class="senales">${d.senales.map((x) => `
+          <li class="s-${riesgo === "alto" ? "alto" : "medio"}">
+            <p class="nombre">${esc(x.que ?? "")}</p>
+            <p class="detalle">${esc(x.porque ?? "")}</p>
+          </li>`).join("")}</ul>` : ""}
+      ${bloquePasos(d.pasos, riesgo === "alto")}
     </div>`;
   $("hilo").appendChild(bloque);
   try { bloque.scrollIntoView({ behavior: "smooth", block: "start" }); } catch { /* cosmético */ }
 }
 
+/**
+ * La pregunta del modelo va con respuestas de un toque, no solo con un cuadro
+ * en blanco. Quien está asustado no redacta: toca. Y las opciones que le
+ * ofrecemos son justo las que discriminan el caso.
+ */
+function respuestasSugeridas(pregunta, riesgo) {
+  const q = (pregunta || "").toLowerCase();
+  if (/c[oó]digo|clave|verificaci[oó]n|entrando|iniciando sesi[oó]n/.test(q))
+    return [["No, no estaba haciendo nada"], ["Sí, estaba entrando"], ["Ya le di el código", true]];
+  if (/pagaste|pag[oó]|dep[oó]sito|transferencia|enviaste dinero|cu[aá]nto tiempo/.test(q))
+    return [["Hace menos de una hora"], ["Hoy"], ["Todavía no envié nada"]];
+  if (/conoc|persona|familiar|hablado|llamado/.test(q))
+    return [["No he hablado con esa persona"], ["Sí, y dice que no fue"], ["Ya le envié el dinero", true]];
+  if (/esperabas|pediste|solicitaste|comprando|compra/.test(q))
+    return [["No, no esperaba nada"], ["Sí, lo estaba haciendo yo"]];
+  return riesgo === "alto"
+    ? [["Todavía no he hecho nada"], ["Ya respondí al mensaje", true], ["Ya envié dinero o datos", true]]
+    : [["No estoy seguro"], ["Cuéntame más"]];
+}
+
 function pintarConversacion(riesgo) {
   const quedan = TOPE_REPREGUNTAS - repreguntas;
-  const $c = $("conversar"), $q = $("cuota");
+  const $c = $("conversar"), $q = $("cuota"), $t = $("tituloConversar");
 
   if (quedan <= 0) {
     $("sugerencias").innerHTML = "";
     $("repregunta").disabled = $("preguntar").disabled = true;
+    $t.textContent = "Hasta aquí llegan las preguntas";
     $q.className = "cuota ultima";
-    $q.textContent = "Hasta aquí llegan las preguntas de esta consulta. Es un límite para que la herramienta siga en pie y gratis para todos. Si necesitas más, revisa el mensaje de nuevo desde el inicio.";
+    $q.textContent = "Es un límite para que la herramienta siga en pie y gratis para todos. Si necesitas más, revisa el mensaje otra vez desde el inicio.";
     $c.hidden = false;
     return;
   }
 
-  $("sugerencias").innerHTML = (SUGERENCIAS[riesgo] ?? SUGERENCIAS.medio)
-    .map((t) => `<button type="button">${esc(t)}</button>`).join("");
-  $("conversar").querySelector("h3").textContent = ultimasPreguntas.length
-    ? "Contéstame arriba, o pregúntame lo que quieras"
+  const hayPregunta = ultimasPreguntas.length > 0;
+  $t.textContent = hayPregunta
+    ? (ultimasPreguntas.length > 1 ? "Necesito saber dos cosas" : "Necesito saber una cosa")
     : "¿Quieres preguntarme algo más?";
+
+  const cuestiones = hayPregunta
+    ? ultimasPreguntas.map((q) => `<p class="cuestion">${esc(q)}</p>`).join("")
+    : "";
+
+  const opciones = hayPregunta
+    ? respuestasSugeridas(ultimasPreguntas[0], riesgo)
+    : (SUGERENCIAS[riesgo] ?? SUGERENCIAS.medio).map((t) => [t]);
+
+  $("sugerencias").innerHTML = opciones
+    .map(([t, grave]) => `<button type="button" class="pastilla${grave ? " grave" : ""}">${esc(t)}</button>`)
+    .join("");
   for (const b of $("sugerencias").children) {
     b.addEventListener("click", () => enviarRepregunta(b.textContent));
   }
+
+  // Las preguntas se pintan encima de las respuestas, dentro del mismo panel.
+  const panel = $c.querySelector(".pide");
+  panel.querySelectorAll(".cuestion").forEach((n) => n.remove());
+  if (cuestiones) $("sugerencias").insertAdjacentHTML("beforebegin", cuestiones);
+
+  $("repregunta").placeholder = hayPregunta ? "Escribe tu respuesta…" : "Escribe tu pregunta…";
   $("repregunta").disabled = $("preguntar").disabled = false;
   $q.className = quedan === 1 ? "cuota ultima" : "cuota";
   $q.textContent = quedan === 1
-    ? "Te queda una pregunta. Aprovéchala para lo que más te preocupe."
-    : `Puedes hacerme ${quedan} preguntas más.`;
+    ? "Te queda una interacción. Aprovéchala para lo que más te preocupe."
+    : `Puedes contestarme o preguntarme ${quedan} veces más.`;
   $c.hidden = false;
 }
 
@@ -1394,13 +1262,29 @@ function soltarAdjunta() {
 
 /** El botón dice qué va a hacer, y no se puede tocar si no hay nada. */
 function refrescarBoton() {
-  const hayTexto = $mensaje.value.trim().length > 0;
+  const largo = $mensaje.value.trim().length;
   const b = $("analizar");
-  b.disabled = !adjunta && !hayTexto;
-  b.textContent = adjunta ? "Revisar la captura" : hayTexto ? "Revisar el mensaje" : "Revisar";
+  b.disabled = !adjunta && !largo;
+  b.textContent = adjunta ? "Revisar la captura" : "Revisar";
+  $("cuentaLetras").textContent = largo ? `${largo} caracteres` : "";
 }
 
 $("subir").addEventListener("click", () => $("archivo").click());
+
+// Pegar una captura desde el portapapeles. No todos los navegadores dejan
+// leerlo con permiso, así que si falla se explica el atajo de siempre.
+$("pegarImagen").addEventListener("click", async () => {
+  try {
+    const items = await navigator.clipboard.read();
+    for (const it of items) {
+      const tipo = it.types.find((t) => t.startsWith("image/"));
+      if (tipo) { adjuntar(new File([await it.getType(tipo)], "captura", { type: tipo })); return; }
+    }
+    $("ayudaPegar").textContent = "No encontré ninguna imagen copiada. Copia la captura y vuelve a tocar aquí.";
+  } catch {
+    $("ayudaPegar").innerHTML = "<strong>Tu navegador no me deja leer lo copiado.</strong> Toca el cuadro de arriba y pega ahí con los dedos, o usa «Elegir una captura».";
+  }
+});
 $("cambiarImagen").addEventListener("click", () => $("archivo").click());
 $("quitarImagen").addEventListener("click", soltarAdjunta);
 $("archivo").addEventListener("change", (e) => { adjuntar(e.target.files?.[0]); e.target.value = ""; });
@@ -1520,7 +1404,12 @@ const $ejemplos = $("ejemplos");
 for (const [nombre, texto] of EJEMPLOS) {
   const b = document.createElement("button");
   b.textContent = nombre;
-  b.addEventListener("click", () => { $mensaje.value = texto; revisar(); });
+  b.addEventListener("click", () => {
+    soltarAdjunta();
+    $mensaje.value = texto;
+    refrescarBoton();
+    $mensaje.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
   $ejemplos.appendChild(b);
 }
 </script>
