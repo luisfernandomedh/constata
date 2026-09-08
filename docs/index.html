@@ -300,6 +300,14 @@ button { font-family: var(--sans); cursor: pointer; }
   border-radius: 0 11px 11px 0; background: var(--papel-tenue);
 }
 .respondido p { margin: 0; font: 400 15.5px/1.6 var(--sans); color: var(--texto); text-wrap: pretty; }
+/* La pregunta que se contestó queda colgada sobre la respuesta: si no,
+   en el hilo aparece un «Sí» suelto que no se entiende al releer. */
+.preguntada {
+  margin: 0 0 10px; max-width: 84%;
+  font: 400 16px/1.45 var(--serif); color: var(--tenue);
+}
+.preguntada::before { content: "“"; }
+.preguntada::after  { content: "”"; }
 .dicho { display: flex; justify-content: flex-end; margin-bottom: 18px; }
 .dicho span {
   max-width: 78%; padding: 12px 15px; border-radius: 14px 14px 4px 14px;
@@ -984,6 +992,8 @@ let miniatura = null;
 let ultimasPreguntas = [];
 /** El mensaje que se está examinando. Se reenvía en cada vuelta. */
 let mensajeOriginal = {};
+/** La pregunta que la persona está contestando ahora mismo. */
+let preguntaEnCurso = "";
 
 /**
  * El modelo es el camino normal, no la excepción.
@@ -1058,7 +1068,7 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     // debajo, en un hilo: si cada respuesta borrase la anterior, la persona
     // perdería justo lo que acaba de leer.
     const riesgoAntes = ultimoRiesgo;
-    if (seguimiento) anadirIntercambio(historial.at(-2)?.content ?? "", d, riesgoAntes);
+    if (seguimiento) anadirIntercambio(historial.at(-2)?.content ?? "", d, riesgoAntes, preguntaEnCurso);
     else { $("hilo").innerHTML = ""; pintarModelo(d); }
     mostrar("vista-resultado");
     try { pintarConversacion(d.riesgo); } catch { $("conversar").hidden = true; }
@@ -1163,7 +1173,7 @@ const SUGERENCIAS = {
  * verdad — y entonces se dice que cambió, en lugar de pintarlo como si fuera
  * un análisis nuevo.
  */
-function anadirIntercambio(dicho, d, riesgoAntes) {
+function anadirIntercambio(dicho, d, riesgoAntes, preguntada) {
   const riesgo = d.riesgo ?? riesgoAntes ?? "medio";
   const cambio = riesgo !== riesgoAntes;
   const bloque = document.createElement("div");
@@ -1177,6 +1187,7 @@ function anadirIntercambio(dicho, d, riesgoAntes) {
 
   bloque.innerHTML = `
     <div class="acolchado" style="padding-bottom:0">
+      ${preguntada ? `<p class="preguntada">${esc(preguntada)}</p>` : ""}
       <div class="dicho"><span>${esc(dicho)}</span></div>
     </div>
     ${cambio ? bloqueVeredicto(riesgo, "Con eso cambia el veredicto.", d.resumen || "") : `
@@ -1271,6 +1282,9 @@ async function enviarRepregunta(texto) {
   $("repregunta").disabled = $("preguntar").disabled = true;
   $("cuota").textContent = "Pensando…";
   repreguntas++;
+  // Se guarda la pregunta que se está contestando: sin ella, en el hilo queda
+  // una respuesta suelta («Sí») que no se entiende al releer.
+  preguntaEnCurso = ultimasPreguntas.join(" ");
   historial.push({ role: "user", content: q });
   await conModelo(q, { seguimiento: true });
 }
