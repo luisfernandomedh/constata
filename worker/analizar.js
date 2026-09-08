@@ -163,20 +163,51 @@ export async function analizar(peticion, env) {
     { role: "user", content: partes },
   ];
 
+  /**
+   * Groq corta a 8000 tokens por minuto, y nuestras instrucciones ya pesan
+   * ~1000. Con dos personas seguidas se topa, aunque quede cuota de sobra
+   * para el día: medido, fallaba 1 de cada 3 en ráfaga.
+   *
+   * Pero ese tope se recupera en segundos, y la cabecera dice exactamente
+   * cuántos. Así que se espera y se reintenta UNA vez. Solo si la espera es
+   * corta: hacer aguardar veinte segundos a alguien asustado es peor que
+   * darle la revisión local al instante.
+   */
+  const llamar = () => fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${env.GROQ_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: MODELO,
+      messages: mensajes,
+      temperature: 0.2,
+      max_tokens: 900,
+      response_format: { type: "json_object" },
+    }),
+    signal: AbortSignal.timeout(45000),
+  });
+
+  const segundos = (v) => {
+    if (!v) return NaN;
+    const m = /^(?:(\d+(?:\.\d+)?)m)?(?:(\d+(?:\.\d+)?)s)?$/.exec(v.trim());
+    if (m && (m[1] || m[2])) return (Number(m[1] || 0) * 60) + Number(m[2] || 0);
+    const n = Number(v);
+    return Number.isFinite(n) ? n : NaN;
+  };
+
   let r;
   try {
-    r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${env.GROQ_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODELO,
-        messages: mensajes,
-        temperature: 0.2,
-        max_tokens: 900,
-        response_format: { type: "json_object" },
-      }),
-      signal: AbortSignal.timeout(45000),
-    });
+    r = await llamar();
+    if (r.status === 429) {
+      const espera = Math.min(
+        segundos(r.headers.get("retry-after")) ||
+        segundos(r.headers.get("x-ratelimit-reset-tokens")) || 6,
+        8,
+      );
+      if (espera > 0) {
+        await new Promise((listo) => setTimeout(listo, Math.ceil(espera * 1000) + 400));
+        r = await llamar();
+      }
+    }
   } catch {
     return json({ limite: true, error: "El análisis profundo no respondió. Te quedas con la revisión rápida." }, 504);
   }
