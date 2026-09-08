@@ -293,6 +293,13 @@ button { font-family: var(--sans); cursor: pointer; }
 
 /* ── Hilo de la conversación ─────────────────────────────────── */
 .intercambio { margin-top: 22px; }
+/* La respuesta a una repregunta, cuando el veredicto no cambia: se lee como
+   una contestación, no como un dictamen nuevo. */
+.respondido {
+  padding: 16px 17px; border: 1px solid var(--borde); border-left: 3px solid var(--azul-medio);
+  border-radius: 0 11px 11px 0; background: var(--papel-tenue);
+}
+.respondido p { margin: 0; font: 400 15.5px/1.6 var(--sans); color: var(--texto); text-wrap: pretty; }
 .dicho { display: flex; justify-content: flex-end; margin-bottom: 18px; }
 .dicho span {
   max-width: 78%; padding: 12px 15px; border-radius: 14px 14px 4px 14px;
@@ -723,7 +730,7 @@ function volverAlInicio() {
   $("abrirContribuir").hidden = true;
   $("ayudaPegar").textContent = "Si no logras copiar el mensaje, toma una foto de la pantalla y súbela.";
   ultimaTranscripcion = "";
-  historial = []; repreguntas = 0;
+  historial = []; repreguntas = 0; mensajeOriginal = {};
   $("conversar").hidden = true;
   $("hilo").innerHTML = "";
   $("repregunta").value = "";
@@ -975,6 +982,8 @@ let ultimaEntrada = "";
 let ultimoRiesgo = "medio";
 let miniatura = null;
 let ultimasPreguntas = [];
+/** El mensaje que se está examinando. Se reenvía en cada vuelta. */
+let mensajeOriginal = {};
 
 /**
  * El modelo es el camino normal, no la excepción.
@@ -986,7 +995,7 @@ let ultimasPreguntas = [];
  */
 async function conModelo(entrada, { seguimiento = false } = {}) {
   const esImagen = entrada instanceof Blob;
-  if (!seguimiento) { historial = []; repreguntas = 0; }
+  if (!seguimiento) { historial = []; repreguntas = 0; mensajeOriginal = {}; }
   if (!seguimiento) {
     if (miniatura) { URL.revokeObjectURL(miniatura); miniatura = null; }
     if (esImagen) {
@@ -1000,10 +1009,27 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     mostrar("vista-analizando");
   }
   try {
-    const cuerpo = esImagen
-      ? { imagen: await encogerImagen(entrada) }
-      : { texto: entrada };
-    if (historial.length) cuerpo.previas = historial;
+    /*
+      En una repregunta se reenvía SIEMPRE el mensaje original, y lo que la
+      persona contestó va aparte, en `respuesta`. Antes su contestación se
+      mandaba como el mensaje a analizar: el modelo examinaba «No estoy
+      seguro», concluía que eso no era una estafa, y tiraba abajo el veredicto.
+
+      Para las capturas se reenvía la transcripción, no la imagen: mandar la
+      foto en cada vuelta gastaría el cupo por minuto en dos preguntas.
+    */
+    let cuerpo;
+    if (seguimiento) {
+      cuerpo = { respuesta: entrada, previas: historial };
+      if (mensajeOriginal.texto) cuerpo.texto = mensajeOriginal.texto;
+      else cuerpo.imagen = mensajeOriginal.imagen;
+    } else if (esImagen) {
+      cuerpo = { imagen: await encogerImagen(entrada) };
+      mensajeOriginal = { imagen: cuerpo.imagen };
+    } else {
+      cuerpo = { texto: entrada };
+      mensajeOriginal = { texto: entrada };
+    }
     const r = await fetch(ANALISIS, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1014,9 +1040,14 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     if (!d.ok) throw new Error(d.error || "sin respuesta");
 
     // El modelo necesita recordar qué dijo, o la repregunta no tiene sentido.
-    if (!seguimiento) historial.push({ role: "user", content: esImagen ? "(captura de pantalla)" : entrada });
+    if (!seguimiento) {
+      historial.push({ role: "user", content: esImagen ? "(la captura adjunta)" : entrada });
+      // Con la transcripción en mano, las siguientes vueltas van en texto:
+      // reenviar la imagen cada vez agotaría el cupo por minuto.
+      if (esImagen && d.transcripcion?.trim()) mensajeOriginal = { texto: d.transcripcion.trim() };
+    }
     historial.push({ role: "assistant", content: d.resumen || "" });
-    ultimoRiesgo = d.riesgo;
+    ultimoRiesgo = d.riesgo ?? ultimoRiesgo;
     ultimasPreguntas = d.preguntas ?? [];
     if (!seguimiento && !esImagen) ultimaEntrada = entrada;
 
@@ -1026,7 +1057,8 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     // El primer análisis pinta el veredicto. Las repreguntas se acumulan
     // debajo, en un hilo: si cada respuesta borrase la anterior, la persona
     // perdería justo lo que acaba de leer.
-    if (seguimiento) anadirIntercambio(historial.at(-2)?.content ?? "", d);
+    const riesgoAntes = ultimoRiesgo;
+    if (seguimiento) anadirIntercambio(historial.at(-2)?.content ?? "", d, riesgoAntes);
     else { $("hilo").innerHTML = ""; pintarModelo(d); }
     mostrar("vista-resultado");
     try { pintarConversacion(d.riesgo); } catch { $("conversar").hidden = true; }
@@ -1124,22 +1156,38 @@ const SUGERENCIAS = {
   ],
 };
 
-function anadirIntercambio(dicho, d) {
+/**
+ * Una respuesta no reabre el juicio. Se muestra lo que contestó la persona y
+ * lo que eso cambia, pero el veredicto original se queda arriba, intacto.
+ * Solo se vuelve a mostrar un bloque de veredicto si el riesgo cambió de
+ * verdad — y entonces se dice que cambió, en lugar de pintarlo como si fuera
+ * un análisis nuevo.
+ */
+function anadirIntercambio(dicho, d, riesgoAntes) {
+  const riesgo = d.riesgo ?? riesgoAntes ?? "medio";
+  const cambio = riesgo !== riesgoAntes;
   const bloque = document.createElement("div");
   bloque.className = "intercambio";
-  const riesgo = d.riesgo ?? "medio";
+
+  const senales = (d.senales ?? []).map((x) => `
+    <li class="s-${riesgo === "alto" ? "alto" : "medio"}">
+      <p class="nombre">${esc(x.que ?? "")}</p>
+      <p class="detalle">${esc(x.porque ?? "")}</p>
+    </li>`).join("");
+
   bloque.innerHTML = `
     <div class="acolchado" style="padding-bottom:0">
       <div class="dicho"><span>${esc(dicho)}</span></div>
     </div>
-    ${bloqueVeredicto(riesgo, TITULAR[riesgo] ?? TITULAR.medio, d.resumen || "")}
-    <div class="acolchado">
-      ${(d.senales ?? []).length ? `<p class="rotulo">Lo que cambia con eso</p>
-        <ul class="senales">${d.senales.map((x) => `
-          <li class="s-${riesgo === "alto" ? "alto" : "medio"}">
-            <p class="nombre">${esc(x.que ?? "")}</p>
-            <p class="detalle">${esc(x.porque ?? "")}</p>
-          </li>`).join("")}</ul>` : ""}
+    ${cambio ? bloqueVeredicto(riesgo, "Con eso cambia el veredicto.", d.resumen || "") : `
+    <div class="acolchado" style="padding-top:0">
+      <div class="respondido">
+        <p>${esc(d.resumen || "")}</p>
+      </div>
+    </div>`}
+    <div class="acolchado" style="padding-top:${cambio ? "22px" : "0"}">
+      ${senales ? `<p class="rotulo">Lo que cambia con eso</p>
+        <ul class="senales">${senales}</ul>` : ""}
       ${bloquePasos(d.pasos, riesgo === "alto")}
     </div>`;
   $("hilo").appendChild(bloque);
