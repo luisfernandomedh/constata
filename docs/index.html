@@ -1161,9 +1161,11 @@ function respuestasSugeridas(pregunta, riesgo) {
     return [["No he hablado con esa persona"], ["Sí, y dice que no fue"], ["Ya le envié el dinero", true]];
   if (/esperabas|pediste|solicitaste|comprando|compra/.test(q))
     return [["No, no esperaba nada"], ["Sí, lo estaba haciendo yo"]];
-  return riesgo === "alto"
-    ? [["Todavía no he hecho nada"], ["Ya respondí al mensaje", true], ["Ya envié dinero o datos", true]]
-    : [["No estoy seguro"], ["Cuéntame más"]];
+  if (/banco|bloquear|llamaste|llamado|denuncia/.test(q))
+    return [["Todavía no he llamado"], ["Ya llamé al banco"], ["No sé a qué número llamar"]];
+  // Sin patrón reconocido, opciones que sirven para cualquier pregunta:
+  // ofrecer respuestas que no encajan es peor que no ofrecer ninguna.
+  return [["Sí"], ["No"], ["No estoy seguro"]];
 }
 
 function pintarConversacion(riesgo) {
