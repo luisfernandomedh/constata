@@ -165,7 +165,7 @@ export async function analizar(peticion, env) {
   */
   const conocidas = texto ? marcasEn(texto) : MARCAS;
   const registro = conocidas.length
-    ? `\n\nDOMINIOS OFICIALES COMPROBADOS por Constata. Son los ÚNICOS legítimos de estas instituciones; cualquier otro que se les parezca es falso. Úsalos tal cual, no los inventes ni los deduzcas:\n${comoTexto(conocidas)}`
+    ? `\n\nDOMINIOS OFICIALES COMPROBADOS (los únicos legítimos; cualquier otro parecido es falso):\n${comoTexto(conocidas)}`
     : "";
 
   /*
@@ -175,7 +175,7 @@ export async function analizar(peticion, env) {
     es donde está casi toda la gente que usa esto.
   */
   const ahora = new Date(Date.now() - 5 * 3_600_000);   // UTC-5
-  const HOY = `\n\nHOY ES ${ahora.toISOString().slice(0, 10)} (hora de Ecuador, UTC-5). Úsalo para situar cualquier fecha del mensaje. Una fecha futura cercana es normal en un aviso o una cita; una fecha pasada tampoco prueba nada, porque la gente revisa mensajes viejos. La fecha por sí sola casi nunca es señal de fraude: dilo solo si el propio mensaje se contradice.`;
+  const HOY = `\n\nHOY ES ${ahora.toISOString().slice(0, 10)} (Ecuador, UTC-5).`;
 
   const partes = [];
   if (imagen) partes.push({ type: "image_url", image_url: { url: imagen } });
@@ -220,7 +220,7 @@ export async function analizar(peticion, env) {
       model: MODELO,
       messages: mensajes,
       temperature: 0.2,
-      max_tokens: 900,
+      max_tokens: 700,
       response_format: { type: "json_object" },
     }),
     signal: AbortSignal.timeout(45000),

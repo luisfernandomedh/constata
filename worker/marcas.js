@@ -9,7 +9,14 @@ export function marcasEn(texto) {
   return MARCAS.filter((m) => m.a.some((alias) => t.includes(alias)));
 }
 
-/** Una línea por marca, para meter en el aviso al modelo. */
+/**
+ * La lista para el modelo, lo más corta posible.
+ *
+ * Va en cada consulta con imagen y cada token cuenta: el tope de Groq es de
+ * 8000 por minuto, y una imagen ya se lleva la mitad. Se quita el guion, se
+ * quita la coma y se quita la coletilla del certificado — al modelo no le
+ * cambia nada saber cómo lo comprobamos, solo cuáles son.
+ */
 export function comoTexto(marcas) {
-  return marcas.map((m) => `- ${m.n}: ${m.d.join(", ")}${m.c ? " (confirmado por certificado)" : ""}`).join("\n");
+  return marcas.map((m) => `${m.n}=${m.d.join(" ")}`).join("\n");
 }
