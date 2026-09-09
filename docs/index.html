@@ -1219,9 +1219,17 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     // debajo, en un hilo: si cada respuesta borrase la anterior, la persona
     // perdería justo lo que acaba de leer.
     const riesgoAntes = ultimoRiesgo;
-    if (seguimiento) anadirIntercambio(historial.at(-2)?.content ?? "", d, riesgoAntes, preguntaEnCurso);
-    else { $("hilo").innerHTML = ""; pintarModelo(d); }
-    mostrar("vista-resultado");
+    if (seguimiento) {
+      // En una repregunta NO se llama a mostrar(): ya estamos en el resultado,
+      // y mostrar() sube la página al principio. Eso era lo que se sentía como
+      // una recarga — se perdía el sitio y había que buscar la respuesta.
+      // Solo se añade lo nuevo abajo y se baja hasta ahí, como en un chat.
+      anadirIntercambio(historial.at(-2)?.content ?? "", d, riesgoAntes, preguntaEnCurso);
+    } else {
+      $("hilo").innerHTML = "";
+      pintarModelo(d);
+      mostrar("vista-resultado");
+    }
     try { pintarConversacion(d.riesgo); } catch (fallo) { tragado("pintar la conversación", fallo); $("conversar").hidden = true; }
     // Para donar hace falta el texto del mensaje, no la imagen. Cuando vino
     // de una captura, se usa lo que el modelo transcribió; y se anonimiza
@@ -1236,8 +1244,11 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
 
       // El resultado entra, y la invitación llega un momento después: cuando
       // la persona ya leyó y soltó el aire. Pedirlo a la vez es atropellarla.
-      animarResultado();
-      if (!$("abrirContribuir").hidden) setTimeout(() => animarAlivio($("abrirContribuir")), 900);
+      // Solo se anima la invitación, y nada más. Animar el resultado entero
+      // hacía que la respuesta pareciera tardar: la persona ya está esperando
+      // desde hace segundos y no necesita que además su veredicto entre
+      // despacio. Aquí el movimiento sobra; allí abajo suma.
+      if (!$("abrirContribuir").hidden) setTimeout(() => animarAlivio($("abrirContribuir")), 700);
     }
 
   } catch (e) {
@@ -1400,7 +1411,10 @@ function anadirIntercambio(dicho, d, riesgoAntes, preguntada) {
       ${bloquePasos(d.pasos, riesgo === "alto")}
     </div>`;
   $("hilo").appendChild(bloque);
-  try { bloque.scrollIntoView({ behavior: "smooth", block: "start" }); } catch { /* cosmético */ }
+  // Se baja hasta lo nuevo, suave, como cuando llega un mensaje en un chat.
+  try { bloque.scrollIntoView({ behavior: "smooth", block: "start" }); }
+  catch { try { bloque.scrollIntoView(); } catch { /* cosmético */ } }
+  animarAlivio(bloque);
 }
 
 /**
@@ -1463,6 +1477,8 @@ function pintarConversacion(riesgo) {
   const panel = $c.querySelector(".pide");
   panel.querySelectorAll(".cuestion").forEach((n) => n.remove());
   if (cuestiones) $("sugerencias").insertAdjacentHTML("beforebegin", cuestiones);
+  // La ventanilla se queda donde está: es el sitio donde se escribe, y moverla
+  // debajo de cada respuesta obligaría a buscarla otra vez.
 
   $("repregunta").placeholder = hayPregunta ? "Escribe tu respuesta…" : "Escribe tu pregunta…";
   $("repregunta").disabled = $("preguntar").disabled = false;
@@ -1725,24 +1741,12 @@ async function cargarAnimacion() {
 async function animarAlivio(caja) {
   const g = await cargarAnimacion();
   if (!g || !caja || caja.hidden) return;
-  const linea = g.timeline({ defaults: { ease: "power2.out" } });
-  linea.from(caja, { autoAlpha: 0, y: 18, duration: .55 })
-       .from(caja.querySelector(".gracias svg"), { scale: .4, autoAlpha: 0, duration: .5, ease: "back.out(2)" }, "-=.3")
-       .from(caja.querySelectorAll(".gracias p"), { y: 8, autoAlpha: 0, duration: .4, stagger: .09 }, "-=.35")
-       .from(caja.querySelector("#botonContribuir"), { y: 10, autoAlpha: 0, duration: .4 }, "-=.2");
+  // Nada de rebotes ni escalas. Aparece, como un mensaje que entra en un
+  // chat: transparencia y un dedo de recorrido. Lo que tranquiliza es que
+  // sea suave, no que sea vistoso.
+  g.from(caja, { autoAlpha: 0, y: 10, duration: .9, ease: "power1.out" });
 }
 
-/** El resultado entra por partes, de arriba abajo, sin sobresaltos. */
-async function animarResultado() {
-  const g = await cargarAnimacion();
-  if (!g) return;
-  const bloques = [
-    $resultado.querySelector(".veredicto"),
-    ...$resultado.querySelectorAll(".acolchado > *"),
-  ].filter(Boolean);
-  if (!bloques.length) return;
-  g.from(bloques, { autoAlpha: 0, y: 14, duration: .45, stagger: .06, ease: "power2.out" });
-}
 
 $("botonContribuir").addEventListener("click", () => {
   $contribuir.hidden = false;
