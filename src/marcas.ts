@@ -50,6 +50,19 @@ export const MARCAS: Marca[] = [
   { nombre: "ANT", pais: "EC", alias: ["ant", "agencia nacional de transito"], dominios: ["ant.gob.ec"] },
   { nombre: "Registro Civil", pais: "EC", alias: ["registro civil"], dominios: ["registrocivil.gob.ec"] },
 
+  // Entidades públicas que asustan cuando escriben, y que faltaban.
+  // Se añadieron el 9 sept 2026 tras una falsa alarma real: un correo
+  // legítimo de la Fiscalía se marcó como dominio falso porque no estaba
+  // aquí, y el modelo dedujo en vez de admitir que no lo sabía.
+  { nombre: "Fiscalía General del Estado", pais: "EC", alias: ["fiscalia", "fiscalia general"], dominios: ["fiscalia.gob.ec"], verificacion: "certificado" },
+  { nombre: "Función Judicial", pais: "EC", alias: ["funcion judicial", "consejo de la judicatura", "judicatura"], dominios: ["funcionjudicial.gob.ec"], verificacion: "certificado" },
+  { nombre: "Ministerio del Trabajo", pais: "EC", alias: ["ministerio del trabajo", "ministerio de trabajo"], dominios: ["trabajo.gob.ec"], verificacion: "certificado" },
+  { nombre: "SENAE (Aduana)", pais: "EC", alias: ["senae", "aduana", "servicio nacional de aduana"], dominios: ["aduana.gob.ec"], verificacion: "certificado" },
+  { nombre: "Policía Nacional", pais: "EC", alias: ["policia nacional"], dominios: ["policia.gob.ec"], verificacion: "pendiente" },
+  { nombre: "Defensoría del Pueblo", pais: "EC", alias: ["defensoria del pueblo"], dominios: ["dpe.gob.ec"], verificacion: "pendiente" },
+  { nombre: "CNE", pais: "EC", alias: ["consejo nacional electoral"], dominios: ["cne.gob.ec"], verificacion: "pendiente" },
+  { nombre: "Ministerio de Educación", pais: "EC", alias: ["ministerio de educacion"], dominios: ["educacion.gob.ec"], verificacion: "pendiente" },
+
   // ── Telecomunicaciones ────────────────────────────────────────
   { nombre: "Claro", pais: "EC", alias: ["claro"], dominios: ["claro.com.ec", "claro.com"] },
   { nombre: "Movistar", alias: ["movistar"], dominios: ["movistar.com.ec", "movistar.com", "movistar.es"], verificacion: "certificado" },
