@@ -319,6 +319,11 @@ button { font-family: var(--sans); cursor: pointer; }
 }
 
 /* ── Aportar ─────────────────────────────────────────────────── */
+.gracias { display: flex; gap: 13px; align-items: flex-start; margin-bottom: 14px; }
+.gracias svg { width: 26px; height: 26px; flex: none; color: var(--azul); margin-top: 2px; }
+.gracias-titulo { margin: 0 0 3px; font: 500 19px/1.3 var(--serif); color: var(--texto); }
+.gracias-texto { margin: 0; font: 400 14px/1.6 var(--sans); color: var(--tenue); text-wrap: pretty; }
+
 .aportar { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--borde-tenue); }
 .aportar > p { margin: 0 0 12px; font: 400 14px/1.6 var(--sans); color: var(--tenue); text-wrap: pretty; }
 .reservado {
@@ -506,8 +511,23 @@ footer a { color: var(--azul-medio); }
         </div>
       </div>
 
+      <!--
+        Se pide aquí, y no antes, porque el momento importa más que el texto.
+        Quien acaba de recibir la respuesta y se ha quedado tranquilo siente
+        algo parecido al agradecimiento; ahí es cuando daría algo a cambio.
+        Pedirlo antes, con el susto todavía encima, es pedirle un favor a
+        alguien que está pensando en otra cosa.
+      -->
       <div class="aportar" id="abrirContribuir" hidden>
-        <p>¿Nos ayudas? Dona este ejemplo para que la herramienta reconozca mejor este tipo de mensaje. Verás el texto ya limpio antes de enviarlo.</p>
+        <div class="gracias">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 0 0-7.1 7.1l8.8 8.8 8.8-8.8a5 5 0 0 0 0-7.1z"/>
+          </svg>
+          <div>
+            <p class="gracias-titulo">¿Te sirvió?</p>
+            <p class="gracias-texto">Dona este mensaje y la próxima persona a la que le llegue algo así lo tendrá más fácil. Un toque, sin cuenta y sin registro.</p>
+          </div>
+        </div>
         <button type="button" class="pastilla" id="botonContribuir">Donar este ejemplo</button>
       </div>
 
@@ -643,6 +663,22 @@ const VEREDICTO = {
 };
 
 const $ = (id) => document.getElementById(id);
+
+/**
+ * Un `catch` vacío que apaga una función es un fallo esperando a pasar.
+ *
+ * Ocurrió: una constante quedó sin definir al rehacer la página, la línea
+ * que la usaba vivía dentro de un try, y el catch se limitó a esconder la
+ * invitación a donar. Nadie vio nada durante un día entero y la colección
+ * dejó de recibir ejemplos.
+ *
+ * Ahora todo lo que apaga una función deja el error escrito en la consola,
+ * con nombre. No molesta a quien usa la herramienta, y a quien la revise le
+ * ahorra un día. Los catch puramente cosméticos siguen callados.
+ */
+function tragado(donde, error) {
+  try { console.error(`[constata] falló «${donde}»:`, error); } catch { /* ni eso */ }
+}
 const $mensaje = $("mensaje"), $resultado = $("resultado"), $contribuir = $("contribuir");
 const $limpio = $("limpio"), $cambios = $("cambios"), $estado = $("estadoEnvio");
 
@@ -702,6 +738,14 @@ function pintar(texto, { riesgo, hallazgos, avisos }) {
         Es más limitado que el análisis completo: no lee intenciones.</p>
     </div>`;
 }
+
+/*
+  Se perdió al rehacer la página con el diseño nuevo, y como la línea que lo
+  usa vive dentro de un try/catch, el fallo no se veía: simplemente la
+  invitación a donar no aparecía nunca. Eso explica por qué la colección
+  llevaba un día entero sin recibir nada.
+*/
+const AVISO_PENDIENTE = "Nada entra a la colección sin que una persona lo revise.";
 
 function prepararContribucion(texto, riesgo) {
   const { texto: limpio, reemplazos } = anonimizar(texto);
@@ -1178,7 +1222,7 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     if (seguimiento) anadirIntercambio(historial.at(-2)?.content ?? "", d, riesgoAntes, preguntaEnCurso);
     else { $("hilo").innerHTML = ""; pintarModelo(d); }
     mostrar("vista-resultado");
-    try { pintarConversacion(d.riesgo); } catch { $("conversar").hidden = true; }
+    try { pintarConversacion(d.riesgo); } catch (fallo) { tragado("pintar la conversación", fallo); $("conversar").hidden = true; }
     // Para donar hace falta el texto del mensaje, no la imagen. Cuando vino
     // de una captura, se usa lo que el modelo transcribió; y se anonimiza
     // aquí, en el navegador, antes de que la persona decida.
@@ -1188,7 +1232,12 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
         prepararContribucion(ultimaTranscripcion, d.riesgo);
         $("abrirContribuir").hidden = !textoUtil(ultimaTranscripcion);
         $contribuir.hidden = true;
-      } catch { $("abrirContribuir").hidden = true; }
+      } catch (fallo) { tragado("preparar el aporte", fallo); $("abrirContribuir").hidden = true; }
+
+      // El resultado entra, y la invitación llega un momento después: cuando
+      // la persona ya leyó y soltó el aire. Pedirlo a la vez es atropellarla.
+      animarResultado();
+      if (!$("abrirContribuir").hidden) setTimeout(() => animarAlivio($("abrirContribuir")), 900);
     }
 
   } catch (e) {
@@ -1277,7 +1326,7 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
       prepararContribucion(texto, local.riesgo);
       $contribuir.hidden = true;
       $("abrirContribuir").hidden = false;
-    } catch { $("abrirContribuir").hidden = true; }
+    } catch (fallo) { tragado("preparar el aporte tras el motor local", fallo); $("abrirContribuir").hidden = true; }
   }
 }
 
@@ -1630,6 +1679,71 @@ $("limpiar").addEventListener("click", () => {
 $mensaje.addEventListener("keydown", (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") revisar();
 });
+/**
+ * ── La animación del final ────────────────────────────────────────────
+ *
+ * GSAP se descarga TARDE y solo una vez: cuando ya hay un resultado en
+ * pantalla. Son unos 70 KB, y quien llega asustado por 4G no debe esperarlos
+ * para leer su veredicto. Para entonces ya tiene la respuesta y la conexión
+ * deja de ser urgente.
+ *
+ * Todo esto es añadido, nunca requisito. Se anima DESDE un estado visible
+ * con `gsap.from`, así que si la librería no llega —red mala, CDN caído— la
+ * página se ve exactamente igual, solo que sin movimiento. Nada se esconde
+ * esperando a un archivo que quizá no venga.
+ */
+const GSAP = "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js";
+let motorAnim = null;
+
+function quietoPorPreferencia() {
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+}
+
+async function cargarAnimacion() {
+  if (motorAnim !== null) return motorAnim;
+  if (quietoPorPreferencia()) return (motorAnim = false);
+  try {
+    await new Promise((listo, falla) => {
+      const t = setTimeout(() => falla(new Error("tardó demasiado")), 6000);
+      const e = document.createElement("script");
+      e.src = GSAP;
+      e.onload = () => { clearTimeout(t); listo(); };
+      e.onerror = () => { clearTimeout(t); falla(new Error("no llegó")); };
+      document.head.appendChild(e);
+    });
+    motorAnim = window.gsap ?? false;
+  } catch {
+    motorAnim = false;   // sin animación, y sin drama
+  }
+  return motorAnim;
+}
+
+/**
+ * El alivio. Es la única animación con intención del proyecto: la respiración
+ * que se suelta cuando la persona entiende que puede estar tranquila.
+ */
+async function animarAlivio(caja) {
+  const g = await cargarAnimacion();
+  if (!g || !caja || caja.hidden) return;
+  const linea = g.timeline({ defaults: { ease: "power2.out" } });
+  linea.from(caja, { autoAlpha: 0, y: 18, duration: .55 })
+       .from(caja.querySelector(".gracias svg"), { scale: .4, autoAlpha: 0, duration: .5, ease: "back.out(2)" }, "-=.3")
+       .from(caja.querySelectorAll(".gracias p"), { y: 8, autoAlpha: 0, duration: .4, stagger: .09 }, "-=.35")
+       .from(caja.querySelector("#botonContribuir"), { y: 10, autoAlpha: 0, duration: .4 }, "-=.2");
+}
+
+/** El resultado entra por partes, de arriba abajo, sin sobresaltos. */
+async function animarResultado() {
+  const g = await cargarAnimacion();
+  if (!g) return;
+  const bloques = [
+    $resultado.querySelector(".veredicto"),
+    ...$resultado.querySelectorAll(".acolchado > *"),
+  ].filter(Boolean);
+  if (!bloques.length) return;
+  g.from(bloques, { autoAlpha: 0, y: 14, duration: .45, stagger: .06, ease: "power2.out" });
+}
+
 $("botonContribuir").addEventListener("click", () => {
   $contribuir.hidden = false;
   $("abrirContribuir").hidden = true;
