@@ -15,11 +15,10 @@
     --borde: #e4e1dc; --marca: #2f6690; --marca-suave: #e8f0f7; --falla:#c02718; --falla-suave:#fdecea;
     --sombra: 0 1px 2px rgba(0,0,0,.04), 0 10px 28px -14px rgba(0,0,0,.16);
   }
-  @media (prefers-color-scheme: dark) {
-    :root { --fondo: #141a21; --papel: #1c242d; --texto: #e7edf3; --tenue: #95a3b1;
+  /* Lo decide el botón de la herramienta, no el sistema. */
+  :root[data-tema="oscuro"] { --fondo: #141a21; --papel: #1c242d; --texto: #e7edf3; --tenue: #95a3b1;
       --borde: #2b353f; --marca: #7fb2e8; --marca-suave: #1a2a3a; --falla:#ff9186; --falla-suave:#351d1a;
       --sombra: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7); }
-  }
   *{box-sizing:border-box}
   body{margin:0;background:var(--fondo);color:var(--texto);
     font:17px/1.65 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
@@ -118,6 +117,17 @@ const no = d.categorias.filter((c) => !c.detectada);
 document.getElementById("salida").innerHTML =
   (no.length ? `<h2>Todavía no las detectamos (${no.length})</h2><div class="lista">${no.map(fila).join("")}</div>` : "") +
   (si.length ? `<h2>Sí las detectamos (${si.length})</h2><div class="lista">${si.map(fila).join("")}</div>` : "");
+</script>
+
+<script>
+// El tema se recuerda entre páginas: si solo viviera en la herramienta, al
+// saltar aquí se perdería. Traducir estas páginas es un trabajo aparte.
+(() => {
+  try {
+    const t = localStorage.getItem("constata-tema");
+    document.documentElement.dataset.tema = t === "oscuro" ? "oscuro" : "claro";
+  } catch { document.documentElement.dataset.tema = "claro"; }
+})();
 </script>
 </body>
 </html>

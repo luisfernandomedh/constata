@@ -88,8 +88,11 @@
   fondo oscuro sin deslumbrar: un rojo encendido sobre negro cansa la vista
   de quien ya está nervioso.
 */
-@media (prefers-color-scheme: dark) {
-  :root {
+/* Se entra en claro siempre, aunque el teléfono esté en oscuro, y el cambio
+   lo decide la persona con el botón. Un fondo negro de golpe en una
+   herramienta a la que se llega asustado no ayuda; y quien prefiere oscuro
+   lo toca una vez y se recuerda. */
+:root[data-tema="oscuro"] {
     --arena:      #141a21;
     --papel:      #1c242d;
     --papel-tenue:#222b35;
@@ -139,7 +142,6 @@
 
     --sombra:      0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
     --sombra-boton:0 6px 16px -8px rgba(0,0,0,.8);
-  }
 }
 
 * { box-sizing: border-box; }
@@ -175,6 +177,26 @@ a:hover { color: var(--azul-hondo); text-decoration: underline; }
 /* ── Cabecera ────────────────────────────────────────────────── */
 header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
 .marca-fila { display: flex; align-items: center; gap: 10px; }
+.controles { display: flex; align-items: center; gap: 8px; }
+.conmutador {
+  display: flex; gap: 2px; padding: 2px;
+  background: var(--papel-tenue); border: 1px solid var(--borde); border-radius: 7px;
+}
+.conmutador button {
+  padding: 6px 9px; border: none; border-radius: 5px; background: none;
+  font: 500 11px/1 var(--sans); color: var(--tenue-mas); cursor: pointer;
+}
+.conmutador button.activo {
+  background: var(--papel); color: var(--texto); font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0,0,0,.08);
+}
+.icono-boton {
+  display: grid; place-items: center; width: 32px; height: 32px; padding: 0;
+  background: var(--papel-tenue); color: var(--tenue);
+  border: 1px solid var(--borde); border-radius: 7px; cursor: pointer;
+}
+.icono-boton:hover { color: var(--texto); border-color: var(--azul-linea); }
+.icono-boton svg { width: 16px; height: 16px; }
 .marca-fila svg { width: 26px; height: 26px; color: var(--azul); flex: none; }
 h1 { margin: 0; font: 500 27px/1 var(--serif); letter-spacing: -.01em; }
 .lema { margin: 0 0 22px; font: 400 16px/1.5 var(--sans); color: #4b5560; text-wrap: pretty; }
@@ -478,16 +500,37 @@ footer a { color: var(--azul-medio); }
         </svg>
         <h1>Constata</h1>
       </div>
+
+      <!--
+        Los dos controles del diseño, arriba a la derecha y pequeños: quien
+        llega asustado no debe tropezar con ellos antes que con el cuadro de
+        texto, pero quien los busca los encuentra donde siempre están.
+      -->
+      <div class="controles">
+        <div class="conmutador" id="idioma" role="group" aria-label="Idioma">
+          <button type="button" data-idioma="es" class="activo">ES</button>
+          <button type="button" data-idioma="en">EN</button>
+        </div>
+        <button type="button" id="tema" class="icono-boton" aria-label="Cambiar a modo oscuro" title="Modo oscuro">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path class="luna" d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/>
+            <g class="sol" hidden>
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"/>
+            </g>
+          </svg>
+        </button>
+      </div>
     </header>
 
-    <p class="lema"><strong>¿Crees que es una estafa?</strong> Pégalo aquí y te digo qué es y qué hacer.</p>
+    <p class="lema" data-t="lema"><strong>¿Crees que es una estafa?</strong> Pégalo aquí y te digo qué es y qué hacer.</p>
 
-    <label class="rotulo" for="mensaje" hidden>El mensaje</label>
-    <textarea id="mensaje" placeholder="Pega o escribe aquí el mensaje…"></textarea>
+    <label class="rotulo" for="mensaje" hidden data-t="elMensaje">El mensaje</label>
+    <textarea id="mensaje" data-t-ph="cuadro" placeholder="Pega o escribe aquí el mensaje…"></textarea>
 
     <div class="contador">
       <span id="cuentaLetras"></span>
-      <button type="button" class="enlace" id="pegar">Pegar del portapapeles</button>
+      <button type="button" class="enlace" id="pegar" data-t="pegar">Pegar del portapapeles</button>
     </div>
 
     <!--
@@ -497,20 +540,20 @@ footer a { color: var(--azul-medio); }
     -->
     <div id="zona" class="zona">
       <div id="zonaVacia">
-        <p id="ayudaPegar">Si no logras copiar el mensaje, sube una foto de la pantalla.</p>
+        <p id="ayudaPegar" data-t="ayuda">Si no logras copiar el mensaje, sube una foto de la pantalla.</p>
         <div class="opciones">
-          <button type="button" class="pastilla" id="subir">Elegir una captura</button>
-          <button type="button" class="pastilla" id="pegarImagen">Pegar imagen</button>
+          <button type="button" class="pastilla" id="subir" data-t="elegir">Elegir una captura</button>
+          <button type="button" class="pastilla" id="pegarImagen" data-t="pegarImg">Pegar imagen</button>
         </div>
       </div>
       <div id="zonaImagen" hidden>
         <img id="previa" alt="Captura que vas a revisar">
         <div class="zona-datos">
-          <b>Captura lista</b>
+          <b data-t="lista">Captura lista</b>
           <span id="pesoImagen"></span>
           <div class="zona-acciones">
-            <button type="button" class="enlace" id="cambiarImagen">Cambiar</button>
-            <button type="button" class="enlace" id="quitarImagen">Quitar</button>
+            <button type="button" class="enlace" id="cambiarImagen" data-t="cambiar">Cambiar</button>
+            <button type="button" class="enlace" id="quitarImagen" data-t="quitar">Quitar</button>
           </div>
         </div>
       </div>
@@ -529,21 +572,21 @@ footer a { color: var(--azul-medio); }
 
     <div class="fila">
       <button id="analizar" class="principal" disabled>Revisar</button>
-      <button id="limpiar" class="secundario">Borrar</button>
+      <button id="limpiar" class="secundario" data-t="borrar">Borrar</button>
     </div>
 
     <div class="promesa" id="promesa">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
         <rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>
       </svg>
-      <p><strong>Sin cuenta y sin registro.</strong> Para revisarlo, el mensaje se manda a un servicio de análisis y no se guarda en ningún lado. Quita los nombres propios antes.
+      <p data-t="promesa"><strong>Sin cuenta y sin registro.</strong> Para revisarlo, el mensaje se manda a un servicio de análisis y no se guarda en ningún lado. Quita los nombres propios antes.
         <a href="https://github.com/luisfernandomedh/constata/blob/main/ANALISIS.md" target="_blank" rel="noopener">Cómo funciona</a> ·
         <a href="https://github.com/luisfernandomedh/constata/blob/main/INSTRUCCIONES.md" target="_blank" rel="noopener">Lo que le decimos al modelo</a>
       </p>
     </div>
 
     <div class="ejemplos">
-      <p class="rotulo">O prueba con un ejemplo</p>
+      <p class="rotulo" data-t="oPrueba">O prueba con un ejemplo</p>
       <div class="fichas" id="ejemplos"></div>
     </div>
   </section>
@@ -558,20 +601,20 @@ footer a { color: var(--azul-medio); }
     <div class="revisando">
       <img id="miniaturaEspera" alt="" hidden>
       <div class="puntos" aria-hidden="true"><span></span><span></span><span></span></div>
-      <h2 id="textoAnalizando">Revisando el mensaje…</h2>
-      <p>Toma unos segundos.</p>
+      <h2 id="textoAnalizando" data-t="revisando">Revisando el mensaje…</h2>
+      <p data-t="segundos">Toma unos segundos.</p>
     </div>
 
     <div class="mientras">
-      <p>Mientras tanto: <strong>no contestes el mensaje</strong> ni toques ningún enlace que traiga.</p>
+      <p data-t="mientras">Mientras tanto: <strong>no contestes el mensaje</strong> ni toques ningún enlace que traiga.</p>
     </div>
   </section>
 
   <!-- ═══ RESULTADO ════════════════════════════════════════════ -->
   <section id="vista-resultado" hidden>
     <div class="salidas">
-      <button type="button" class="enlace" id="volver">← Revisar otro mensaje</button>
-      <button type="button" class="enlace" id="subirOtra">Subir otra captura</button>
+      <button type="button" class="enlace" id="volver" data-t="volver">← Revisar otro mensaje</button>
+      <button type="button" class="enlace" id="subirOtra" data-t="otraCaptura">Subir otra captura</button>
     </div>
 
     <div id="resultado" aria-live="polite"></div>
@@ -588,7 +631,7 @@ footer a { color: var(--azul-medio); }
           <div class="respuestas" id="sugerencias"></div>
           <div class="caja-responder">
             <input id="repregunta" type="text" autocomplete="off" placeholder="Escribe tu respuesta…" maxlength="400">
-            <button type="button" id="preguntar">Enviar</button>
+            <button type="button" id="preguntar" data-t="enviar">Enviar</button>
           </div>
           <p class="cuota" id="cuota"></p>
         </div>
@@ -607,17 +650,17 @@ footer a { color: var(--azul-medio); }
             <path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 0 0-7.1 7.1l8.8 8.8 8.8-8.8a5 5 0 0 0 0-7.1z"/>
           </svg>
           <div>
-            <p class="gracias-titulo">¿Te sirvió?</p>
-            <p class="gracias-texto">Dona este mensaje y la próxima persona a la que le llegue algo así lo tendrá más fácil. Un toque, sin cuenta y sin registro.</p>
+            <p class="gracias-titulo" data-t="teSirvio">¿Te sirvió?</p>
+            <p class="gracias-texto" data-t="gracias">Dona este mensaje y la próxima persona a la que le llegue algo así lo tendrá más fácil. Un toque, sin cuenta y sin registro.</p>
           </div>
         </div>
-        <button type="button" class="pastilla" id="botonContribuir">Donar este ejemplo</button>
+        <button type="button" class="pastilla" id="botonContribuir" data-t="donar">Donar este ejemplo</button>
       </div>
 
       <div class="aportar" id="contribuir" hidden>
-        <p class="reservado"><strong>Esto no se publica.</strong> Va a una colección cerrada que solo ve Constata, y sirve para una cosa: que la herramienta reconozca mejor los engaños que circulan aquí.</p>
+        <p class="reservado" data-t="reservado"><strong>Esto no se publica.</strong> Va a una colección cerrada que solo ve Constata, y sirve para una cosa: que la herramienta reconozca mejor los engaños que circulan aquí.</p>
 
-        <p class="rotulo">Esto es exactamente lo que se enviaría</p>
+        <p class="rotulo" data-t="loQueSeEnvia">Esto es exactamente lo que se enviaría</p>
         <textarea id="limpio" spellcheck="false"></textarea>
         <p class="cambios" id="cambios"></p>
 
@@ -637,17 +680,17 @@ footer a { color: var(--azul-medio); }
           </label>
         </div>
 
-        <p class="ojo">Se envía solo el <strong>texto</strong>, nunca tu imagen. Ya se le quitaron correos, teléfonos, montos y fechas — pero <strong>la limpieza no detecta nombres propios</strong>. Léelo y borra el tuyo o el de cualquier otra persona.</p>
+        <p class="ojo" data-t="ojo">Se envía solo el <strong>texto</strong>, nunca tu imagen. Ya se le quitaron correos, teléfonos, montos y fechas — pero <strong>la limpieza no detecta nombres propios</strong>. Léelo y borra el tuyo o el de cualquier otra persona.</p>
 
         <div class="fila" style="margin-top:0">
           <button id="enviar" class="principal">Enviar este ejemplo</button>
-          <button id="cancelar" class="secundario">Ahora no</button>
+          <button id="cancelar" class="secundario" data-t="ahoraNo">Ahora no</button>
         </div>
         <p class="remate" id="estadoEnvio">Nada entra a la colección sin que una persona lo revise.</p>
       </div>
 
       <div class="fila">
-        <button id="otro" class="principal">Revisar otro mensaje</button>
+        <button id="otro" class="principal" data-t="otroMensaje">Revisar otro mensaje</button>
       </div>
     </div>
   </section>
@@ -672,17 +715,30 @@ const ENDPOINT = "/aportar";
 const ANALISIS = "/analizar";
 const REPO = "luisfernandomedh/constata";
 
-const EJEMPLOS = [
-  ["Banco falso", "Banco Pichincha: detectamos un consumo de $340 en Quito. Si no lo reconoce, bloquee aqui: http://pichincha-seguro.net/bloqueo"],
-  ["SRI falso", "SRI: usted tiene una devolucion de impuestos de $187.40 pendiente. Ingrese sus datos: https://sri-devoluciones.info"],
-  ["Robo de código", "Somos WhatsApp. Envianos el codigo de verificacion que te llego por SMS para restaurar tu cuenta."],
-  ["«Hola mamá»", "Hola mama, se me daño el telefono, este es mi numero nuevo. Necesito que me hagas una transferencia urgente, luego te explico."],
-  ["Falso jefe", "Soy el gerente. Estoy en una reunion y no puedo hablar. Necesito que compres tarjetas de regalo y me envies los codigos."],
-  ["Empleo irreal", "Buenas, le escribo de Recursos Humanos. Tenemos una vacante de trabajo remoto, $80 diarios por 2 horas. Interesado responda SI."],
-  ["Letras falsas", "Verifique su cuenta en раypal.com ahora mismo"],
-  ["Caso ambiguo", "Su codigo de verificacion de Google es 483920. No lo comparta con nadie."],
-  ["Mensaje normal", "Banco Pichincha: consumo aprobado por $45.20 en SUPERMAXI. Si no lo reconoce llame al 1700 100 100."],
-];
+const EJEMPLOS = {
+  es: [
+    ["Banco falso", "Banco Pichincha: detectamos un consumo de $340 en Quito. Si no lo reconoce, bloquee aqui: http://pichincha-seguro.net/bloqueo"],
+    ["SRI falso", "SRI: usted tiene una devolucion de impuestos de $187.40 pendiente. Ingrese sus datos: https://sri-devoluciones.info"],
+    ["Robo de código", "Somos WhatsApp. Envianos el codigo de verificacion que te llego por SMS para restaurar tu cuenta."],
+    ["«Hola mamá»", "Hola mama, se me daño el telefono, este es mi numero nuevo. Necesito que me hagas una transferencia urgente, luego te explico."],
+    ["Falso jefe", "Soy el gerente. Estoy en una reunion y no puedo hablar. Necesito que compres tarjetas de regalo y me envies los codigos."],
+    ["Empleo irreal", "Buenas, le escribo de Recursos Humanos. Tenemos una vacante de trabajo remoto, $80 diarios por 2 horas. Interesado responda SI."],
+    ["Letras falsas", "Verifique su cuenta en раypal.com ahora mismo"],
+    ["Caso ambiguo", "Su codigo de verificacion de Google es 483920. No lo comparta con nadie."],
+    ["Mensaje normal", "Banco Pichincha: consumo aprobado por $45.20 en SUPERMAXI. Si no lo reconoce llame al 1700 100 100."],
+  ],
+  en: [
+    ["Fake bank", "Chase Bank: we detected a $340 charge in Miami. If you don't recognise it, block it here: http://chase-secure.net/block"],
+    ["Fake tax office", "IRS: you have a pending tax refund of $187.40. Enter your details: https://irs-refunds.info"],
+    ["Code theft", "This is WhatsApp Support. Send us the verification code you just received by SMS to restore your account."],
+    ["\u00abHi mum\u00bb", "Hi mum, my phone broke, this is my new number. I need you to send me a transfer urgently, I'll explain later."],
+    ["Fake boss", "It's the manager. I'm in a meeting and can't talk. I need you to buy gift cards and send me the codes."],
+    ["Too-good job", "Hello, I'm writing from HR. We have a remote vacancy, $80 a day for 2 hours. Reply YES if interested."],
+    ["Lookalike letters", "Verify your account at раypal.com right now"],
+    ["Ambiguous case", "Your Google verification code is 483920. Do not share it with anyone."],
+    ["Normal message", "Chase Bank: purchase approved for $45.20 at WHOLE FOODS. If you don't recognise it call 1-800-935-9935."],
+  ],
+};
 
 // Nombre corto y legible por señal. El identificador técnico sirve al código,
 // no a una persona asustada mirando su teléfono.
@@ -812,10 +868,10 @@ function pintar(texto, { riesgo, hallazgos, avisos }) {
     </li>`).join("");
 
   $resultado.innerHTML = `
-    ${bloqueVeredicto(riesgo, TITULAR[riesgo] ?? TITULAR.medio, v.sub)}
+    ${bloqueVeredicto(riesgo, titular(riesgo), v.sub)}
     <div class="acolchado">
       ${bloqueRevisado(mensajeMarcado(texto, senales), Boolean(miniatura))}
-      ${tarjetas ? `<p class="rotulo" style="margin-top:24px">Señales que encontré</p>
+      ${tarjetas ? `<p class="rotulo" style="margin-top:24px">${rotulo("senales")}</p>
         <ul class="senales">${tarjetas}</ul>` : ""}
       ${bloquePasos(v.pasos, riesgo === "alto")}
       <p class="remate">Esta revisión la hizo el motor de reglas de tu propio dispositivo, sin red.
@@ -912,7 +968,7 @@ $("pegar").addEventListener("click", async () => {
       return;
     }
     $mensaje.value = texto;
-    $("ayudaPegar").textContent = "Ya está pegado. Léelo y toca Revisar cuando quieras.";
+    $("ayudaPegar").textContent = t("pegado");
     refrescarBoton();
   } catch {
     // Sin permiso de portapapeles: se degrada al cuadro de texto de siempre.
@@ -1120,19 +1176,34 @@ async function decodificar(archivo) {
   Nunca un número de riesgo: un 78 sobre 100 no le dice nada a nadie.
 */
 const CEJA = {
-  alto:  { texto: "No contestes ese chat", icono: '<path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4"/><path d="M12 17.2v.1"/>' },
-  medio: { texto: "Compruébalo antes de actuar", icono: '<circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.2v.1"/>' },
-  bajo:  { texto: "Sin señales conocidas", icono: '<circle cx="12" cy="12" r="9"/><path d="m8.4 12.2 2.5 2.5 4.7-4.9"/>' },
+  es: {
+    alto:  { texto: "No contestes ese chat", icono: '<path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4"/><path d="M12 17.2v.1"/>' },
+    medio: { texto: "Compruébalo antes de actuar", icono: '<circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.2v.1"/>' },
+    bajo:  { texto: "Sin señales conocidas", icono: '<circle cx="12" cy="12" r="9"/><path d="m8.4 12.2 2.5 2.5 4.7-4.9"/>' },
+  },
+  en: {
+    alto:  { texto: "Don't reply to that chat", icono: '<path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4"/><path d="M12 17.2v.1"/>' },
+    medio: { texto: "Check before you act", icono: '<circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.2v.1"/>' },
+    bajo:  { texto: "No known warning signs", icono: '<circle cx="12" cy="12" r="9"/><path d="m8.4 12.2 2.5 2.5 4.7-4.9"/>' },
+  },
 };
 
 const TITULAR = {
-  alto:  "Esto es una estafa.",
-  medio: "Hay algo aquí que no cuadra.",
-  bajo:  "No encontré señales conocidas de estafa.",
+  es: { alto: "Esto es una estafa.", medio: "Hay algo aquí que no cuadra.", bajo: "No encontré señales conocidas de estafa." },
+  en: { alto: "This is a scam.", medio: "Something here doesn't add up.", bajo: "I found no known signs of a scam." },
 };
 
+const ROTULO = {
+  es: { revise: "Esto es lo que revisé", senales: "Señales que encontré", hacer: "Qué hacer ahora", cambia: "Lo que cambia con eso" },
+  en: { revise: "This is what I checked", senales: "Warning signs I found", hacer: "What to do now", cambia: "What that changes" },
+};
+
+const titular = (r) => (TITULAR[idioma] ?? TITULAR.es)[r] ?? (TITULAR[idioma] ?? TITULAR.es).medio;
+const rotulo = (k) => (ROTULO[idioma] ?? ROTULO.es)[k];
+
 function bloqueVeredicto(riesgo, titulo, cuerpo) {
-  const c = CEJA[riesgo] ?? CEJA.medio;
+  const cejas = CEJA[idioma] ?? CEJA.es;
+  const c = cejas[riesgo] ?? cejas.medio;
   return `
     <div class="veredicto v-${riesgo}">
       <div class="ceja">
@@ -1149,7 +1220,7 @@ function bloqueRevisado(contenido, hayImagen) {
   if (!contenido && !hayImagen) return "";
   const caja = `<div class="revisado">${contenido || "<em>La captura que subiste</em>"}</div>`;
   return `
-    <p class="rotulo">Esto es lo que revisé</p>
+    <p class="rotulo">${rotulo("revise")}</p>
     ${hayImagen
       ? `<div class="con-miniatura"><img src="${miniatura}" alt="Captura revisada"><div style="flex:1;min-width:0">${caja}</div></div>`
       : caja}`;
@@ -1158,7 +1229,7 @@ function bloqueRevisado(contenido, hayImagen) {
 function bloquePasos(pasos, urgente) {
   if (!pasos?.length) return "";
   return `
-    <p class="rotulo" style="margin-top:24px">Qué hacer ahora</p>
+    <p class="rotulo" style="margin-top:24px">${rotulo("hacer")}</p>
     <ol class="pasos${urgente ? " urgente" : ""}">
       ${pasos.map((x, n) => `<li><span class="num">${n + 1}</span><p>${esc(x)}</p></li>`).join("")}
     </ol>`;
@@ -1183,10 +1254,10 @@ function pintarModelo(d) {
   const revisado = transcrito ? esc(transcrito) : (ultimaEntrada ? esc(ultimaEntrada) : "");
 
   $resultado.innerHTML = `
-    ${bloqueVeredicto(riesgo, TITULAR[riesgo] ?? TITULAR.medio, d.resumen || "")}
+    ${bloqueVeredicto(riesgo, titular(riesgo), d.resumen || "")}
     <div class="acolchado">
       ${bloqueRevisado(revisado, Boolean(miniatura))}
-      ${senales ? `<p class="rotulo" style="margin-top:24px">Señales que encontré</p>
+      ${senales ? `<p class="rotulo" style="margin-top:24px">${rotulo("senales")}</p>
         <ul class="senales">${senales}</ul>` : ""}
       ${bloquePasos(d.pasos, riesgo === "alto")}
     </div>`;
@@ -1224,8 +1295,8 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     }
     $("miniaturaEspera").hidden = !esImagen;
     $("textoAnalizando").textContent = esImagen
-      ? "Mirando tu captura…"
-      : "Revisando el mensaje…";
+      ? t("mirando")
+      : t("revisando");
     mostrar("vista-analizando");
   }
   try {
@@ -1240,7 +1311,7 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     */
     let cuerpo;
     if (seguimiento) {
-      cuerpo = { respuesta: entrada, previas: historial };
+      cuerpo = { respuesta: entrada, previas: historial, idioma };
       if (mensajeOriginal.texto) cuerpo.texto = mensajeOriginal.texto;
       else cuerpo.imagen = mensajeOriginal.imagen;
     } else if (esImagen) {
@@ -1248,10 +1319,10 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
       // tocar la foto original: ahí es donde se quedaba sin memoria.
       const img = adjuntaLista?.url;
       if (!img) throw new Error("la imagen no llegó preparada");
-      cuerpo = { imagen: img };
+      cuerpo = { imagen: img, idioma };
       mensajeOriginal = { imagen: img };
     } else {
-      cuerpo = { texto: entrada };
+      cuerpo = { texto: entrada, idioma };
       mensajeOriginal = { texto: entrada };
     }
     const r = await fetch(ANALISIS, {
@@ -1441,31 +1512,65 @@ let repreguntas = 0;
 
 /** Se ofrecen según el veredicto: en blanco, nadie sabe qué preguntar. */
 const SUGERENCIAS = {
-  alto: [
-    "Ya envié el dinero, ¿qué hago?",
-    "Ya di mi clave o mi código",
-    "¿Cómo denuncio esto?",
-    "¿Y si de verdad es mi conocido?",
-  ],
-  medio: [
-    "¿Cómo compruebo si es real?",
-    "¿Puedo responder para preguntar?",
-    "Ya di algunos datos, ¿es grave?",
-  ],
-  bajo: [
-    "Igual me da desconfianza, ¿por qué?",
-    "¿Qué señales debería mirar yo?",
-    "¿Y si me vuelven a escribir?",
-  ],
+  es: {
+    alto: ["Ya envié el dinero, ¿qué hago?", "Ya di mi clave o mi código", "¿Cómo denuncio esto?", "¿Y si de verdad es mi conocido?"],
+    medio: ["¿Cómo compruebo si es real?", "¿Puedo responder para preguntar?", "Ya di algunos datos, ¿es grave?"],
+    bajo: ["Igual me da desconfianza, ¿por qué?", "¿Qué señales debería mirar yo?", "¿Y si me vuelven a escribir?"],
+  },
+  en: {
+    alto: ["I already sent the money, what now?", "I already gave my password or code", "How do I report this?", "What if it really is someone I know?"],
+    medio: ["How do I check if it's real?", "Can I reply and ask?", "I already gave some details, is that bad?"],
+    bajo: ["It still feels off to me, why?", "What signs should I look for?", "What if they write to me again?"],
+  },
 };
 
-/**
- * Una respuesta no reabre el juicio. Se muestra lo que contestó la persona y
- * lo que eso cambia, pero el veredicto original se queda arriba, intacto.
- * Solo se vuelve a mostrar un bloque de veredicto si el riesgo cambió de
- * verdad — y entonces se dice que cambió, en lugar de pintarlo como si fuera
- * un análisis nuevo.
- */
+/** Respuestas de un toque, elegidas por lo que pregunta el modelo. */
+const RESPUESTAS = {
+  es: {
+    codigo: [["No, no estaba haciendo nada"], ["Sí, estaba entrando"], ["Ya le di el código", true]],
+    pago: [["Hace menos de una hora"], ["Hoy"], ["Todavía no envié nada"]],
+    conocido: [["No he hablado con esa persona"], ["Sí, y dice que no fue"], ["Ya le envié el dinero", true]],
+    esperaba: [["No, no esperaba nada"], ["Sí, lo estaba haciendo yo"]],
+    banco: [["Todavía no he llamado"], ["Ya llamé al banco"], ["No sé a qué número llamar"]],
+    generico: [["Sí"], ["No"], ["No estoy seguro"]],
+  },
+  en: {
+    codigo: [["No, I wasn't doing anything"], ["Yes, I was signing in"], ["I already gave them the code", true]],
+    pago: [["Less than an hour ago"], ["Today"], ["I haven't sent anything yet"]],
+    conocido: [["I haven't spoken to that person"], ["Yes, and they say it wasn't them"], ["I already sent the money", true]],
+    esperaba: [["No, I wasn't expecting anything"], ["Yes, that was me"]],
+    banco: [["I haven't called yet"], ["I already called the bank"], ["I don't know which number to call"]],
+    generico: [["Yes"], ["No"], ["I'm not sure"]],
+  },
+};
+
+const CONVERSAR = {
+  es: {
+    masPreguntas: "¿Quieres preguntarme algo más?",
+    unaCosa: "Necesito saber una cosa", dosCosas: "Necesito saber dos cosas",
+    fin: "Hasta aquí llegan las preguntas",
+    finTexto: "Es un límite para que la herramienta siga en pie y gratis para todos. Si necesitas más, revisa el mensaje otra vez desde el inicio.",
+    ultima: "Te queda una interacción. Aprovéchala para lo que más te preocupe.",
+    quedan: (n) => `Puedes contestarme o preguntarme ${n} veces más.`,
+    escribeResp: "Escribe tu respuesta…", escribePreg: "Escribe tu pregunta…",
+    pensando: "Pensando…",
+  },
+  en: {
+    masPreguntas: "Anything else you'd like to ask?",
+    unaCosa: "I need to know one thing", dosCosas: "I need to know two things",
+    fin: "That's all the questions for now",
+    finTexto: "It's a limit that keeps the tool running and free for everyone. If you need more, check the message again from the start.",
+    ultima: "You have one turn left. Use it for whatever worries you most.",
+    quedan: (n) => `You can answer or ask me ${n} more times.`,
+    escribeResp: "Type your answer…", escribePreg: "Type your question…",
+    pensando: "Thinking…",
+  },
+};
+const c = (k, ...a) => {
+  const v = (CONVERSAR[idioma] ?? CONVERSAR.es)[k];
+  return typeof v === "function" ? v(...a) : v;
+};
+
 function anadirIntercambio(dicho, d, riesgoAntes, preguntada) {
   const riesgo = d.riesgo ?? riesgoAntes ?? "medio";
   const cambio = riesgo !== riesgoAntes;
@@ -1490,7 +1595,7 @@ function anadirIntercambio(dicho, d, riesgoAntes, preguntada) {
       </div>
     </div>`}
     <div class="acolchado" style="padding-top:${cambio ? "22px" : "0"}">
-      ${senales ? `<p class="rotulo">Lo que cambia con eso</p>
+      ${senales ? `<p class="rotulo">${rotulo("cambia")}</p>
         <ul class="senales">${senales}</ul>` : ""}
       ${bloquePasos(d.pasos, riesgo === "alto")}
     </div>`;
@@ -1508,19 +1613,13 @@ function anadirIntercambio(dicho, d, riesgoAntes, preguntada) {
  */
 function respuestasSugeridas(pregunta, riesgo) {
   const q = (pregunta || "").toLowerCase();
-  if (/c[oó]digo|clave|verificaci[oó]n|entrando|iniciando sesi[oó]n/.test(q))
-    return [["No, no estaba haciendo nada"], ["Sí, estaba entrando"], ["Ya le di el código", true]];
-  if (/pagaste|pag[oó]|dep[oó]sito|transferencia|enviaste dinero|cu[aá]nto tiempo/.test(q))
-    return [["Hace menos de una hora"], ["Hoy"], ["Todavía no envié nada"]];
-  if (/conoc|persona|familiar|hablado|llamado/.test(q))
-    return [["No he hablado con esa persona"], ["Sí, y dice que no fue"], ["Ya le envié el dinero", true]];
-  if (/esperabas|pediste|solicitaste|comprando|compra/.test(q))
-    return [["No, no esperaba nada"], ["Sí, lo estaba haciendo yo"]];
-  if (/banco|bloquear|llamaste|llamado|denuncia/.test(q))
-    return [["Todavía no he llamado"], ["Ya llamé al banco"], ["No sé a qué número llamar"]];
-  // Sin patrón reconocido, opciones que sirven para cualquier pregunta:
-  // ofrecer respuestas que no encajan es peor que no ofrecer ninguna.
-  return [["Sí"], ["No"], ["No estoy seguro"]];
+  const R = RESPUESTAS[idioma] ?? RESPUESTAS.es;
+  if (/c[oó]digo|clave|verificaci[oó]n|entrando|iniciando sesi[oó]n|code|password|signing in/.test(q)) return R.codigo;
+  if (/pagaste|pag[oó]|dep[oó]sito|transferencia|enviaste dinero|cu[aá]nto tiempo|paid|sent|transfer|how long/.test(q)) return R.pago;
+  if (/conoc|persona|familiar|hablado|llamado|know|spoken|called them/.test(q)) return R.conocido;
+  if (/esperabas|pediste|solicitaste|comprando|compra|expecting|request|buying/.test(q)) return R.esperaba;
+  if (/banco|bloquear|llamaste|llamado|denuncia|bank|block|report/.test(q)) return R.banco;
+  return R.generico;
 }
 
 function pintarConversacion(riesgo) {
@@ -1530,17 +1629,17 @@ function pintarConversacion(riesgo) {
   if (quedan <= 0) {
     $("sugerencias").innerHTML = "";
     $("repregunta").disabled = $("preguntar").disabled = true;
-    $t.textContent = "Hasta aquí llegan las preguntas";
+    $t.textContent = c("fin");
     $q.className = "cuota ultima";
-    $q.textContent = "Es un límite para que la herramienta siga en pie y gratis para todos. Si necesitas más, revisa el mensaje otra vez desde el inicio.";
+    $q.textContent = c("finTexto");
     $c.hidden = false;
     return;
   }
 
   const hayPregunta = ultimasPreguntas.length > 0;
   $t.textContent = hayPregunta
-    ? (ultimasPreguntas.length > 1 ? "Necesito saber dos cosas" : "Necesito saber una cosa")
-    : "¿Quieres preguntarme algo más?";
+    ? c(ultimasPreguntas.length > 1 ? "dosCosas" : "unaCosa")
+    : c("masPreguntas");
 
   const cuestiones = hayPregunta
     ? ultimasPreguntas.map((q) => `<p class="cuestion">${esc(q)}</p>`).join("")
@@ -1548,10 +1647,10 @@ function pintarConversacion(riesgo) {
 
   const opciones = hayPregunta
     ? respuestasSugeridas(ultimasPreguntas[0], riesgo)
-    : (SUGERENCIAS[riesgo] ?? SUGERENCIAS.medio).map((t) => [t]);
+    : ((SUGERENCIAS[idioma] ?? SUGERENCIAS.es)[riesgo] ?? (SUGERENCIAS[idioma] ?? SUGERENCIAS.es).medio).map((x) => [x]);
 
   $("sugerencias").innerHTML = opciones
-    .map(([t, grave]) => `<button type="button" class="pastilla${grave ? " grave" : ""}">${esc(t)}</button>`)
+    .map(([texto, grave]) => `<button type="button" class="pastilla${grave ? " grave" : ""}">${esc(texto)}</button>`)
     .join("");
   for (const b of $("sugerencias").children) {
     b.addEventListener("click", () => enviarRepregunta(b.textContent));
@@ -1564,12 +1663,10 @@ function pintarConversacion(riesgo) {
   // La ventanilla se queda donde está: es el sitio donde se escribe, y moverla
   // debajo de cada respuesta obligaría a buscarla otra vez.
 
-  $("repregunta").placeholder = hayPregunta ? "Escribe tu respuesta…" : "Escribe tu pregunta…";
+  $("repregunta").placeholder = c(hayPregunta ? "escribeResp" : "escribePreg");
   $("repregunta").disabled = $("preguntar").disabled = false;
   $q.className = quedan === 1 ? "cuota ultima" : "cuota";
-  $q.textContent = quedan === 1
-    ? "Te queda una interacción. Aprovéchala para lo que más te preocupe."
-    : `Puedes contestarme o preguntarme ${quedan} veces más.`;
+  $q.textContent = quedan === 1 ? c("ultima") : c("quedan", quedan);
   $c.hidden = false;
 }
 
@@ -1578,7 +1675,7 @@ async function enviarRepregunta(texto) {
   if (!q || repreguntas >= TOPE_REPREGUNTAS) return;
   $("repregunta").value = "";
   $("repregunta").disabled = $("preguntar").disabled = true;
-  $("cuota").textContent = "Pensando…";
+  $("cuota").textContent = c("pensando");
   repreguntas++;
   // Se guarda la pregunta que se está contestando: sin ella, en el hilo queda
   // una respuesta suelta («Sí») que no se entiende al releer.
@@ -1620,7 +1717,7 @@ async function adjuntar(archivo) {
   // Nada de comprobar el tipo MIME: en Android llega vacío muy a menudo y
   // esto se rendía sin decir nada. Se intenta decodificar, y si no es una
   // imagen se dice con palabras.
-  $("ayudaPegar").textContent = "Preparando la imagen…";
+  $("ayudaPegar").textContent = t("preparando");
   let listo;
   try {
     listo = await prepararAdjunta(archivo);
@@ -1643,7 +1740,7 @@ async function adjuntar(archivo) {
   $("pesoImagen").textContent = `${listo.ancho}×${listo.alto} · ${Math.max(1, Math.round((archivo.size || 0) / 1024))} KB`;
   $("zonaVacia").hidden = true;
   $("zonaImagen").hidden = false;
-  $("ayudaPegar").textContent = "Comprueba que es la captura correcta y toca Revisar.";
+  $("ayudaPegar").textContent = t("listaTocar");
   refrescarBoton();
 }
 
@@ -1699,8 +1796,8 @@ function refrescarBoton() {
   const largo = $mensaje.value.trim().length;
   const b = $("analizar");
   b.disabled = !adjunta && !largo;
-  b.textContent = adjunta ? "Revisar la captura" : "Revisar";
-  $("cuentaLetras").textContent = largo ? `${largo} caracteres` : "";
+  b.textContent = t(adjunta ? "revisarCaptura" : "revisar");
+  $("cuentaLetras").textContent = largo ? t("caracteres", largo) : "";
 }
 
 $("subir").addEventListener("click", () => $("archivo").click());
@@ -1915,13 +2012,124 @@ const MINIMO_PARA_ENSENAR = 25;
     const r = await fetch("/uso", { signal: AbortSignal.timeout(4000) });
     const { revisados } = await r.json();
     if (!(revisados >= MINIMO_PARA_ENSENAR)) return;
-    $("uso").innerHTML = `<b>${revisados.toLocaleString("es")}</b> mensajes revisados hasta ahora.`;
+    $("uso").innerHTML = t("usoTexto", revisados.toLocaleString(idioma));
     $("uso").hidden = false;
   } catch { /* sin número, y sin ruido */ }
 })();
 
-const $ejemplos = $("ejemplos");
-for (const [nombre, texto] of EJEMPLOS) {
+
+/**
+ * ── Idioma y tema ─────────────────────────────────────────────────────
+ *
+ * Dos decisiones que se guardan y no se vuelven a preguntar.
+ *
+ * El tema arranca SIEMPRE en claro, aunque el teléfono esté en oscuro. Un
+ * fondo negro de golpe en una herramienta a la que se llega asustado no
+ * ayuda; quien prefiere oscuro lo toca una vez.
+ *
+ * El idioma no solo cambia la pantalla: viaja al modelo, porque de nada
+ * sirve una interfaz en inglés que responde en español.
+ */
+const T = {
+  es: {
+    lema: "<strong>¿Crees que es una estafa?</strong> Pégalo aquí y te digo qué es y qué hacer.",
+    cuadro: "Pega o escribe aquí el mensaje…",
+    pegar: "Pegar del portapapeles",
+    ayuda: "Si no logras copiar el mensaje, sube una foto de la pantalla.",
+    elegir: "Elegir una captura", pegarImg: "Pegar imagen",
+    lista: "Captura lista", cambiar: "Cambiar", quitar: "Quitar",
+    borrar: "Borrar", oPrueba: "O prueba con un ejemplo",
+    segundos: "Toma unos segundos.",
+    volver: "← Revisar otro mensaje", otraCaptura: "Subir otra captura",
+    enviar: "Enviar", donar: "Donar este ejemplo", teSirvio: "¿Te sirvió?",
+    otroMensaje: "Revisar otro mensaje", ahoraNo: "Ahora no",
+    loQueSeEnvia: "Esto es exactamente lo que se enviaría",
+    promesa: "<strong>Sin cuenta y sin registro.</strong> Para revisarlo, el mensaje se manda a un servicio de análisis y no se guarda en ningún lado. Quita los nombres propios antes.",
+    gracias: "Dona este mensaje y la próxima persona a la que le llegue algo así lo tendrá más fácil. Un toque, sin cuenta y sin registro.",
+    mientras: "Mientras tanto: <strong>no contestes el mensaje</strong> ni toques ningún enlace que traiga.",
+    reservado: "<strong>Esto no se publica.</strong> Va a una colección cerrada que solo ve Constata, y sirve para una cosa: que la herramienta reconozca mejor los engaños que circulan aquí.",
+    ojo: "Se envía solo el <strong>texto</strong>, nunca tu imagen. Ya se le quitaron correos, teléfonos, montos y fechas — pero <strong>la limpieza no detecta nombres propios</strong>. Léelo y borra el tuyo o el de cualquier otra persona.",
+    revisando: "Revisando el mensaje…", mirando: "Mirando tu captura…",
+    revisar: "Revisar", revisarCaptura: "Revisar la captura",
+    caracteres: (n) => `${n} caracteres`,
+    listaTocar: "Comprueba que es la captura correcta y toca Revisar.",
+    preparando: "Preparando la imagen…",
+    pegado: "Ya está pegado. Léelo y toca Revisar cuando quieras.",
+    usoTexto: (n) => `<b>${n}</b> mensajes revisados hasta ahora.`,
+    aOscuro: "Modo oscuro", aClaro: "Modo claro", elMensaje: "El mensaje",
+  },
+  en: {
+    lema: "<strong>Think it's a scam?</strong> Paste it here and I'll tell you what it is and what to do.",
+    cuadro: "Paste or type the message here…",
+    pegar: "Paste from clipboard",
+    ayuda: "If you can't copy the message, upload a screenshot instead.",
+    elegir: "Choose a screenshot", pegarImg: "Paste image",
+    lista: "Screenshot ready", cambiar: "Change", quitar: "Remove",
+    borrar: "Clear", oPrueba: "Or try an example",
+    segundos: "This takes a few seconds.",
+    volver: "← Check another message", otraCaptura: "Upload another screenshot",
+    enviar: "Send", donar: "Donate this example", teSirvio: "Did this help?",
+    otroMensaje: "Check another message", ahoraNo: "Not now",
+    loQueSeEnvia: "This is exactly what would be sent",
+    promesa: "<strong>No account, no sign-up.</strong> To check it, the message is sent to an analysis service and is not stored anywhere. Remove any names first.",
+    gracias: "Donate this message and the next person who gets something like it will have an easier time. One tap, no account, no sign-up.",
+    mientras: "In the meantime: <strong>don't reply to the message</strong> and don't tap any link in it.",
+    reservado: "<strong>This is not published.</strong> It goes to a closed collection that only Constata sees, and it serves one purpose: helping the tool recognise the scams going around here.",
+    ojo: "Only the <strong>text</strong> is sent, never your image. Emails, phone numbers, amounts and dates have been removed — but <strong>the cleanup does not catch personal names</strong>. Read it and delete yours or anyone else's.",
+    revisando: "Checking the message…", mirando: "Looking at your screenshot…",
+    revisar: "Check", revisarCaptura: "Check the screenshot",
+    caracteres: (n) => `${n} characters`,
+    listaTocar: "Make sure it's the right screenshot and tap Check.",
+    preparando: "Preparing the image…",
+    pegado: "Pasted. Read it and tap Check whenever you're ready.",
+    usoTexto: (n) => `<b>${n}</b> messages checked so far.`,
+    aOscuro: "Dark mode", aClaro: "Light mode", elMensaje: "The message",
+  },
+};
+
+let idioma = "es";
+const t = (clave, ...args) => {
+  const v = (T[idioma] ?? T.es)[clave];
+  return typeof v === "function" ? v(...args) : (v ?? "");
+};
+
+function aplicarIdioma(nuevo) {
+  idioma = T[nuevo] ? nuevo : "es";
+  document.documentElement.lang = idioma;
+  for (const n of document.querySelectorAll("[data-t]")) {
+    const v = t(n.dataset.t);
+    if (v) n.innerHTML = v;
+  }
+  for (const n of document.querySelectorAll("[data-t-ph]")) {
+    const v = t(n.dataset.tPh);
+    if (v) n.placeholder = v;
+  }
+  for (const b of $("idioma").children) b.classList.toggle("activo", b.dataset.idioma === idioma);
+  try { localStorage.setItem("constata-idioma", idioma); } catch { /* modo privado */ }
+  refrescarBoton();
+  pintarEjemplos();
+}
+
+function aplicarTema(oscuro) {
+  document.documentElement.dataset.tema = oscuro ? "oscuro" : "claro";
+  const b = $("tema");
+  b.querySelector(".luna").hidden = oscuro;
+  b.querySelector(".sol").hidden = !oscuro;
+  b.title = b.ariaLabel = oscuro ? t("aClaro") : t("aOscuro");
+  try { localStorage.setItem("constata-tema", oscuro ? "oscuro" : "claro"); } catch { /* modo privado */ }
+}
+
+$("tema").addEventListener("click", () =>
+  aplicarTema(document.documentElement.dataset.tema !== "oscuro"));
+for (const b of $("idioma").children) {
+  b.addEventListener("click", () => aplicarIdioma(b.dataset.idioma));
+}
+
+
+function pintarEjemplos() {
+  const $ejemplos = $("ejemplos");
+  $ejemplos.innerHTML = "";
+  for (const [nombre, texto] of (EJEMPLOS[idioma] ?? EJEMPLOS.es)) {
   const b = document.createElement("button");
   b.textContent = nombre;
   b.addEventListener("click", () => {
@@ -1931,7 +2139,19 @@ for (const [nombre, texto] of EJEMPLOS) {
     $mensaje.scrollIntoView({ behavior: "smooth", block: "center" });
   });
   $ejemplos.appendChild(b);
+  }
 }
+// Al arrancar: lo guardado, y si no hay nada, español y claro. El idioma del
+// navegador sí se respeta la primera vez; el tema no, a propósito.
+(() => {
+  let guardadoIdioma = null, guardadoTema = null;
+  try {
+    guardadoIdioma = localStorage.getItem("constata-idioma");
+    guardadoTema = localStorage.getItem("constata-tema");
+  } catch { /* modo privado */ }
+  aplicarIdioma(guardadoIdioma ?? (navigator.language?.startsWith("en") ? "en" : "es"));
+  aplicarTema(guardadoTema === "oscuro");
+})();
 </script>
 </body>
 </html>

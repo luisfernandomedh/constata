@@ -1,14 +1,19 @@
 {
-  "revisado": "2026-09-04T15:57:02.752Z",
+  "revisado": "2026-09-10T02:57:44.740Z",
   "metodo": "certificado TLS del servidor; historial de transparencia como respaldo",
   "resumen": {
-    "total": 67,
-    "confirmados": 37,
-    "revisar": 22,
+    "total": 75,
+    "confirmados": 39,
+    "revisar": 25,
     "dudosos": 0,
-    "sin_respuesta": 8
+    "sin_respuesta": 11
   },
   "dominios": {
+    "aduana.gob.ec": {
+      "institucion": "SENAE (Aduana)",
+      "estado": "ERROR",
+      "detalle": "ENOTFOUND"
+    },
     "amazon.com": {
       "institucion": "Amazon",
       "estado": "REVISAR",
@@ -30,7 +35,7 @@
     "ant.gob.ec": {
       "institucion": "ANT",
       "estado": "ERROR",
-      "detalle": "sin respuesta — pero tiene 60 certificados emitidos desde 2014-11-19: el dominio es real y activo. Reintenta cuando el sitio esté arriba."
+      "detalle": "sin respuesta"
     },
     "apple.com": {
       "institucion": "Apple",
@@ -64,8 +69,9 @@
     },
     "banorte.com": {
       "institucion": "Banorte",
-      "estado": "ERROR",
-      "detalle": "sin respuesta"
+      "estado": "CONFIRMADO",
+      "detalle": "Grupo Financiero Banorte, S.A.B de C.V.",
+      "certificado_vence": "Dec  4 23:59:59 2026 GMT"
     },
     "bbva.com": {
       "institucion": "BBVA",
@@ -108,6 +114,11 @@
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
       "certificado_vence": "Oct 12 15:03:06 2026 GMT"
+    },
+    "cne.gob.ec": {
+      "institucion": "CNE",
+      "estado": "ERROR",
+      "detalle": "ERR_SSL_TLSV1_UNRECOGNIZED_NAME"
     },
     "cnt.com.ec": {
       "institucion": "CNT",
@@ -155,23 +166,47 @@
       "detalle": "certificado sin nombre de organización (validación simple)",
       "certificado_vence": "Oct 19 00:38:10 2026 GMT"
     },
+    "dpe.gob.ec": {
+      "institucion": "Defensoría del Pueblo",
+      "estado": "REVISAR",
+      "detalle": "certificado sin nombre de organización (validación simple)",
+      "certificado_vence": "Jan 15 23:59:59 2027 GMT"
+    },
+    "educacion.gob.ec": {
+      "institucion": "Ministerio de Educación",
+      "estado": "REVISAR",
+      "detalle": "certificado sin nombre de organización (validación simple)",
+      "certificado_vence": "Apr 12 23:59:59 2027 GMT"
+    },
     "facebook.com": {
       "institucion": "Facebook",
       "estado": "CONFIRMADO",
       "detalle": "Meta Platforms, Inc.",
-      "certificado_vence": "Sep 11 23:59:59 2026 GMT"
+      "certificado_vence": "Sep 17 23:59:59 2026 GMT"
     },
     "fb.com": {
       "institucion": "Facebook",
       "estado": "REVISAR",
       "detalle": "el certificado dice \"Meta Platforms, Inc.\"",
-      "certificado_vence": "Sep 11 23:59:59 2026 GMT"
+      "certificado_vence": "Sep 17 23:59:59 2026 GMT"
     },
     "fedex.com": {
       "institucion": "FedEx",
       "estado": "CONFIRMADO",
       "detalle": "FedEx Corporation",
       "certificado_vence": "Jan 31 23:59:59 2027 GMT"
+    },
+    "fiscalia.gob.ec": {
+      "institucion": "Fiscalía General del Estado",
+      "estado": "CONFIRMADO",
+      "detalle": "Fiscalía General del Estado",
+      "certificado_vence": "Dec 11 23:59:59 2026 GMT"
+    },
+    "funcionjudicial.gob.ec": {
+      "institucion": "Función Judicial",
+      "estado": "CONFIRMADO",
+      "detalle": "Consejo de la Judicatura",
+      "certificado_vence": "Jan  8 23:59:59 2027 GMT"
     },
     "gmail.com": {
       "institucion": "Google",
@@ -201,7 +236,7 @@
       "institucion": "Instagram",
       "estado": "CONFIRMADO",
       "detalle": "Meta Platforms, Inc.",
-      "certificado_vence": "Sep 11 23:59:59 2026 GMT"
+      "certificado_vence": "Sep 17 23:59:59 2026 GMT"
     },
     "interbank.pe": {
       "institucion": "Interbank",
@@ -212,7 +247,7 @@
     "itau.com": {
       "institucion": "Itaú",
       "estado": "ERROR",
-      "detalle": "sin respuesta"
+      "detalle": "sin respuesta — pero tiene 4897 certificados emitidos desde 2013-09-16: el dominio es real y activo. Reintenta cuando el sitio esté arriba."
     },
     "itau.com.br": {
       "institucion": "Itaú",
@@ -242,7 +277,7 @@
       "institucion": "Mercado Libre",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Nov  6 23:59:59 2026 GMT"
+      "certificado_vence": "Mar 24 23:59:59 2027 GMT"
     },
     "microsoft.com": {
       "institucion": "Microsoft",
@@ -310,11 +345,16 @@
       "detalle": "Banco Pichincha C.A.",
       "certificado_vence": "Oct 26 23:59:59 2026 GMT"
     },
+    "policia.gob.ec": {
+      "institucion": "Policía Nacional",
+      "estado": "REVISAR",
+      "detalle": "certificado sin nombre de organización (validación simple)",
+      "certificado_vence": "Oct 20 03:50:49 2026 GMT"
+    },
     "produbanco.com": {
       "institucion": "Produbanco",
-      "estado": "CONFIRMADO",
-      "detalle": "BANCO DE LA PRODUCCION S.A. PRODUBANCO",
-      "certificado_vence": "Dec  6 13:46:25 2026 GMT"
+      "estado": "ERROR",
+      "detalle": "ENOTFOUND"
     },
     "produbanco.com.ec": {
       "institucion": "Produbanco",
@@ -332,7 +372,7 @@
       "institucion": "Santander",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Dec  2 22:19:47 2026 GMT"
+      "certificado_vence": "Dec  7 20:21:13 2026 GMT"
     },
     "santander.com.mx": {
       "institucion": "Santander",
@@ -360,7 +400,12 @@
     "sri.gob.ec": {
       "institucion": "SRI",
       "estado": "ERROR",
-      "detalle": "ENOTFOUND — pero tiene 283 certificados emitidos desde 2010-12-24: el dominio es real y activo. Reintenta cuando el sitio esté arriba."
+      "detalle": "ENOTFOUND"
+    },
+    "trabajo.gob.ec": {
+      "institucion": "Ministerio del Trabajo",
+      "estado": "ERROR",
+      "detalle": "ERR_TLS_CERT_ALTNAME_INVALID"
     },
     "uber.com": {
       "institucion": "Uber",
@@ -377,13 +422,13 @@
     "viabcp.com": {
       "institucion": "BCP",
       "estado": "ERROR",
-      "detalle": "ERR_SSL_SSL/TLS_ALERT_HANDSHAKE_FAILURE"
+      "detalle": "ERR_SSL_SSL/TLS_ALERT_HANDSHAKE_FAILURE — pero tiene 1985 certificados emitidos desde 2004-11-24: el dominio es real y activo. Reintenta cuando el sitio esté arriba."
     },
     "wa.me": {
       "institucion": "WhatsApp",
       "estado": "CONFIRMADO",
       "detalle": "Meta Platforms, Inc.",
-      "certificado_vence": "Sep 11 23:59:59 2026 GMT"
+      "certificado_vence": "Sep 17 23:59:59 2026 GMT"
     },
     "westernunion.com": {
       "institucion": "Western Union",
@@ -395,7 +440,7 @@
       "institucion": "WhatsApp",
       "estado": "CONFIRMADO",
       "detalle": "Meta Platforms, Inc.",
-      "certificado_vence": "Sep 11 23:59:59 2026 GMT"
+      "certificado_vence": "Sep 17 23:59:59 2026 GMT"
     },
     "youtube.com": {
       "institucion": "Google",
