@@ -357,6 +357,11 @@ footer {
   font: 400 12.5px/1.7 var(--sans); color: var(--tenue-mas); text-wrap: pretty;
 }
 footer a { color: var(--azul-medio); }
+#uso {
+  display: block; margin-bottom: 6px;
+  font: 500 13px/1.6 var(--sans); color: var(--texto);
+}
+#uso b { font-weight: 600; color: var(--azul); font-variant-numeric: tabular-nums; }
 
 [hidden] { display: none !important; }
 
@@ -572,6 +577,7 @@ footer a { color: var(--azul-medio); }
 </div>
 
 <footer>
+  <span id="uso" hidden></span>
   Constata es gratis y siempre lo será. Sin cuentas, sin publicidad y sin guardar nada tuyo.<br>
   <a href="como-funciona.html">Cómo funciona</a> ·
   <a href="evaluacion.html">Qué detecta y qué no</a> ·
@@ -1815,6 +1821,26 @@ $("enviar").addEventListener("click", async () => {
     if (boton.textContent === "Enviando…") { boton.disabled = false; boton.textContent = "Enviar al corpus"; }
   }
 });
+
+/*
+  Cuántos mensajes se han revisado. Se pide al final, sin bloquear nada, y si
+  no llega no pasa nada: el número no es parte de la herramienta.
+
+  No se enseña hasta que la cifra significa algo. Un contador que dice «3»
+  no da confianza, la quita. Y no se le pone un número de arranque inventado:
+  el contador empezó el 9 de septiembre y cuenta desde ahí.
+*/
+const MINIMO_PARA_ENSENAR = 25;
+
+(async () => {
+  try {
+    const r = await fetch("/uso", { signal: AbortSignal.timeout(4000) });
+    const { revisados } = await r.json();
+    if (!(revisados >= MINIMO_PARA_ENSENAR)) return;
+    $("uso").innerHTML = `<b>${revisados.toLocaleString("es")}</b> mensajes revisados hasta ahora.`;
+    $("uso").hidden = false;
+  } catch { /* sin número, y sin ruido */ }
+})();
 
 const $ejemplos = $("ejemplos");
 for (const [nombre, texto] of EJEMPLOS) {

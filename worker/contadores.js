@@ -28,9 +28,23 @@ export function esPrueba(peticion) {
 
 export async function contar(env, que, peticion) {
   if (!env.LIMITES || (peticion && esPrueba(peticion))) return;
-  const clave = `m:${que}:${hoy()}`;
   try {
+    const clave = `m:${que}:${hoy()}`;
     const previo = Number(await env.LIMITES.get(clave)) || 0;
     await env.LIMITES.put(clave, String(previo + 1), { expirationTtl: NOVENTA_DIAS });
+
+    // Un total acumulado aparte, sin caducidad: es el que se enseña en la
+    // página, y leerlo debe costar una sola lectura, no recorrer 90 claves.
+    if (que !== "donacion") {
+      const t = Number(await env.LIMITES.get("m:total")) || 0;
+      await env.LIMITES.put("m:total", String(t + 1));
+    }
   } catch { /* una cuenta perdida no vale romper una respuesta */ }
+}
+
+/** El total que se enseña en la página. Público a propósito. */
+export async function total(env) {
+  if (!env.LIMITES) return 0;
+  try { return Number(await env.LIMITES.get("m:total")) || 0; }
+  catch { return 0; }
 }

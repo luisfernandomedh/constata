@@ -16,6 +16,11 @@ zone_name = "constata.dev"
 pattern = "constata.dev/analizar"
 zone_name = "constata.dev"
 
+# Cuántos mensajes se han revisado. Lo lee la propia página.
+[[routes]]
+pattern = "constata.dev/uso"
+zone_name = "constata.dev"
+
 [vars]
 # Repositorio donde aterrizan los issues. Separado del código a propósito:
 # si el corpus recibe una queja o una marca de seguridad, la biblioteca sigue viva.
