@@ -50,8 +50,9 @@ def barra(u,t,n=24):
     p=round(u/t*n) if t else 0
     return '█'*p + '░'*(n-p)
 print(f'CUOTA DEL MODELO (Groq, capa gratuita)')
-print(f'  hoy:        {barra(lr-rr,lr)} {lr-rr} de {lr} consultas')
+print(f'  depósito:   {barra(lr-rr,lr)} {lr-rr} de {lr} gastadas · se rellena solo, 1 cada 86,4 s')
 print(f'  este minuto:{barra(lt-rt,lt)} {lt-rt} de {lt} tokens')
+print(f'  (el depósito NO es un total del día: se recupera solo)')
 print(f'  → quedan {rr} consultas. Una imagen gasta ~2 200 tokens.')
 "
 else
