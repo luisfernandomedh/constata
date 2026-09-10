@@ -8,22 +8,48 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+/* Va en la cabecera y no al final: aplicarlo después de pintar deja ver un
+   parpadeo del tema equivocado. Y sin `color-scheme` explícito el navegador
+   decide por su cuenta, que es lo que hacía que esta página saliera oscura
+   aunque estuviera elegido el claro. */
+(() => {
+  let t = "claro";
+  try { if (localStorage.getItem("constata-tema") === "oscuro") t = "oscuro"; } catch { /* modo privado */ }
+  document.documentElement.dataset.tema = t;
+})();
+</script>
 <style>
   :root {
-    color-scheme: light dark;
+    color-scheme: light;
     --fondo: #eceae5; --papel: #ffffff; --texto: #15202b; --tenue: #5a6570;
     --borde: #e4e1dc; --marca: #2f6690; --marca-suave: #e8f0f7;
     --sombra: 0 1px 2px rgba(0,0,0,.04), 0 10px 28px -14px rgba(0,0,0,.16);
   }
   /* Lo decide el botón de la herramienta, no el sistema. */
   :root[data-tema="oscuro"] {
+    color-scheme: dark;
       --fondo: #141a21; --papel: #1c242d; --texto: #e7edf3; --tenue: #95a3b1;
       --borde: #2b353f; --marca: #7fb2e8; --marca-suave: #1a2a3a;
       --sombra: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
     }
+  /* Los mismos dos interruptores que la herramienta, arriba a la derecha y
+     fuera del camino. La elección se comparte por el navegador. */
+  .controles-fijos { position: absolute; top: 14px; right: 14px; display: flex; gap: 8px; z-index: 5; }
+  .conmutador { display: flex; gap: 2px; padding: 2px; background: var(--papel);
+    border: 1px solid var(--borde); border-radius: 7px; }
+  .conmutador button { padding: 6px 9px; border: none; border-radius: 5px; background: none;
+    font: 500 11px/1 inherit; font-family: inherit; color: var(--tenue); cursor: pointer; }
+  .conmutador button.activo { background: var(--marca-suave); color: var(--texto); font-weight: 600; }
+  .icono-boton { display: grid; place-items: center; width: 32px; height: 32px; padding: 0;
+    background: var(--papel); color: var(--tenue); border: 1px solid var(--borde);
+    border-radius: 7px; cursor: pointer; }
+  .icono-boton:hover { color: var(--texto); }
+  .icono-boton svg { width: 16px; height: 16px; }
+  @media (max-width: 560px) { .controles-fijos { position: static; justify-content: flex-end; padding: 12px 12px 0; } }
   * { box-sizing: border-box; }
   body {
-    margin: 0; background: var(--fondo); color: var(--texto);
+    position: relative; margin: 0; background: var(--fondo); color: var(--texto);
     font: 16px/1.7 "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
     -webkit-font-smoothing: antialiased;
   }
@@ -63,11 +89,23 @@
 </style>
 </head>
 <body>
+<div class="controles-fijos">
+  <div class="conmutador" id="idioma" role="group" aria-label="Idioma / Language">
+    <button type="button" data-idioma="es">ES</button>
+    <button type="button" data-idioma="en">EN</button>
+  </div>
+  <button type="button" id="tema" class="icono-boton" aria-label="Cambiar tema / Switch theme">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path class="luna" d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/>
+      <g class="sol" hidden><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"/></g>
+    </svg>
+  </button>
+</div>
 <div class="envoltura">
 
-  <a class="volver" href="./">← Volver a la herramienta</a>
+  <a class="volver" href="./" data-es="← Volver a la herramienta" data-en="← Back to the tool">← Volver a la herramienta</a>
 
-  <h1>Cómo funciona Constata</h1>
+  <h1 data-es="Cómo funciona Constata" data-en="How Constata works">Cómo funciona Constata</h1>
   <p class="entrada">Y por qué está construido así, que es la parte que importa.</p>
 
   <h2>El problema</h2>
@@ -122,10 +160,10 @@
   <p>Es gratis, de código abierto y sin publicidad. No hay cuenta que crear ni datos que vender, porque no se recoge ninguno. <a href="https://github.com/luisfernandomedh/constata">El código está publicado</a> para que no tengas que creerme: puedes leerlo.</p>
 
   <footer>
-    <a href="./">Volver a la herramienta</a> ·
-    <a href="dominios.html">Dominios verificados</a> ·
-    <a href="evaluacion.html">Qué detecta y qué no</a> ·
-    <a href="https://github.com/luisfernandomedh/constata">Código en GitHub</a> ·
+    <a href="./" data-es="Volver a la herramienta" data-en="Back to the tool">Volver a la herramienta</a> ·
+    <a href="dominios.html" data-es="Dominios verificados" data-en="Verified domains">Dominios verificados</a> ·
+    <a href="evaluacion.html" data-es="Qué detecta y qué no" data-en="What it catches and what it doesn&#x27;t">Qué detecta y qué no</a> ·
+    <a href="https://github.com/luisfernandomedh/constata" data-es="Código en GitHub" data-en="Code on GitHub">Código en GitHub</a> ·
     <a href="https://github.com/luisfernandomedh/constata/blob/main/SECURITY.md">Modelo de amenazas</a> ·
     <a href="https://github.com/luisfernandomedh/constata-corpus">El corpus abierto</a>
   </footer>
@@ -140,6 +178,41 @@
     const t = localStorage.getItem("constata-tema");
     document.documentElement.dataset.tema = t === "oscuro" ? "oscuro" : "claro";
   } catch { document.documentElement.dataset.tema = "claro"; }
+})();
+</script>
+
+<script>
+/* Los dos interruptores. El tema y el idioma se guardan donde los deja la
+   herramienta, así que la elección sobrevive a la navegación. */
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const leer = (k, x) => { try { return localStorage.getItem(k) ?? x; } catch { return x; } };
+  const guardar = (k, v) => { try { localStorage.setItem(k, v); } catch { /* modo privado */ } };
+
+  function tema(oscuro) {
+    document.documentElement.dataset.tema = oscuro ? "oscuro" : "claro";
+    $("tema").querySelector(".luna").hidden = oscuro;
+    $("tema").querySelector(".sol").hidden = !oscuro;
+    guardar("constata-tema", oscuro ? "oscuro" : "claro");
+  }
+  function idioma(cual) {
+    const l = cual === "en" ? "en" : "es";
+    document.documentElement.lang = l;
+    for (const n of document.querySelectorAll("[data-es]")) {
+      const v = l === "en" ? n.dataset.en : n.dataset.es;
+      if (v !== undefined) n.innerHTML = v;
+    }
+    for (const n of document.querySelectorAll("[data-ph-es]")) {
+      n.placeholder = l === "en" ? n.dataset.phEn : n.dataset.phEs;
+    }
+    for (const b of $("idioma").children) b.classList.toggle("activo", b.dataset.idioma === l);
+    guardar("constata-idioma", l);
+    document.dispatchEvent(new CustomEvent("idioma", { detail: l }));
+  }
+  $("tema").addEventListener("click", () => tema(document.documentElement.dataset.tema !== "oscuro"));
+  for (const b of $("idioma").children) b.addEventListener("click", () => idioma(b.dataset.idioma));
+  tema(leer("constata-tema", "claro") === "oscuro");
+  idioma(leer("constata-idioma", "es"));
 })();
 </script>
 </body>

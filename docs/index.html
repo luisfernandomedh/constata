@@ -21,6 +21,7 @@
   bloque del veredicto destaque solo, sin gritar.
 */
 :root {
+  color-scheme: light;
   --arena:      #eceae5;
   --papel:      #ffffff;
   --papel-tenue:#faf9f7;
@@ -93,6 +94,7 @@
    herramienta a la que se llega asustado no ayuda; y quien prefiere oscuro
    lo toca una vez y se recuerda. */
 :root[data-tema="oscuro"] {
+    color-scheme: dark;
     --arena:      #141a21;
     --papel:      #1c242d;
     --papel-tenue:#222b35;
@@ -580,8 +582,8 @@ footer a { color: var(--azul-medio); }
         <rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>
       </svg>
       <p data-t="promesa"><strong>Sin cuenta y sin registro.</strong> Para revisarlo, el mensaje se manda a un servicio de análisis y no se guarda en ningún lado. Quita los nombres propios antes.
-        <a href="https://github.com/luisfernandomedh/constata/blob/main/ANALISIS.md" target="_blank" rel="noopener">Cómo funciona</a> ·
-        <a href="https://github.com/luisfernandomedh/constata/blob/main/INSTRUCCIONES.md" target="_blank" rel="noopener">Lo que le decimos al modelo</a>
+        <a href="https://github.com/luisfernandomedh/constata/blob/main/ANALISIS.md" target="_blank" rel="noopener" data-t="pieComo">Cómo funciona</a> ·
+        <a href="https://github.com/luisfernandomedh/constata/blob/main/INSTRUCCIONES.md" target="_blank" rel="noopener" data-t="queLeDecimos">Lo que le decimos al modelo</a>
       </p>
     </div>
 
@@ -627,7 +629,7 @@ footer a { color: var(--azul-medio); }
       -->
       <div id="conversar" hidden>
         <div class="pide">
-          <p class="rotulo" id="tituloConversar">¿Quieres preguntarme algo más?</p>
+          <p class="rotulo" id="tituloConversar" data-t="masPreguntas">¿Quieres preguntarme algo más?</p>
           <div class="respuestas" id="sugerencias"></div>
           <div class="caja-responder">
             <input id="repregunta" type="text" autocomplete="off" placeholder="Escribe tu respuesta…" maxlength="400">
@@ -665,17 +667,17 @@ footer a { color: var(--azul-medio); }
         <p class="cambios" id="cambios"></p>
 
         <div class="campos">
-          <label>Qué es
+          <label><span data-t="queEs">Qué es</span>
             <select id="etiqueta">
-              <option value="estafa">Una estafa</option>
-              <option value="legitimo">Un mensaje legítimo</option>
+              <option value="estafa" data-t="optEstafa">Una estafa</option>
+              <option value="legitimo" data-t="optLegitimo">Un mensaje legítimo</option>
             </select>
           </label>
-          <label>Por dónde llegó
+          <label><span data-t="porDonde">Por dónde llegó</span>
             <select id="canal">
               <option value="sms">SMS</option><option value="whatsapp">WhatsApp</option>
-              <option value="correo">Correo</option><option value="llamada">Llamada</option>
-              <option value="red-social">Red social</option><option value="otro">Otro</option>
+              <option value="correo" data-t="optCorreo">Correo</option><option value="llamada" data-t="optLlamada">Llamada</option>
+              <option value="red-social" data-t="optRed">Red social</option><option value="otro" data-t="optOtro">Otro</option>
             </select>
           </label>
         </div>
@@ -683,10 +685,10 @@ footer a { color: var(--azul-medio); }
         <p class="ojo" data-t="ojo">Se envía solo el <strong>texto</strong>, nunca tu imagen. Ya se le quitaron correos, teléfonos, montos y fechas — pero <strong>la limpieza no detecta nombres propios</strong>. Léelo y borra el tuyo o el de cualquier otra persona.</p>
 
         <div class="fila" style="margin-top:0">
-          <button id="enviar" class="principal">Enviar este ejemplo</button>
+          <button id="enviar" class="principal" data-t="enviarEjemplo">Enviar este ejemplo</button>
           <button id="cancelar" class="secundario" data-t="ahoraNo">Ahora no</button>
         </div>
-        <p class="remate" id="estadoEnvio">Nada entra a la colección sin que una persona lo revise.</p>
+        <p class="remate" id="estadoEnvio" data-t="pendienteRevision">Nada entra a la colección sin que una persona lo revise.</p>
       </div>
 
       <div class="fila">
@@ -699,12 +701,12 @@ footer a { color: var(--azul-medio); }
 
 <footer>
   <span id="uso" hidden></span>
-  Constata es gratis y siempre lo será. Sin cuentas, sin publicidad y sin guardar nada tuyo.<br>
-  <a href="como-funciona.html">Cómo funciona</a> ·
-  <a href="evaluacion.html">Qué detecta y qué no</a> ·
-  <a href="dominios.html">Dominios verificados</a> ·
-  <a href="https://github.com/luisfernandomedh/constata">Código en GitHub</a> ·
-  <a href="https://github.com/luisfernandomedh/constata/blob/main/SECURITY.md">Modelo de amenazas</a>
+  <span data-t="pieLibre">Constata es gratis y siempre lo será. Sin cuentas, sin publicidad y sin guardar nada tuyo.</span><br>
+  <a href="como-funciona.html" data-t="pieComo">Cómo funciona</a> ·
+  <a href="evaluacion.html" data-t="pieDetecta">Qué detecta y qué no</a> ·
+  <a href="dominios.html" data-t="pieDominios">Dominios verificados</a> ·
+  <a href="https://github.com/luisfernandomedh/constata" data-t="pieCodigo">Código en GitHub</a> ·
+  <a href="https://github.com/luisfernandomedh/constata/blob/main/SECURITY.md" data-t="pieAmenazas">Modelo de amenazas</a>
 </footer>
 </div>
 
@@ -879,14 +881,6 @@ function pintar(texto, { riesgo, hallazgos, avisos }) {
     </div>`;
 }
 
-/*
-  Se perdió al rehacer la página con el diseño nuevo, y como la línea que lo
-  usa vive dentro de un try/catch, el fallo no se veía: simplemente la
-  invitación a donar no aparecía nunca. Eso explica por qué la colección
-  llevaba un día entero sin recibir nada.
-*/
-const AVISO_PENDIENTE = "Nada entra a la colección sin que una persona lo revise.";
-
 function prepararContribucion(texto, riesgo) {
   const { texto: limpio, reemplazos } = anonimizar(texto);
   $limpio.value = limpio;
@@ -895,9 +889,9 @@ function prepararContribucion(texto, riesgo) {
     : "No se encontró ningún dato personal que reemplazar. Revísalo igual.";
   $("etiqueta").value = riesgo === "bajo" ? "legitimo" : "estafa";
   $estado.className = "remate";
-  $estado.textContent = AVISO_PENDIENTE;
+  $estado.textContent = t("pendienteRevision");
   $("enviar").disabled = false;
-  $("enviar").textContent = "Enviar este ejemplo";
+  $("enviar").textContent = t("enviarEjemplo");
 }
 
 /**
@@ -933,7 +927,7 @@ function volverAlInicio() {
   $resultado.innerHTML = "";
   $contribuir.hidden = true;
   $("abrirContribuir").hidden = true;
-  $("ayudaPegar").textContent = "Si no logras copiar el mensaje, toma una foto de la pantalla y súbela.";
+  $("ayudaPegar").textContent = t("ayudaFoto");
   ultimaTranscripcion = "";
   historial = []; repreguntas = 0; mensajeOriginal = {};
   $("conversar").hidden = true;
@@ -964,7 +958,7 @@ $("pegar").addEventListener("click", async () => {
   try {
     const texto = await navigator.clipboard.readText();
     if (!texto.trim()) {
-      $("ayudaPegar").textContent = "No encontré nada copiado. Copia primero el mensaje y vuelve a tocar este botón.";
+      $("ayudaPegar").textContent = t("nadaCopiado");
       return;
     }
     $mensaje.value = texto;
@@ -972,7 +966,7 @@ $("pegar").addEventListener("click", async () => {
     refrescarBoton();
   } catch {
     // Sin permiso de portapapeles: se degrada al cuadro de texto de siempre.
-    $("ayudaPegar").innerHTML = "<strong>No pude tomar lo que copiaste.</strong> Pégalo en el cuadro de abajo y toca «Revisar».";
+    $("ayudaPegar").innerHTML = t("noTome");
     $mensaje.focus();
     $mensaje.scrollIntoView({ behavior: "smooth", block: "center" });
   } finally {
@@ -1087,9 +1081,9 @@ async function leerTextoDeImagen(archivo) {
   const { data } = await T.recognize(limpia, "spa", {
     logger: (m) => {
       if (m.status === "recognizing text") {
-        $("textoAnalizando").textContent = `Leyéndola aquí, en tu dispositivo… ${Math.round(m.progress * 100)}%`;
+        $("textoAnalizando").textContent = t("leyendoPor", Math.round(m.progress * 100));
       } else if (m.status === "loading language traineddata") {
-        $("textoAnalizando").textContent = "Esto tarda un poco la primera vez…";
+        $("textoAnalizando").textContent = t("primeraVez");
       }
     },
   });
@@ -1342,7 +1336,7 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     */
     if (d.limite && !reintentado) {
       reintentado = true;
-      $("textoAnalizando").textContent = "Hay mucha gente ahora mismo. Lo intento otra vez…";
+      $("textoAnalizando").textContent = t("muchaGente");
       mostrar("vista-analizando");
       await new Promise((listo) => setTimeout(listo, 7000));
       const r2 = await fetch(ANALISIS, {
@@ -1424,7 +1418,7 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     // herramienta no hizo nada. Se sigue adelante con lo que haya.
     let texto = entrada;
     if (esImagen) {
-      $("textoAnalizando").textContent = "El análisis a fondo no respondió. Lo estoy leyendo aquí, en tu dispositivo…";
+      $("textoAnalizando").textContent = t("leyendoAqui");
       texto = await leerTextoDeImagen(adjuntaLista?.url ?? entrada).catch(() => "");
       if (!textoUtil(texto)) texto = "";
     }
@@ -1725,9 +1719,8 @@ async function adjuntar(archivo) {
     $("zonaVacia").hidden = false;
     $("zonaImagen").hidden = true;
     adjunta = null; adjuntaLista = null;
-    $("ayudaPegar").innerHTML = `<strong>No pude abrir ese archivo como imagen.</strong>
-      Prueba con una captura de pantalla, o escribe el mensaje en el cuadro de arriba.
-      <br><small>Detalle: ${esc(String(fallo?.message || "desconocido").slice(0, 90))}</small>`;
+    $("ayudaPegar").innerHTML = `<strong>${t("noAbrir")}</strong>${t("noAbrirCola")}
+      <br><small>${t("detalle")}${esc(String(fallo?.message || "?").slice(0, 90))}</small>`;
     refrescarBoton();
     return;
   }
@@ -1787,7 +1780,7 @@ function soltarAdjunta() {
   $("previa").removeAttribute("src");
   $("zonaVacia").hidden = false;
   $("zonaImagen").hidden = true;
-  $("ayudaPegar").textContent = "Si no logras copiar el mensaje, toma una foto de la pantalla y súbela.";
+  $("ayudaPegar").textContent = t("ayudaFoto");
   refrescarBoton();
 }
 
@@ -1811,9 +1804,9 @@ $("pegarImagen").addEventListener("click", async () => {
       const tipo = it.types.find((t) => t.startsWith("image/"));
       if (tipo) { await adjuntar(new File([await it.getType(tipo)], "captura", { type: tipo })); return; }
     }
-    $("ayudaPegar").textContent = "No encontré ninguna imagen copiada. Copia la captura y vuelve a tocar aquí.";
+    $("ayudaPegar").textContent = t("sinImagen");
   } catch {
-    $("ayudaPegar").innerHTML = "<strong>Tu navegador no me deja leer lo copiado.</strong> Toca el cuadro de arriba y pega ahí con los dedos, o usa «Elegir una captura».";
+    $("ayudaPegar").innerHTML = t("noDeja");
   }
 });
 $("cambiarImagen").addEventListener("click", () => $("archivo").click());
@@ -1822,7 +1815,7 @@ $("archivo").addEventListener("change", async (e) => {
   const f = e.target.files?.[0];
   if (!f) {
     // Pasa en Android cuando el selector se cierra sin elegir nada.
-    $("ayudaPegar").textContent = "No elegiste ninguna imagen. Toca «Elegir una captura» y prueba otra vez.";
+    $("ayudaPegar").textContent = t("sinElegir");
     return;
   }
   await adjuntar(f);
@@ -1946,20 +1939,20 @@ function enviarPorGitHub(cuerpo) {
   url.searchParams.set("texto", cuerpo);
   window.open(url.toString(), "_blank", "noopener");
   $estado.className = "exito";
-  $estado.textContent = "Se abrió el formulario de GitHub con tu mensaje ya puesto.";
+  $estado.textContent = t("otraVia");
 }
 
 $("enviar").addEventListener("click", async () => {
   const cuerpo = $limpio.value.trim();
   if (cuerpo.length < 10) {
     $estado.className = "fallo";
-    $estado.textContent = "El mensaje es demasiado corto para aportarlo.";
+    $estado.textContent = t("muyCorto");
     return;
   }
   if (!ENDPOINT) return enviarPorGitHub(cuerpo);
 
   const boton = $("enviar");
-  boton.disabled = true; boton.textContent = "Enviando…";
+  boton.disabled = true; boton.textContent = t("enviando");
   $estado.className = "remate"; $estado.textContent = "Enviando…";
 
   try {
@@ -1970,10 +1963,10 @@ $("enviar").addEventListener("click", async () => {
     const datos = await r.json().catch(() => ({}));
     if (r.ok && datos.ok) {
       $estado.className = "exito";
-      $estado.innerHTML = "Gracias. Tu ejemplo quedó registrado como propuesta " +
+      $estado.innerHTML = t("gracias1") +
         `<a href="${esc(datos.url)}" target="_blank" rel="noopener">#${esc(datos.numero)}</a>. ` +
         "Una persona lo revisa antes de que entre al corpus.";
-      boton.textContent = "Enviado";
+      boton.textContent = t("enviado");
       return;
     }
     $estado.className = "fallo";
@@ -1988,12 +1981,11 @@ $("enviar").addEventListener("click", async () => {
     // con el mensaje ya puesto.
     $estado.className = "fallo";
     $estado.innerHTML =
-      "Tu conexión no dejó pasar el envío. <strong>Abriendo otra vía…</strong> " +
-      "Si no se abre sola, <a href=\"#\" id=\"viaAlterna\">toca aquí</a>.";
+      t("noPasoEnvio") + `<a href="#" id="viaAlterna">${t("tocaAqui")}</a>.`;
     $("viaAlterna")?.addEventListener("click", (ev) => { ev.preventDefault(); enviarPorGitHub(cuerpo); });
     setTimeout(() => enviarPorGitHub(cuerpo), 1200);
   } finally {
-    if (boton.textContent === "Enviando…") { boton.disabled = false; boton.textContent = "Enviar al corpus"; }
+    if (boton.textContent === t("enviando")) { boton.disabled = false; boton.textContent = t("enviarEjemplo"); }
   }
 });
 
@@ -2057,6 +2049,35 @@ const T = {
     pegado: "Ya está pegado. Léelo y toca Revisar cuando quieras.",
     usoTexto: (n) => `<b>${n}</b> mensajes revisados hasta ahora.`,
     aOscuro: "Modo oscuro", aClaro: "Modo claro", elMensaje: "El mensaje",
+    noTome: "<strong>No pude tomar lo que copiaste.</strong> Pégalo en el cuadro de abajo y toca «Revisar».",
+    noDeja: "<strong>Tu navegador no me deja leer lo copiado.</strong> Toca el cuadro de arriba y pega ahí con los dedos, o usa «Elegir una captura».",
+    queEs: "Qué es", optEstafa: "Una estafa", optLegitimo: "Un mensaje legítimo",
+    porDonde: "Por dónde llegó", optCorreo: "Correo", optLlamada: "Llamada",
+    optRed: "Red social", optOtro: "Otro",
+    enviarEjemplo: "Enviar este ejemplo",
+    pendienteRevision: "Nada entra a la colección sin que una persona lo revise.",
+    masPreguntas: "¿Quieres preguntarme algo más?",
+    pieLibre: "Constata es gratis y siempre lo será. Sin cuentas, sin publicidad y sin guardar nada tuyo.",
+    pieComo: "Cómo funciona", pieDetecta: "Qué detecta y qué no",
+    pieDominios: "Dominios verificados", pieCodigo: "Código en GitHub",
+    pieAmenazas: "Modelo de amenazas", queLeDecimos: "Lo que le decimos al modelo",
+    ayudaFoto: "Si no logras copiar el mensaje, toma una foto de la pantalla y súbela.",
+    nadaCopiado: "No encontré nada copiado. Copia primero el mensaje y vuelve a tocar este botón.",
+    primeraVez: "Esto tarda un poco la primera vez…",
+    muchaGente: "Hay mucha gente ahora mismo. Lo intento otra vez…",
+    leyendoAqui: "El análisis a fondo no respondió. Lo estoy leyendo aquí, en tu dispositivo…",
+    sinImagen: "No encontré ninguna imagen copiada. Copia la captura y vuelve a tocar aquí.",
+    sinElegir: "No elegiste ninguna imagen. Toca «Elegir una captura» y prueba otra vez.",
+    otraVia: "Se abrió el formulario de GitHub con tu mensaje ya puesto.",
+    muyCorto: "El mensaje es demasiado corto para aportarlo.",
+    enviando: "Enviando…", enviado: "Enviado",
+    gracias1: "Gracias. Tu ejemplo quedó registrado como propuesta ",
+    noPasoEnvio: "Tu conexión no dejó pasar el envío. <strong>Abriendo otra vía…</strong> ",
+    tocaAqui: "toca aquí",
+    noAbrir: "No pude abrir ese archivo como imagen.",
+    noAbrirCola: " Prueba con una captura de pantalla, o escribe el mensaje en el cuadro de arriba.",
+    detalle: "Detalle: ",
+    leyendoPor: (n) => `Leyéndola aquí, en tu dispositivo… ${n}%`,
   },
   en: {
     lema: "<strong>Think it's a scam?</strong> Paste it here and I'll tell you what it is and what to do.",
@@ -2084,6 +2105,35 @@ const T = {
     pegado: "Pasted. Read it and tap Check whenever you're ready.",
     usoTexto: (n) => `<b>${n}</b> messages checked so far.`,
     aOscuro: "Dark mode", aClaro: "Light mode", elMensaje: "The message",
+    noTome: "<strong>I couldn't read what you copied.</strong> Paste it in the box below and tap \u00abCheck\u00bb.",
+    noDeja: "<strong>Your browser won't let me read the clipboard.</strong> Tap the box above and paste there with your fingers, or use \u00abChoose a screenshot\u00bb.",
+    queEs: "What is it", optEstafa: "A scam", optLegitimo: "A legitimate message",
+    porDonde: "How it arrived", optCorreo: "Email", optLlamada: "Phone call",
+    optRed: "Social media", optOtro: "Other",
+    enviarEjemplo: "Send this example",
+    pendienteRevision: "Nothing enters the collection until a person reviews it.",
+    masPreguntas: "Anything else you'd like to ask?",
+    pieLibre: "Constata is free and always will be. No accounts, no ads, and nothing of yours is stored.",
+    pieComo: "How it works", pieDetecta: "What it catches and what it doesn't",
+    pieDominios: "Verified domains", pieCodigo: "Code on GitHub",
+    pieAmenazas: "Threat model", queLeDecimos: "What we tell the model",
+    ayudaFoto: "If you can't copy the message, take a screenshot and upload it.",
+    nadaCopiado: "I didn't find anything copied. Copy the message first, then tap this button again.",
+    primeraVez: "This takes a moment the first time…",
+    muchaGente: "A lot of people are using it right now. Trying again…",
+    leyendoAqui: "The full check didn't respond. I'm reading it here, on your device…",
+    sinImagen: "I didn't find a copied image. Copy the screenshot and tap here again.",
+    sinElegir: "You didn't pick an image. Tap \u00abChoose a screenshot\u00bb and try again.",
+    otraVia: "A GitHub form opened with your message already filled in.",
+    muyCorto: "The message is too short to contribute.",
+    enviando: "Sending…", enviado: "Sent",
+    gracias1: "Thank you. Your example was filed as proposal ",
+    noPasoEnvio: "Your connection blocked the upload. <strong>Opening another route…</strong> ",
+    tocaAqui: "tap here",
+    noAbrir: "I couldn't open that file as an image.",
+    noAbrirCola: " Try a screenshot, or type the message in the box above.",
+    detalle: "Detail: ",
+    leyendoPor: (n) => `Reading it here, on your device… ${n}%`,
   },
 };
 
@@ -2149,7 +2199,9 @@ function pintarEjemplos() {
     guardadoIdioma = localStorage.getItem("constata-idioma");
     guardadoTema = localStorage.getItem("constata-tema");
   } catch { /* modo privado */ }
-  aplicarIdioma(guardadoIdioma ?? (navigator.language?.startsWith("en") ? "en" : "es"));
+  // Español por defecto, siempre. El idioma del navegador no decide: mucha
+  // gente de la región tiene el teléfono en inglés y lee en español.
+  aplicarIdioma(guardadoIdioma ?? "es");
   aplicarTema(guardadoTema === "oscuro");
 })();
 </script>
