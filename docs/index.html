@@ -57,11 +57,89 @@
   --apagado:      #e9ecef;
   --apagado-texto:#a5adb6;
 
+  /* Tokens de componente. Existen para que el tema oscuro se resuelva aquí
+     arriba y no con reglas sueltas más abajo, que llegaban tarde a la
+     cascada y no se aplicaban. */
+  --aviso-fondo:  #f4f8fc;
+  --boton:        #2f6690;
+  --boton-hover:  #1f4a6b;
+  --boton-texto:  #ffffff;
+  --num:          #2f6690;
+  --num-urgente:  #a8442f;
+  --marca-alto:   #d08c76;
+  --marca-medio:  #d6ab5e;
+  --marca-aviso:  #7ba3c6;
+  --marca-medio-fondo: #fdf3e2;
+
   --sombra:      0 1px 2px rgba(0,0,0,.04), 0 10px 28px -14px rgba(0,0,0,.16);
   --sombra-boton:0 6px 16px -8px rgba(47,102,144,.7);
 
   --serif: "Newsreader", Georgia, "Times New Roman", serif;
   --sans:  "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/*
+  Tema oscuro. Se perdió al aplicar el rediseño y la herramienta se quedó
+  clara a la fuerza, mientras las páginas de al lado sí cambiaban: al saltar
+  de una a otra parecían dos sitios distintos.
+
+  No es una inversión automática. La arena clara se vuelve un gris azulado
+  cálido, y los tres colores de aviso se rebajan hasta que se leen sobre
+  fondo oscuro sin deslumbrar: un rojo encendido sobre negro cansa la vista
+  de quien ya está nervioso.
+*/
+@media (prefers-color-scheme: dark) {
+  :root {
+    --arena:      #141a21;
+    --papel:      #1c242d;
+    --papel-tenue:#222b35;
+    --papel-suave:#1a222b;
+    --borde:      #2b353f;
+    --borde-tenue:#242d36;
+
+    --texto:      #e7edf3;
+    --texto-medio:#c2ccd6;
+    --tenue:      #95a3b1;
+    --tenue-mas:  #8494a3;
+    --etiqueta:   #8494a3;
+    --marcador:   #6c7c8b;
+
+    --azul:       #7fb2e8;
+    --azul-hondo: #a9cdf3;
+    --azul-medio: #8fbdec;
+    --azul-suave: #1a2a3a;
+    --azul-panel: #182533;
+    --azul-borde: #2d4459;
+    --azul-linea: #33465a;
+    --azul-texto: #bcd6ef;
+
+    --alto:        #f0a48d;
+    --alto-fondo:  #2e1f1a;
+    --alto-borde:  #4d3229;
+    --alto-tarjeta:#261915;
+    --alto-texto:  #e9bcab;
+
+    --medio:        #e0b061;
+    --medio-fondo:  #2b2416;
+    --medio-borde:  #4a3d21;
+
+    --apagado:      #2a333c;
+    --apagado-texto:#5f6d7a;
+
+    --aviso-fondo:  #182533;
+    --boton:        #2b5f8e;
+    --boton-hover:  #35719f;
+    --boton-texto:  #f2f7fb;
+    --num:          #2b5f8e;
+    --num-urgente:  #8f3a28;
+    --marca-alto:   #8f5340;
+    --marca-medio:  #8a6f3c;
+    --marca-aviso:  #4a708f;
+    --marca-medio-fondo: #33291a;
+
+    --sombra:      0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+    --sombra-boton:0 6px 16px -8px rgba(0,0,0,.8);
+  }
 }
 
 * { box-sizing: border-box; }
@@ -147,9 +225,9 @@ button { font-family: var(--sans); cursor: pointer; }
 .principal {
   flex: 1; padding: 17px; border: none; border-radius: 11px;
   font: 600 17px/1 var(--sans);
-  background: var(--azul); color: #fff; box-shadow: var(--sombra-boton);
+  background: var(--boton); color: var(--boton-texto); box-shadow: var(--sombra-boton);
 }
-.principal:hover:not(:disabled) { background: var(--azul-hondo); }
+.principal:hover:not(:disabled) { background: var(--boton-hover); }
 .principal:disabled { background: var(--apagado); color: var(--apagado-texto); box-shadow: none; cursor: not-allowed; }
 
 .secundario {
@@ -237,9 +315,9 @@ button { font-family: var(--sans); cursor: pointer; }
   white-space: pre-wrap; overflow-wrap: anywhere;
 }
 .revisado mark { color: var(--texto); border-radius: 2px; padding: 0 2px; }
-.revisado mark.m-alto  { background: var(--alto-fondo); border-bottom: 2px solid #d08c76; }
-.revisado mark.m-medio { background: #fdf3e2; border-bottom: 2px solid #d6ab5e; }
-.revisado mark.m-aviso { background: var(--azul-suave); border-bottom: 2px solid #7ba3c6; }
+.revisado mark.m-alto  { background: var(--alto-fondo); border-bottom: 2px solid var(--marca-alto); }
+.revisado mark.m-medio { background: var(--marca-medio-fondo); border-bottom: 2px solid var(--marca-medio); }
+.revisado mark.m-aviso { background: var(--azul-suave); border-bottom: 2px solid var(--marca-aviso); }
 .con-miniatura { display: flex; gap: 12px; align-items: flex-start; }
 .con-miniatura img {
   width: 56px; height: 56px; flex: none; object-fit: cover; object-position: top;
@@ -253,7 +331,7 @@ button { font-family: var(--sans); cursor: pointer; }
 .senales .detalle { margin: 0; font: 400 14px/1.6 var(--sans); color: var(--tenue); text-wrap: pretty; }
 .senales li.s-alto  { border-color: var(--alto-borde);  border-left-color: var(--alto);       background: var(--alto-tarjeta); }
 .senales li.s-medio { border-color: var(--medio-borde); border-left-color: var(--medio);      background: var(--medio-fondo); }
-.senales li.s-aviso { border-color: var(--azul-borde);  border-left-color: var(--azul-medio); background: #f4f8fc; }
+.senales li.s-aviso { border-color: var(--azul-borde);  border-left-color: var(--azul-medio); background: var(--aviso-fondo); }
 .insignia {
   display: inline-block; margin-right: 7px; vertical-align: 1px;
   font: 600 10px/1 var(--sans); letter-spacing: .07em; text-transform: uppercase;
@@ -265,11 +343,11 @@ button { font-family: var(--sans); cursor: pointer; }
 .pasos li { display: flex; gap: 12px; }
 .pasos .num {
   flex: none; width: 26px; height: 26px; border-radius: 50%;
-  background: var(--azul); color: #fff;
+  background: var(--num); color: var(--boton-texto);
   font: 600 13px/26px var(--sans); text-align: center;
 }
 .pasos p { margin: 0; font: 400 15px/1.55 var(--sans); color: var(--texto-medio); text-wrap: pretty; }
-.urgente .num { background: var(--alto); }
+.urgente .num { background: var(--num-urgente); }
 
 /* ── Pregunta del modelo, con respuestas de un toque ─────────── */
 .pide {
@@ -288,7 +366,7 @@ button { font-family: var(--sans); cursor: pointer; }
 .caja-responder input::placeholder { color: var(--marcador); }
 .caja-responder button {
   padding: 14px 16px; border: none; border-radius: 9px;
-  font: 600 14.5px/1 var(--sans); background: var(--azul); color: #fff;
+  font: 600 14.5px/1 var(--sans); background: var(--boton); color: var(--boton-texto);
 }
 .caja-responder button:disabled { background: var(--apagado); color: var(--apagado-texto); cursor: not-allowed; }
 .cuota { margin: 12px 0 0; font: 400 13px/1.55 var(--sans); color: var(--tenue); text-wrap: pretty; }
