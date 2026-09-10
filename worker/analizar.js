@@ -25,6 +25,7 @@
 // modelo, y llevárselo a otro. Este archivo se genera desde allí.
 import { INSTRUCCIONES } from "./instrucciones.js";
 import { MARCAS, marcasEn, comoTexto } from "./marcas.js";
+import { contar } from "./contadores.js";
 
 const MODELO = "qwen/qwen3.8-27b";
 
@@ -271,6 +272,9 @@ export async function analizar(peticion, env) {
   try { salida = JSON.parse(bruto); } catch {
     return json({ limite: true, error: "El análisis profundo devolvió algo que no pude leer. Te quedas con la revisión rápida." }, 502);
   }
+
+  // Se cuenta solo lo que salió bien: un análisis que falló no es un análisis.
+  await contar(env, imagen ? "imagen" : "texto", peticion);
 
   return json({
     ok: true,

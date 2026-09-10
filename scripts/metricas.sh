@@ -3,6 +3,7 @@
 #   bash scripts/metricas.sh
 set -u
 . "$HOME/.constata-secrets"
+export CLOUDFLARE_API_TOKEN
 
 echo "═══════════════════════════════════════════════"
 echo " CONSTATA · $(date '+%d %b %Y, %H:%M')"
@@ -59,7 +60,12 @@ else
   echo "CUOTA DEL MODELO · sin clave de Groq configurada"
 fi
 
-# ── 3. Aportes al corpus ─────────────────────────────────────────
+# ── 3. Uso real, día a día ───────────────────────────────────────
+# Dos números por día que guarda el Worker en KV. Sin identificadores.
+echo
+python3 "$(dirname "$0")/uso.py"
+
+# ── 4. Aportes al corpus ─────────────────────────────────────────
 echo
 GH_TOKEN="$GH_ISSUES_TOKEN" gh api "repos/luisfernandomedh/constata-corpus/issues?state=all&per_page=100" \
   --jq 'length as $n | "CORPUS · \($n) aportes recibidos en total"' 2>/dev/null \
