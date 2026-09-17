@@ -3,6 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Lista blanca de lo que el navegador puede cargar. Sin esto, un
+     script inyectado por cualquier vía se ejecuta con permisos totales
+     en la página donde alguien acaba de pegar el mensaje que lo asustó. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; form-action 'none'; frame-ancestors 'none'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; worker-src blob:; connect-src 'self' blob: data: https://cdn.jsdelivr.net https://tessdata.projectnaptha.com">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Constata — ¿este mensaje es una estafa?</title>
 <meta name="description" content="¿Te llegó un mensaje raro? Pégalo y te decimos si parece una estafa y qué hacer. Nadie más lo ve: se revisa en tu propio teléfono. Gratis y sin registrarse.">
 <meta property="og:title" content="Constata — ¿este mensaje es una estafa?">
@@ -997,6 +1002,11 @@ async function cargarOcr() {
   await new Promise((listo, falla) => {
     const s = document.createElement("script");
     s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js";
+    // La huella del archivo exacto que verificamos. Si el CDN devuelve otra
+    // cosa —por ataque o por error—, el navegador la descarta y no la ejecuta.
+    // Preferimos quedarnos sin lector a ejecutar código que no es el nuestro.
+    s.integrity = "sha384-GJqSu7vueQ9qN0E9yLPb3Wtpd7OrgK8KmYzC8T1IysG1bcvxvIO4qtYR/D3A991F";
+    s.crossOrigin = "anonymous";   // sin esto el navegador no comprueba la huella
     s.onload = listo;
     s.onerror = () => falla(new Error("no se pudo descargar el lector"));
     document.head.appendChild(s);
@@ -1883,6 +1893,7 @@ $mensaje.addEventListener("keydown", (e) => {
  * esperando a un archivo que quizá no venga.
  */
 const GSAP = "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js";
+const GSAP_HUELLA = "sha384-g4NTh/Iv5PPU4xPyhEWqPcwtNXOvdaDI8LLnyYfyNZOjKJeYQyjzQ9X5275eBjpt";
 let motorAnim = null;
 
 function quietoPorPreferencia() {
@@ -1897,6 +1908,8 @@ async function cargarAnimacion() {
       const t = setTimeout(() => falla(new Error("tardó demasiado")), 6000);
       const e = document.createElement("script");
       e.src = GSAP;
+      e.integrity = GSAP_HUELLA;
+      e.crossOrigin = "anonymous";
       e.onload = () => { clearTimeout(t); listo(); };
       e.onerror = () => { clearTimeout(t); falla(new Error("no llegó")); };
       document.head.appendChild(e);

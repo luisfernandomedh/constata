@@ -3,6 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Lista blanca de lo que el navegador puede cargar. Sin esto, un
+     script inyectado por cualquier vía se ejecuta con permisos totales
+     en la página donde alguien acaba de pegar el mensaje que lo asustó. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; form-action 'none'; frame-ancestors 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Dominios verificados — Constata</title>
 <meta name="description" content="Los dominios reales de cada banco y entidad, comprobados contra el certificado del propio sitio. Con la fecha de la última comprobación.">
 <link rel="preconnect" href="https://fonts.googleapis.com">

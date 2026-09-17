@@ -26,21 +26,16 @@
 import { INSTRUCCIONES } from "./instrucciones.js";
 import { MARCAS, marcasEn, comoTexto } from "./marcas.js";
 import { contar } from "./contadores.js";
+import { cors } from "./cors.js";
 
 const MODELO = "qwen/qwen3.8-27b";
 
 
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-  "Access-Control-Max-Age": "86400",
+/** Construye el emisor de respuestas para ESTA petición, con su origen. */
+const respondedor = (peticion) => {
+  const cabeceras = { "Content-Type": "application/json; charset=utf-8", ...cors(peticion) };
+  return (d, s = 200) => new Response(JSON.stringify(d), { status: s, headers: cabeceras });
 };
-const json = (d, s = 200) =>
-  new Response(JSON.stringify(d), {
-    status: s,
-    headers: { "Content-Type": "application/json; charset=utf-8", ...CORS },
-  });
 
 /** Las imágenes cuestan muchos tokens, así que se limita aparte del texto. */
 const LIMITE_IMAGEN_HORA = 4;
@@ -119,6 +114,9 @@ async function cupo(env, ip, esImagen) {
 }
 
 export async function analizar(peticion, env) {
+  // El permiso de origen se resuelve por petición, nunca en una global:
+  // un Worker atiende varias peticiones a la vez en el mismo isolate.
+  const json = respondedor(peticion);
   if (!env.GROQ_API_KEY) {
     return json({ error: "El análisis con modelo no está configurado todavía." }, 503);
   }
