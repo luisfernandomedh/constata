@@ -221,3 +221,29 @@ test("la llave de prueba exime del cupo pero NO de los contadores", async () => 
   assert.equal(LIMITES.datos.get(`a:t:${id}:${hora}`), "100", "el contador horario también");
   assert.equal(LIMITES.datos.get("m:total"), "1", "y la métrica de uso se cuenta igual");
 });
+
+/* ── El bucle de la repregunta con captura ──────────────────────────── */
+
+test("una repregunta sin mensaje no se rechaza: el historial sostiene el contexto", async () => {
+  const p = peticion({ cuerpo: {
+    respuesta: "Sí, esa compra la hice yo",
+    previas: [{ role: "user", content: "(captura) BPichincha: Consumiste 24,80…" }],
+  } });
+  const { salida, llamadas } = await conGroqFalso(() => analizar(p, ENTORNO));
+  assert.equal(salida.status, 200, "antes respondía 400 y la conversación se colgaba");
+  const partes = llamadas[0].cuerpo.messages[1].content;
+  assert.match(partes.map((x) => x.text || "").join(" "), /no vuelvas a analizarlo/i);
+  assert.ok(!partes.some((x) => x.type === "image_url"), "no se reenvía ninguna imagen");
+});
+
+test("sin mensaje tampoco se le manda el registro entero de dominios", async () => {
+  const p = peticion({ cuerpo: { respuesta: "sí", previas: [{ role: "user", content: "algo" }] } });
+  const { llamadas } = await conGroqFalso(() => analizar(p, ENTORNO));
+  const texto = llamadas[0].cuerpo.messages[1].content.map((x) => x.text || "").join(" ");
+  assert.ok(!texto.includes("DOMINIOS OFICIALES"), "son ~340 tokens por vuelta, y ya los vio");
+});
+
+test("una petición vacía de verdad sigue rechazándose", async () => {
+  const r = await analizar(peticion({ cuerpo: {} }), ENTORNO);
+  assert.equal(r.status, 400);
+});

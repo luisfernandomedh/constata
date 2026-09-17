@@ -1328,8 +1328,11 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     let cuerpo;
     if (seguimiento) {
       cuerpo = { respuesta: entrada, previas: historial, idioma };
+      // Solo texto. Reenviar la foto en cada vuelta agota el cupo por minuto y
+      // la conversación se queda colgada dando vueltas en «analizando». Si el
+      // primer análisis no devolvió transcripción, el contexto lo sostiene el
+      // historial: el servidor acepta la repregunta sin mensaje.
       if (mensajeOriginal.texto) cuerpo.texto = mensajeOriginal.texto;
-      else cuerpo.imagen = mensajeOriginal.imagen;
     } else if (esImagen) {
       // Ya está decodificada y reducida desde que se adjuntó. No se vuelve a
       // tocar la foto original: ahí es donde se quedaba sin memoria.
@@ -1358,8 +1361,15 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
     */
     if (d.limite && !reintentado) {
       reintentado = true;
-      $("textoAnalizando").textContent = t("muchaGente");
-      mostrar("vista-analizando");
+      // A media conversación NO se vuelve a la pantalla de análisis: la persona
+      // ya está leyendo su resultado y verse otra vez en «analizando la
+      // captura» se siente como si la herramienta hubiera vuelto a empezar.
+      if (seguimiento) {
+        $("cuota").textContent = t("muchaGente");
+      } else {
+        $("textoAnalizando").textContent = t("muchaGente");
+        mostrar("vista-analizando");
+      }
       await new Promise((listo) => setTimeout(listo, 7000));
       const r2 = await fetch(ANALISIS, {
         method: "POST",
@@ -1373,7 +1383,17 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
 
     // El modelo necesita recordar qué dijo, o la repregunta no tiene sentido.
     if (!seguimiento) {
-      historial.push({ role: "user", content: esImagen ? "(la captura adjunta)" : entrada });
+      // Lo que se guarda del primer turno sostiene toda la conversación. De una
+      // captura se guarda lo que el modelo leyó, no «(la captura adjunta)»: si
+      // no hay transcripción, las vueltas siguientes se quedan sin el mensaje.
+      historial.push({
+        role: "user",
+        content: esImagen
+          ? (d.transcripcion?.trim()
+              ? `(captura) ${d.transcripcion.trim().slice(0, 1500)}`
+              : "(la captura adjunta)")
+          : entrada,
+      });
       // Con la transcripción en mano, las siguientes vueltas van en texto:
       // reenviar la imagen cada vez agotaría el cupo por minuto.
       if (esImagen && d.transcripcion?.trim()) mensajeOriginal = { texto: d.transcripcion.trim() };

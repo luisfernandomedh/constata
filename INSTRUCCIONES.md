@@ -201,7 +201,7 @@ contradice a sí mismo.
 
 RESPONDE SOLO CON JSON, sin texto alrededor:
 {
-  "transcripcion": "si te dieron una imagen, el texto del mensaje tal como se lee; si te dieron texto, null",
+  "transcripcion": "si te dieron una imagen, el texto del mensaje tal como se lee. SIEMPRE que haya imagen, también cuando el riesgo sea «contexto»: sin ella las siguientes vueltas de la conversación se quedan sin el mensaje. Si te dieron texto, null",
   "riesgo": "alto" | "medio" | "bajo" | "contexto",
   "resumen": "UNA frase que abra con el veredicto. Sin preámbulo ni consuelo. Si el riesgo es «contexto», abre con la pregunta en vez del veredicto",
   "senales": [{"que": "nombre corto", "porque": "una o dos frases llanas"}],
