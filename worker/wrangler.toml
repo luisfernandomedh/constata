@@ -34,3 +34,8 @@ id = "cfe0c3561c724f0d852286b869e2ff8d"
 # Secretos — NO van en este archivo. Se cargan con:
 #   npx wrangler secret put GITHUB_TOKEN
 #   npx wrangler secret put TURNSTILE_SECRET   (opcional)
+#   npx wrangler secret put CLAVE_PRUEBA       (opcional)
+#
+# CLAVE_PRUEBA es la llave de prueba de /analizar: se manda en la cabecera
+# X-Constata-Llave y exime del cupo diario, nunca de los contadores. Sin el
+# secreto configurado, la cabecera no vale nada.

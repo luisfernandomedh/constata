@@ -335,6 +335,11 @@ button { font-family: var(--sans); cursor: pointer; }
 .v-bajo  { background: var(--azul-suave);  border-color: var(--azul-borde); }
 .v-bajo  p { color: var(--azul-texto); }
 .v-bajo  .ceja span, .v-bajo .ceja svg { color: var(--azul-medio); }
+/* Cuarto estado: todavía no hay veredicto. Neutro a propósito — ni alarma ni
+   alivio—, porque prometer cualquiera de los dos aquí sería mentir. */
+.v-contexto { background: var(--azul-panel); border-color: var(--borde); }
+.v-contexto p { color: var(--tinta-suave, var(--azul-texto)); }
+.v-contexto .ceja span, .v-contexto .ceja svg { color: var(--azul-medio); }
 
 /* ── Lo revisado, con lo sospechoso subrayado ────────────────── */
 .revisado {
@@ -892,6 +897,9 @@ function prepararContribucion(texto, riesgo) {
   $cambios.textContent = reemplazos.length
     ? `Se reemplazó automáticamente: ${reemplazos.join(", ")}.`
     : "No se encontró ningún dato personal que reemplazar. Revísalo igual.";
+  // Sin veredicto todavía no se pide el aporte: etiquetar «estafa» algo que
+  // aún no sabemos si lo es envenena el corpus con nuestra propia duda.
+  if (riesgo === "contexto") return;
   $("etiqueta").value = riesgo === "bajo" ? "legitimo" : "estafa";
   $estado.className = "remate";
   $estado.textContent = t("pendienteRevision");
@@ -1184,17 +1192,21 @@ const CEJA = {
     alto:  { texto: "No contestes ese chat", icono: '<path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4"/><path d="M12 17.2v.1"/>' },
     medio: { texto: "Compruébalo antes de actuar", icono: '<circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.2v.1"/>' },
     bajo:  { texto: "Sin señales conocidas", icono: '<circle cx="12" cy="12" r="9"/><path d="m8.4 12.2 2.5 2.5 4.7-4.9"/>' },
+    contexto: { texto: "Todavía no puedo decirte", icono: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 0 1 5 .9c0 1.7-2.5 2.2-2.5 3.9"/><path d="M12 17.2v.1"/>' },
   },
   en: {
     alto:  { texto: "Don't reply to that chat", icono: '<path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4"/><path d="M12 17.2v.1"/>' },
     medio: { texto: "Check before you act", icono: '<circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.2v.1"/>' },
     bajo:  { texto: "No known warning signs", icono: '<circle cx="12" cy="12" r="9"/><path d="m8.4 12.2 2.5 2.5 4.7-4.9"/>' },
+    contexto: { texto: "I can't tell you yet", icono: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 0 1 5 .9c0 1.7-2.5 2.2-2.5 3.9"/><path d="M12 17.2v.1"/>' },
   },
 };
 
 const TITULAR = {
-  es: { alto: "Esto es una estafa.", medio: "Hay algo aquí que no cuadra.", bajo: "No encontré señales conocidas de estafa." },
-  en: { alto: "This is a scam.", medio: "Something here doesn't add up.", bajo: "I found no known signs of a scam." },
+  es: { alto: "Esto es una estafa.", medio: "Hay algo aquí que no cuadra.", bajo: "No encontré señales conocidas de estafa.",
+        contexto: "Necesito un dato tuyo para poder decirte." },
+  en: { alto: "This is a scam.", medio: "Something here doesn't add up.", bajo: "I found no known signs of a scam.",
+        contexto: "I need one detail from you before I can tell you." },
 };
 
 const ROTULO = {
@@ -1390,6 +1402,14 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
       mostrar("vista-resultado");
     }
     try { pintarConversacion(d.riesgo); } catch (fallo) { tragado("pintar la conversación", fallo); $("conversar").hidden = true; }
+    // Si el análisis se quedó sin veredicto y la respuesta de la persona lo
+    // resuelve, es ahora cuando la invitación al corpus tiene sentido.
+    if (seguimiento && d.riesgo && d.riesgo !== "contexto" && textoUtil(ultimaTranscripcion)) {
+      try {
+        prepararContribucion(ultimaTranscripcion, d.riesgo);
+        $("abrirContribuir").hidden = false;
+      } catch (fallo) { tragado("preparar el aporte tras la repregunta", fallo); }
+    }
     // Para donar hace falta el texto del mensaje, no la imagen. Cuando vino
     // de una captura, se usa lo que el modelo transcribió; y se anonimiza
     // aquí, en el navegador, antes de que la persona decida.
@@ -1397,7 +1417,10 @@ async function conModelo(entrada, { seguimiento = false } = {}) {
       try {
         ultimaTranscripcion = esImagen ? (d.transcripcion || "") : entrada;
         prepararContribucion(ultimaTranscripcion, d.riesgo);
-        $("abrirContribuir").hidden = !textoUtil(ultimaTranscripcion);
+        // Sin veredicto no se invita a donar: el desplegable arranca en
+        // «Una estafa» y preseleccionar eso es ponerle nuestra duda en la boca.
+        $("abrirContribuir").hidden =
+          !textoUtil(ultimaTranscripcion) || d.riesgo === "contexto";
         $contribuir.hidden = true;
       } catch (fallo) { tragado("preparar el aporte", fallo); $("abrirContribuir").hidden = true; }
 
@@ -1520,11 +1543,13 @@ const SUGERENCIAS = {
     alto: ["Ya envié el dinero, ¿qué hago?", "Ya di mi clave o mi código", "¿Cómo denuncio esto?", "¿Y si de verdad es mi conocido?"],
     medio: ["¿Cómo compruebo si es real?", "¿Puedo responder para preguntar?", "Ya di algunos datos, ¿es grave?"],
     bajo: ["Igual me da desconfianza, ¿por qué?", "¿Qué señales debería mirar yo?", "¿Y si me vuelven a escribir?"],
+    contexto: ["No sé, no me acuerdo", "Sí, fui yo", "No, yo no hice nada"],
   },
   en: {
     alto: ["I already sent the money, what now?", "I already gave my password or code", "How do I report this?", "What if it really is someone I know?"],
     medio: ["How do I check if it's real?", "Can I reply and ask?", "I already gave some details, is that bad?"],
     bajo: ["It still feels off to me, why?", "What signs should I look for?", "What if they write to me again?"],
+    contexto: ["I don't know, I can't remember", "Yes, that was me", "No, I didn't do anything"],
   },
 };
 

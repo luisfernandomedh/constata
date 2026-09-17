@@ -1,0 +1,5 @@
+# GitHub Pages construye este sitio con Jekyll, y Jekyll descarta por defecto
+# todo lo que empieza por punto. Sin esta línea, /.well-known/security.txt
+# simplemente no se publica: el archivo está en el repo y el sitio da 404.
+include:
+  - ".well-known"

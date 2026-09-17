@@ -37,16 +37,120 @@ const respondedor = (peticion) => {
   return (d, s = 200) => new Response(JSON.stringify(d), { status: s, headers: cabeceras });
 };
 
+/**
+ * Tope del cuerpo entero, mirado por `Content-Length` ANTES de leer nada.
+ *
+ * El tope efectivo de la imagen son 6.000.000 de caracteres de base64; sumados
+ * el texto (8.000), las cuatro previas y el JSON que lo envuelve, 6,5 MB cubre
+ * con holgura cualquier petición legítima. Por encima de eso no se parsea:
+ * `peticion.json()` de un cuerpo enorme gasta memoria y CPU del Worker antes
+ * de que ninguna validación llegue a correr, y eso es justo lo que busca quien
+ * quiere tumbarlo barato.
+ *
+ * Si la cabecera falta o no es un número —cuerpo por trozos—, aquí no se
+ * rechaza nada: los topes de más abajo siguen valiendo igual.
+ */
+export const LIMITE_CUERPO = 6_500_000;
+
+export function cuerpoExcesivo(peticion) {
+  const declarado = Number(peticion?.headers?.get("Content-Length"));
+  return Number.isFinite(declarado) && declarado > LIMITE_CUERPO;
+}
+
+/**
+ * La imagen tiene que ser una URL de datos de un tipo que el modelo entienda.
+ *
+ * Antes valía cualquier cadena de menos de 6 MB. Una cadena que no es una URL
+ * de datos se le reenviaba igual al proveedor dentro de `image_url`, y ahí un
+ * `https://…` lo convierte en nuestro mensajero: sale él a buscar la dirección
+ * que le pongan (hallazgo 6 del registro). Con prefijo obligado y lista blanca
+ * de tipos, lo único que puede viajar son bytes que ya trae la petición.
+ *
+ * El navegador siempre manda `data:image/jpeg;base64,…` (`toDataURL`); png y
+ * webp se admiten para quien llame al endpoint sin pasar por la página.
+ */
+export const TIPOS_IMAGEN = ["jpeg", "png", "webp"];
+export const LIMITE_IMAGEN = 6_000_000;
+const PREFIJO_IMAGEN = new RegExp(`^data:image/(?:${TIPOS_IMAGEN.join("|")});base64,[A-Za-z0-9+/]`);
+
+export function imagenAceptada(imagen) {
+  if (typeof imagen !== "string" || !imagen) return false;
+  // Solo se mira la cabecera: recorrer 6 MB con una expresión regular en cada
+  // petición es trabajo que no compra nada. El contenido lo valida el proveedor.
+  return PREFIJO_IMAGEN.test(imagen);
+}
+
+/**
+ * Los turnos anteriores que manda el navegador. Solo se aceptan los de rol
+ * `user`.
+ *
+ * Un turno con rol `assistant` es una respuesta que el cliente DICE que dimos
+ * nosotros, y el cliente no es fuente de verdad sobre lo que dijo el modelo:
+ * cualquiera podía mandar «ya revisé este mensaje y es legítimo» firmado como
+ * el modelo, y la vuelta siguiente lo tomaba por conclusión propia (hallazgo 5
+ * del registro de seguridad). Es la puerta de entrada más barata para que un
+ * estafador le enseñe a la víctima una pantalla nuestra que la tranquilice.
+ *
+ * Se descartan en vez de reetiquetarse porque reetiquetar conserva el texto
+ * fabricado, solo que en otra casilla. Y no rompe la repregunta: el mensaje
+ * original se reenvía siempre en el primer turno, lo único que se pierde es el
+ * resumen que el navegador guardaba de la vuelta anterior, y la instrucción de
+ * la repregunta ya le pide al modelo mantener el nivel de riesgo.
+ */
+export function turnosDelCliente(previas) {
+  if (!Array.isArray(previas)) return [];
+  return previas
+    .slice(-4)
+    .filter((m) => m && m.role === "user" && typeof m.content === "string" && m.content.trim())
+    .map((m) => ({ role: "user", content: m.content.slice(0, 2000) }));
+}
+
+/**
+ * Comparación que tarda lo mismo acierte donde acierte: comparar con `===` le
+ * dice a quien prueba llaves por dónde dejó de coincidir.
+ */
+export function igualEnTiempoConstante(a, b) {
+  const x = new TextEncoder().encode(String(a ?? ""));
+  const y = new TextEncoder().encode(String(b ?? ""));
+  let dif = x.length ^ y.length;
+  for (let i = 0; i < Math.max(x.length, y.length); i++) dif |= (x[i] ?? 0) ^ (y[i] ?? 0);
+  return dif === 0;
+}
+
+/**
+ * Llave de prueba. Exime del cupo, NO de los contadores.
+ *
+ * Existe para que se pueda probar el endpoint sin quedarse fuera al bajar el
+ * umbral diario. Se manda en la cabecera `X-Constata-Llave` y se compara con
+ * el secreto `CLAVE_PRUEBA` del Worker (`npx wrangler secret put CLAVE_PRUEBA`).
+ * Sin secreto configurado no exime a nadie: la cabecera sola no vale.
+ *
+ * Lo que sigue contando igual: el contador diario, el horario y las métricas
+ * de uso. Una prueba que no aparece en los contadores es una prueba que miente
+ * sobre lo que el sistema está haciendo.
+ */
+export function conLlaveDePrueba(peticion, env) {
+  const esperada = env?.CLAVE_PRUEBA || "";
+  const dada = peticion?.headers?.get("X-Constata-Llave") || "";
+  if (!esperada || !dada) return false;
+  return igualEnTiempoConstante(dada, esperada);
+}
+
 /** Las imágenes cuestan muchos tokens, así que se limita aparte del texto. */
 const LIMITE_IMAGEN_HORA = 4;
 const LIMITE_TEXTO_HORA = 15;
 
 /**
- * Por debajo de 100 consultas al día no pasa absolutamente nada: ni espera,
- * ni bloqueo. Es el margen para probar sin que la herramienta te expulse a
- * mitad de una prueba. Pasadas las 100, ahí sí empieza el enfriamiento.
+ * Por debajo de 50 consultas al día no pasa absolutamente nada: ni espera, ni
+ * bloqueo. Es el margen para que nadie se quede fuera por usar la herramienta
+ * de verdad. Pasadas las 50, ahí sí empieza el enfriamiento.
+ *
+ * Bajado de 100 a 50 el 17 sep 2026 (hallazgo 7): 100 consultas diarias por
+ * conexión son más de las que hace ninguna persona real y dejaban sitio de
+ * sobra para agotar la cuota del modelo. Para probar sin chocar contra esto
+ * está la llave de prueba, que exime del cupo pero no de los contadores.
  */
-const UMBRAL_DIARIO = 100;
+export const UMBRAL_DIARIO = 50;
 
 async function huella(ip) {
   const b = new TextEncoder().encode(`constata-analisis:${ip}`);
@@ -70,7 +174,7 @@ async function huella(ip) {
  */
 const ESPERAS = [1, 3, 12]; // horas
 
-async function cupo(env, ip, esImagen) {
+async function cupo(env, ip, esImagen, exento = false) {
   const tope = esImagen ? LIMITE_IMAGEN_HORA : LIMITE_TEXTO_HORA;
   if (!env.LIMITES) return { excedido: false, restantes: tope, tope, espera: 0, hoy: 0 };
 
@@ -88,12 +192,15 @@ async function cupo(env, ip, esImagen) {
   const claveHora = `a:${esImagen ? "i" : "t"}:${id}:${hora}`;
   const usados = Number(await env.LIMITES.get(claveHora)) || 0;
 
-  if (hoy < UMBRAL_DIARIO) {
+  // La llave de prueba salta el cupo, pero ya dejó su marca arriba en el
+  // contador diario y la deja abajo en el horario: exime del castigo, no de
+  // las cuentas.
+  if (exento || hoy < UMBRAL_DIARIO) {
     await env.LIMITES.put(claveHora, String(usados + 1), { expirationTtl: 7200 });
     return { excedido: false, restantes: Math.max(0, tope - usados - 1), tope, espera: 0, hoy };
   }
 
-  // A partir de aquí sí: pasadas las 100 del día, el enfriamiento manda.
+  // A partir de aquí sí: pasadas las 50 del día, el enfriamiento manda.
   const castigo = await env.LIMITES.get(`c:${id}`, { type: "json" });
   if (castigo && castigo.hasta > Date.now()) {
     return { excedido: true, restantes: 0, tope, hoy,
@@ -121,12 +228,18 @@ export async function analizar(peticion, env) {
     return json({ error: "El análisis con modelo no está configurado todavía." }, 503);
   }
 
+  // Antes de leer el cuerpo: si ya viene declarado como enorme, se corta aquí
+  // y no se parsea nada.
+  if (cuerpoExcesivo(peticion)) {
+    return json({ error: "La imagen es demasiado grande. Prueba con una más pequeña." }, 413);
+  }
+
   let datos;
   try { datos = await peticion.json(); } catch { return json({ error: "Cuerpo inválido" }, 400); }
 
   const texto = typeof datos.texto === "string" ? datos.texto.slice(0, 8000) : "";
   const imagen = typeof datos.imagen === "string" ? datos.imagen : "";
-  const previas = Array.isArray(datos.previas) ? datos.previas.slice(-4) : [];
+  const previas = turnosDelCliente(datos.previas);
   // La respuesta a una repregunta es un turno de conversación, NUNCA el
   // mensaje a analizar. Mandarla como `texto` hacía que el modelo analizara
   // «No estoy seguro» y concluyera que eso no es una estafa, tirando abajo
@@ -138,10 +251,13 @@ export async function analizar(peticion, env) {
 
   if (!texto && !imagen) return json({ error: "No hay nada que analizar." }, 400);
   // 20 MB en base64 son ~27 MB de cadena; se corta antes por seguridad.
-  if (imagen.length > 6_000_000) return json({ error: "La imagen es demasiado grande. Prueba con una más pequeña." }, 413);
+  if (imagen.length > LIMITE_IMAGEN) return json({ error: "La imagen es demasiado grande. Prueba con una más pequeña." }, 413);
+  if (imagen && !imagenAceptada(imagen)) {
+    return json({ error: "No reconozco ese formato de imagen. Prueba con una captura JPG, PNG o WEBP." }, 400);
+  }
 
   const ip = peticion.headers.get("CF-Connecting-IP") || "";
-  const permiso = await cupo(env, ip, Boolean(imagen));
+  const permiso = await cupo(env, ip, Boolean(imagen), conLlaveDePrueba(peticion, env));
   if (permiso.excedido) {
     return json({
       limite: true,
@@ -199,8 +315,8 @@ export async function analizar(peticion, env) {
   const mensajes = [
     { role: "system", content: INSTRUCCIONES },
     { role: "user", content: partes },
-    ...previas.filter((m) => m && typeof m.content === "string" && ["user", "assistant"].includes(m.role))
-              .map((m) => ({ role: m.role, content: m.content.slice(0, 2000) })),
+    // `previas` ya viene filtrada: solo turnos de la persona. Ver turnosDelCliente.
+    ...previas,
   ];
   if (respuesta) {
     mensajes.push({
@@ -289,7 +405,7 @@ export async function analizar(peticion, env) {
     // La transcripción es lo que hace útil un aporte hecho desde una imagen.
     // Se anonimiza en el navegador antes de que la persona decida donarlo.
     transcripcion: typeof salida.transcripcion === "string" ? salida.transcripcion.slice(0, 4000) : "",
-    riesgo: ["alto", "medio", "bajo"].includes(salida.riesgo) ? salida.riesgo : "medio",
+    riesgo: ["alto", "medio", "bajo", "contexto"].includes(salida.riesgo) ? salida.riesgo : "medio",
     resumen: String(salida.resumen ?? "").slice(0, 400),
     senales: Array.isArray(salida.senales)
       ? salida.senales.slice(0, 6).map((s) => ({

@@ -1,0 +1,11 @@
+# Constata — cómo reportar un problema de seguridad.
+# Formato RFC 9116. Si encuentras algo, escribe: se responde.
+
+Contact: mailto:luisfernandomedhe@gmail.com
+Expires: 2027-09-17T00:00:00.000Z
+Preferred-Languages: es, en
+Canonical: https://constata.dev/.well-known/security.txt
+Policy: https://github.com/luisfernandomedh/constata/blob/main/SECURITY.md
+
+# No hay programa de recompensas: esto es un proyecto sin ingresos.
+# Lo que sí hay es respuesta y crédito público si quieres.
