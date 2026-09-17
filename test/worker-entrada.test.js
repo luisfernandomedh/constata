@@ -247,3 +247,23 @@ test("una petición vacía de verdad sigue rechazándose", async () => {
   const r = await analizar(peticion({ cuerpo: {} }), ENTORNO);
   assert.equal(r.status, 400);
 });
+
+test("una repregunta lleva el prompt corto, no el largo", async () => {
+  const { INSTRUCCIONES, INSTRUCCIONES_REPREGUNTA } = await import("../worker/instrucciones.js");
+  const p = peticion({ cuerpo: {
+    texto: "BPichincha: Consumiste 24,80 GLOBAL PET 17/09 con tarjeta 873",
+    respuesta: "Sí, esa compra la hice yo",
+    previas: [{ role: "user", content: "(captura) BPichincha…" }],
+  } });
+  const { llamadas } = await conGroqFalso(() => analizar(p, ENTORNO));
+  const sistema = llamadas[0].cuerpo.messages[0].content;
+  assert.equal(sistema, INSTRUCCIONES_REPREGUNTA);
+  assert.ok(sistema.length < INSTRUCCIONES.length / 3, "el corto debe ser mucho más corto");
+});
+
+test("el primer análisis sí lleva el prompt largo", async () => {
+  const { INSTRUCCIONES } = await import("../worker/instrucciones.js");
+  const p = peticion({ cuerpo: { texto: "me llegó esto y no sé qué es" } });
+  const { llamadas } = await conGroqFalso(() => analizar(p, ENTORNO));
+  assert.equal(llamadas[0].cuerpo.messages[0].content, INSTRUCCIONES);
+});
