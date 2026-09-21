@@ -3,7 +3,7 @@
 Estado vivo de la seguridad de Constata. Lo mantiene el agente `seguridad`.
 Se lee entero al empezar cualquier trabajo de seguridad y se actualiza al terminar.
 
-**Última actualización:** 17 de septiembre de 2026
+**Última actualización:** 21 de septiembre de 2026
 
 ---
 
@@ -36,12 +36,9 @@ Severidad según el daño real en este producto, no según el número del CVE.
 | # | Hallazgo | Severidad | Estado |
 |---|---|---|---|
 | 4 | `SECURITY.md:9` y `:90` afirman que analizar «nunca envía nada a ninguna parte» y que no envía nada durante el análisis. Los metadatos de `docs/index.html:12` y `:14` dicen «nadie más lo ve». Desde que el modelo es el camino por defecto, texto e imágenes van a Groq | **Alta** | **Luis decidió no cambiarlo** (17 sep 2026): considera que los avisos de la interfaz ya lo cubren. Queda registrado, no se toca sin que él lo pida |
-| 5 | `worker/analizar.js:202` acepta turnos con rol `assistant` enviados desde el navegador (4 × 2.000 caracteres). Permite fabricar una respuesta previa del modelo que declare legítimo el mensaje | Alta | **Arreglado en local, sin desplegar** (17 sep 2026). `turnosDelCliente()` solo deja pasar rol `user` |
-| 6 | El cuerpo de la petición se parsea antes de aplicar cualquier tope; la imagen solo se mide por longitud, sin exigir `data:image/` ni validar tipo | Media | **Arreglado en local, sin desplegar** (17 sep 2026). 413 por `Content-Length` antes de parsear; `data:image/(jpeg\|png\|webp);base64,` obligatorio |
-| 7 | Umbral de 100 consultas diarias por conexión antes de que entre el límite horario | Media | **Arreglado en local, sin desplegar** (17 sep 2026). `UMBRAL_DIARIO = 50` y llave `CLAVE_PRUEBA`. **Falta que Luis cargue el secreto** |
+| 7b | La llave de prueba `CLAVE_PRUEBA` no tiene secreto cargado en el Worker: hoy Luis está sujeto al mismo tope de 50 que cualquiera | Baja | Pendiente de él: `npx wrangler secret put CLAVE_PRUEBA` |
 | 8 | El contador de KV no es atómico: lee y luego escribe. Peticiones en paralelo saltan el tope | Media | Sin aprobar. Requeriría Durable Objects |
 | 9 | La política de contenido va en etiqueta `meta`, no en cabecera HTTP. `frame-ancestors` no es fiable así. Faltan HSTS, `X-Content-Type-Options` y `Permissions-Policy` | Media | Aprobado: mover a reglas de Cloudflare |
-| 10 | No existe `/.well-known/security.txt` | Baja | **Escrito en local, sin desplegar** (17 sep 2026). Hace falta `docs/_config.yml` con `include: [".well-known"]`: Jekyll descarta lo que empieza por punto. **Sin comprobar contra el sitio en vivo** |
 | 11 | No hay pruebas del Worker ni integración continua en cada push. Los flujos existentes son mensuales o cada 48 h | Media | Aprobado |
 | 12 | `sharp 0.35.2` arrastra `GHSA-rgj7-g3m4-5g8c` (alta). Solo se usa al construir; no llega al navegador | Baja aquí | Plazo hasta el 17 nov 2026 |
 | 13 | Tres archivos basura versionados en la raíz (`10}`, `8}` y uno con saltos de línea en el nombre), restos de un heredoc mal cerrado | Higiene | Sin tocar |
@@ -83,38 +80,28 @@ donde viven 1.494 líneas de JavaScript de cliente.
 
 ## Trabajo en curso
 
-Bloques aprobados por Luis el 17 de septiembre de 2026, sin empezar:
+Verificado contra el sitio en vivo el 21 de septiembre de 2026.
 
-- [x] **Entrada** (hallazgos 5 y 6) — hecho en local el 17 sep 2026, **sin desplegar**
-- [x] **Umbral** (hallazgo 7) — hecho en local el 17 sep 2026, **sin desplegar y sin secreto cargado**
-- [ ] **Cabeceras** (hallazgo 9): moverlas a reglas de Cloudflare, dejando la etiqueta `meta` como segunda capa
-- [x] **`security.txt`** (hallazgo 10) — escrito en local el 17 sep 2026, **sin desplegar**
-- [ ] **Pruebas y CI** (hallazgo 11): las pruebas del Worker ya existen (`test/worker-entrada.test.js`); falta el flujo de integración continua que corra las cuatro capas en cada push
+- [x] **Entrada** (hallazgos 5 y 6) — desplegado, commit `43609cc`
+- [x] **Umbral** (hallazgo 7) — desplegado; falta que Luis cargue el secreto
+- [x] **`security.txt`** (hallazgo 10) — publicado y respondiendo 200
+- [ ] **Cabeceras** (hallazgo 9): moverlas a reglas de Cloudflare. La etiqueta `meta` funciona pero `frame-ancestors` no es fiable así, y siguen faltando HSTS, `X-Content-Type-Options` y `Permissions-Policy`
+- [ ] **Integración continua** (hallazgo 11): las 46 pruebas existen; falta el flujo que corra las cuatro capas en cada push
 
-### Cambios en local pendientes de que Luis apruebe y despliegue
+### Comprobación en vivo, 21 sep 2026
 
-17 de septiembre de 2026. Nada commiteado, nada en producción.
-
-| Archivo | Qué cambió |
+| Qué | Resultado |
 |---|---|
-| `worker/analizar.js` | `cuerpoExcesivo()` → 413 por `Content-Length` (tope 6,5 MB) **antes** de `peticion.json()`. `imagenAceptada()` exige `data:image/` con lista blanca jpeg/png/webp. `turnosDelCliente()` descarta todo turno `assistant` del cliente. `UMBRAL_DIARIO` 100 → 50. `conLlaveDePrueba()` + `igualEnTiempoConstante()`: cabecera `X-Constata-Llave` contra el secreto `CLAVE_PRUEBA`, comparada en tiempo constante; exime del cupo, nunca de los contadores |
-| `worker/wrangler.toml` | Documentado el secreto `CLAVE_PRUEBA` (solo comentarios) |
-| `test/worker-entrada.test.js` | Nuevo. 15 pruebas del endpoint, con la cara negativa y la positiva de cada arreglo. **Ninguna sale a la red**: `globalThis.fetch` se sustituye por un doble que guarda lo que se le habría mandado a Groq |
-| `test/security-txt.test.js` | Nuevo. 2 pruebas: campos de RFC 9116 y que no esté caducado. Se pondrá en rojo sola cuando venza |
-| `docs/.well-known/security.txt` | Nuevo. Contacto `luisfernandomedhe@gmail.com`, `Expires: 2027-09-17` |
-| `docs/_config.yml` | Nuevo. `include: [".well-known"]`, o Jekyll no publica el archivo |
+| `https://constata.dev/` | 200 |
+| `/.well-known/security.txt` | 200 |
+| Política de contenido en la página | presente |
+| Huellas de los dos scripts de CDN | presentes |
+| `OPTIONS /analizar` con origen hostil | sin permiso |
+| Campo imagen con una URL en vez de una imagen | 400 |
+| Mensajes revisados hasta hoy | 65 |
 
-Pasos que le tocan a Luis, en este orden:
+### Cambios posteriores que tocaron el endpoint
 
-```
-cd worker && source ~/.constata-secrets && npx wrangler secret put CLAVE_PRUEBA
-cd worker && source ~/.constata-secrets && npx wrangler deploy
-git add -A && git commit && git push          # publica docs/ en Pages
-curl -sS -D- -o /dev/null https://constata.dev/.well-known/security.txt
-```
-
-Si esa última línea devuelve 404, Jekyll siguió descartando el directorio: la
-alternativa es `docs/.nojekyll`, que hace que Pages copie el sitio tal cual.
-
-**Estado de las pruebas el 17 sep 2026:** `npm test` → 41 pruebas, 41 en verde
-(eran 24). `npx wrangler deploy --dry-run` empaqueta sin errores, 30,28 KiB.
+Cuatro commits del 17 de septiembre cambiaron `worker/analizar.js` después de la revisión: el cuarto
+veredicto «contexto», la regla de los avisos de consumo, el arreglo del bucle en la repregunta y la
+separación en dos prompts. Ninguno tocó las defensas, pero conviene saber que el archivo se movió.
