@@ -1,12 +1,12 @@
 {
-  "revisado": "2026-09-10T02:57:44.740Z",
+  "revisado": "2026-10-01T16:13:54.695Z",
   "metodo": "certificado TLS del servidor; historial de transparencia como respaldo",
   "resumen": {
     "total": 75,
     "confirmados": 39,
-    "revisar": 25,
+    "revisar": 22,
     "dudosos": 0,
-    "sin_respuesta": 11
+    "sin_respuesta": 14
   },
   "dominios": {
     "aduana.gob.ec": {
@@ -18,13 +18,13 @@
       "institucion": "Amazon",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Nov 18 23:59:59 2026 GMT"
+      "certificado_vence": "Apr  5 23:59:59 2027 GMT"
     },
     "amazon.com.mx": {
       "institucion": "Amazon",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Nov  3 23:59:59 2026 GMT"
+      "certificado_vence": "Mar 21 23:59:59 2027 GMT"
     },
     "amazon.es": {
       "institucion": "Amazon",
@@ -41,7 +41,7 @@
       "institucion": "Apple",
       "estado": "CONFIRMADO",
       "detalle": "Apple Inc.",
-      "certificado_vence": "Nov  5 20:55:13 2026 GMT"
+      "certificado_vence": "Dec 23 19:10:23 2026 GMT"
     },
     "bancodelpacifico.com": {
       "institucion": "Banco del Pacífico",
@@ -77,7 +77,7 @@
       "institucion": "BBVA",
       "estado": "CONFIRMADO",
       "detalle": "BANCO BILBAO VIZCAYA ARGENTARIA SOCIEDAD ANONIMA",
-      "certificado_vence": "Oct  2 23:59:59 2026 GMT"
+      "certificado_vence": "Feb 18 23:59:59 2027 GMT"
     },
     "bbva.es": {
       "institucion": "BBVA",
@@ -100,20 +100,20 @@
     "bolivariano.com": {
       "institucion": "Banco Bolivariano",
       "estado": "CONFIRMADO",
-      "detalle": "Banco Bolivariano S.A.",
-      "certificado_vence": "Sep 13 23:59:59 2026 GMT"
+      "detalle": "Banco Bolivariano C.A.",
+      "certificado_vence": "Mar 26 23:59:59 2027 GMT"
     },
     "claro.com": {
       "institucion": "Claro",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Sep 28 00:19:34 2026 GMT"
+      "certificado_vence": "Dec 14 01:01:08 2026 GMT"
     },
     "claro.com.ec": {
       "institucion": "Claro",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Oct 12 15:03:06 2026 GMT"
+      "certificado_vence": "Dec 21 14:53:16 2026 GMT"
     },
     "cne.gob.ec": {
       "institucion": "CNE",
@@ -122,14 +122,13 @@
     },
     "cnt.com.ec": {
       "institucion": "CNT",
-      "estado": "REVISAR",
-      "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Sep 17 23:59:59 2026 GMT"
+      "estado": "ERROR",
+      "detalle": "sin respuesta"
     },
     "cnt.gob.ec": {
       "institucion": "CNT",
       "estado": "ERROR",
-      "detalle": "ERR_TLS_CERT_ALTNAME_INVALID"
+      "detalle": "sin respuesta"
     },
     "coopjep.fin.ec": {
       "institucion": "Cooperativa JEP",
@@ -140,7 +139,7 @@
     "correosdelecuador.com.ec": {
       "institucion": "Correos del Ecuador",
       "estado": "ERROR",
-      "detalle": "UNABLE_TO_VERIFY_LEAF_SIGNATURE"
+      "detalle": "EAI_AGAIN"
     },
     "deuna.app": {
       "institucion": "Banco Pichincha",
@@ -164,31 +163,29 @@
       "institucion": "Disney+",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Oct 19 00:38:10 2026 GMT"
+      "certificado_vence": "Dec 14 23:18:25 2026 GMT"
     },
     "dpe.gob.ec": {
       "institucion": "Defensoría del Pueblo",
-      "estado": "REVISAR",
-      "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Jan 15 23:59:59 2027 GMT"
+      "estado": "ERROR",
+      "detalle": "sin respuesta"
     },
     "educacion.gob.ec": {
       "institucion": "Ministerio de Educación",
-      "estado": "REVISAR",
-      "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Apr 12 23:59:59 2027 GMT"
+      "estado": "ERROR",
+      "detalle": "sin respuesta"
     },
     "facebook.com": {
       "institucion": "Facebook",
       "estado": "CONFIRMADO",
       "detalle": "Meta Platforms, Inc.",
-      "certificado_vence": "Sep 17 23:59:59 2026 GMT"
+      "certificado_vence": "Oct  9 23:59:59 2026 GMT"
     },
     "fb.com": {
       "institucion": "Facebook",
       "estado": "REVISAR",
       "detalle": "el certificado dice \"Meta Platforms, Inc.\"",
-      "certificado_vence": "Sep 17 23:59:59 2026 GMT"
+      "certificado_vence": "Oct  9 23:59:59 2026 GMT"
     },
     "fedex.com": {
       "institucion": "FedEx",
@@ -212,13 +209,13 @@
       "institucion": "Google",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Nov  2 08:39:00 2026 GMT"
+      "certificado_vence": "Dec  3 19:23:18 2026 GMT"
     },
     "google.com": {
       "institucion": "Google",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Nov  2 08:37:34 2026 GMT"
+      "certificado_vence": "Dec  3 19:21:52 2026 GMT"
     },
     "icloud.com": {
       "institucion": "Apple",
@@ -236,7 +233,7 @@
       "institucion": "Instagram",
       "estado": "CONFIRMADO",
       "detalle": "Meta Platforms, Inc.",
-      "certificado_vence": "Sep 17 23:59:59 2026 GMT"
+      "certificado_vence": "Oct  9 23:59:59 2026 GMT"
     },
     "interbank.pe": {
       "institucion": "Interbank",
@@ -247,7 +244,7 @@
     "itau.com": {
       "institucion": "Itaú",
       "estado": "ERROR",
-      "detalle": "sin respuesta — pero tiene 4897 certificados emitidos desde 2013-09-16: el dominio es real y activo. Reintenta cuando el sitio esté arriba."
+      "detalle": "SELF_SIGNED_CERT_IN_CHAIN"
     },
     "itau.com.br": {
       "institucion": "Itaú",
@@ -265,13 +262,13 @@
       "institucion": "Mercado Libre",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Jan 26 23:59:59 2027 GMT"
+      "certificado_vence": "Mar 24 23:59:59 2027 GMT"
     },
     "mercadolibre.com.ec": {
       "institucion": "Mercado Libre",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Nov 15 23:59:59 2026 GMT"
+      "certificado_vence": "Apr  2 23:59:59 2027 GMT"
     },
     "mercadopago.com": {
       "institucion": "Mercado Libre",
@@ -289,7 +286,7 @@
       "institucion": "Movistar",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Oct 20 04:19:24 2026 GMT"
+      "certificado_vence": "Dec 18 08:08:55 2026 GMT"
     },
     "movistar.com.ec": {
       "institucion": "Movistar",
@@ -331,7 +328,7 @@
       "institucion": "PayPal",
       "estado": "CONFIRMADO",
       "detalle": "PayPal, Inc.",
-      "certificado_vence": "Nov 25 23:59:59 2026 GMT"
+      "certificado_vence": "Apr 10 23:59:59 2027 GMT"
     },
     "payphone.app": {
       "institucion": "PayPhone",
@@ -349,7 +346,7 @@
       "institucion": "Policía Nacional",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Oct 20 03:50:49 2026 GMT"
+      "certificado_vence": "Dec 19 10:57:07 2026 GMT"
     },
     "produbanco.com": {
       "institucion": "Produbanco",
@@ -372,7 +369,7 @@
       "institucion": "Santander",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Dec  7 20:21:13 2026 GMT"
+      "certificado_vence": "Dec 14 21:30:09 2026 GMT"
     },
     "santander.com.mx": {
       "institucion": "Santander",
@@ -422,13 +419,13 @@
     "viabcp.com": {
       "institucion": "BCP",
       "estado": "ERROR",
-      "detalle": "ERR_SSL_SSL/TLS_ALERT_HANDSHAKE_FAILURE — pero tiene 1985 certificados emitidos desde 2004-11-24: el dominio es real y activo. Reintenta cuando el sitio esté arriba."
+      "detalle": "ERR_SSL_SSL/TLS_ALERT_HANDSHAKE_FAILURE"
     },
     "wa.me": {
       "institucion": "WhatsApp",
       "estado": "CONFIRMADO",
       "detalle": "Meta Platforms, Inc.",
-      "certificado_vence": "Sep 17 23:59:59 2026 GMT"
+      "certificado_vence": "Oct  9 23:59:59 2026 GMT"
     },
     "westernunion.com": {
       "institucion": "Western Union",
@@ -440,13 +437,13 @@
       "institucion": "WhatsApp",
       "estado": "CONFIRMADO",
       "detalle": "Meta Platforms, Inc.",
-      "certificado_vence": "Sep 17 23:59:59 2026 GMT"
+      "certificado_vence": "Oct  9 23:59:59 2026 GMT"
     },
     "youtube.com": {
       "institucion": "Google",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Nov  2 08:37:34 2026 GMT"
+      "certificado_vence": "Dec  3 19:21:52 2026 GMT"
     }
   }
 }
