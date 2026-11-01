@@ -1,5 +1,5 @@
 {
-  "revisado": "2026-10-01T16:13:54.695Z",
+  "revisado": "2026-11-01T15:55:43.845Z",
   "metodo": "certificado TLS del servidor; historial de transparencia como respaldo",
   "resumen": {
     "total": 75,
@@ -52,14 +52,14 @@
     "bancoguayaquil.com": {
       "institucion": "Banco Guayaquil",
       "estado": "CONFIRMADO",
-      "detalle": "Banco Guayaquil S.A.",
-      "certificado_vence": "Nov  1 23:59:59 2026 GMT"
+      "detalle": "Banco Guayaquil S.A",
+      "certificado_vence": "May 14 23:59:59 2027 GMT"
     },
     "bancointernacional.com.ec": {
       "institucion": "Banco Internacional",
       "estado": "CONFIRMADO",
-      "detalle": "BANCO INTERNACIONAL S.A.",
-      "certificado_vence": "Oct 19 16:13:58 2026 GMT"
+      "detalle": "Banco Internacional S.A.",
+      "certificado_vence": "Apr  8 15:16:18 2027 GMT"
     },
     "bancolombia.com": {
       "institucion": "Bancolombia",
@@ -139,13 +139,13 @@
     "correosdelecuador.com.ec": {
       "institucion": "Correos del Ecuador",
       "estado": "ERROR",
-      "detalle": "EAI_AGAIN"
+      "detalle": "ENOTFOUND"
     },
     "deuna.app": {
       "institucion": "Banco Pichincha",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Nov 29 16:47:00 2026 GMT"
+      "certificado_vence": "Jan 28 04:22:21 2027 GMT"
     },
     "dhl.com": {
       "institucion": "DHL",
@@ -157,7 +157,7 @@
       "institucion": "Diners Club",
       "estado": "CONFIRMADO",
       "detalle": "BANCO DINERS CLUB DEL ECUADOR S. A.",
-      "certificado_vence": "Oct 23 23:59:59 2026 GMT"
+      "certificado_vence": "Apr 11 23:59:59 2027 GMT"
     },
     "disneyplus.com": {
       "institucion": "Disney+",
@@ -179,13 +179,13 @@
       "institucion": "Facebook",
       "estado": "CONFIRMADO",
       "detalle": "Meta Platforms, Inc.",
-      "certificado_vence": "Oct  9 23:59:59 2026 GMT"
+      "certificado_vence": "Nov  8 23:59:59 2026 GMT"
     },
     "fb.com": {
       "institucion": "Facebook",
       "estado": "REVISAR",
       "detalle": "el certificado dice \"Meta Platforms, Inc.\"",
-      "certificado_vence": "Oct  9 23:59:59 2026 GMT"
+      "certificado_vence": "Nov  8 23:59:59 2026 GMT"
     },
     "fedex.com": {
       "institucion": "FedEx",
@@ -209,19 +209,19 @@
       "institucion": "Google",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Dec  3 19:23:18 2026 GMT"
+      "certificado_vence": "Dec 30 19:09:05 2026 GMT"
     },
     "google.com": {
       "institucion": "Google",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Dec  3 19:21:52 2026 GMT"
+      "certificado_vence": "Dec 30 19:07:41 2026 GMT"
     },
     "icloud.com": {
       "institucion": "Apple",
       "estado": "CONFIRMADO",
       "detalle": "Apple Inc.",
-      "certificado_vence": "Nov 12 18:22:03 2026 GMT"
+      "certificado_vence": "Dec 22 20:30:01 2026 GMT"
     },
     "iess.gob.ec": {
       "institucion": "IESS",
@@ -233,7 +233,7 @@
       "institucion": "Instagram",
       "estado": "CONFIRMADO",
       "detalle": "Meta Platforms, Inc.",
-      "certificado_vence": "Oct  9 23:59:59 2026 GMT"
+      "certificado_vence": "Nov  8 23:59:59 2026 GMT"
     },
     "interbank.pe": {
       "institucion": "Interbank",
@@ -244,13 +244,13 @@
     "itau.com": {
       "institucion": "Itaú",
       "estado": "ERROR",
-      "detalle": "SELF_SIGNED_CERT_IN_CHAIN"
+      "detalle": "sin respuesta"
     },
     "itau.com.br": {
       "institucion": "Itaú",
       "estado": "CONFIRMADO",
       "detalle": "Itau Unibanco S.A.",
-      "certificado_vence": "Nov 13 23:59:59 2026 GMT"
+      "certificado_vence": "Mar  4 23:59:59 2027 GMT"
     },
     "live.com": {
       "institucion": "Microsoft",
@@ -280,7 +280,7 @@
       "institucion": "Microsoft",
       "estado": "CONFIRMADO",
       "detalle": "Microsoft Corporation",
-      "certificado_vence": "Dec 20 09:04:17 2026 GMT"
+      "certificado_vence": "Jan 30 14:50:49 2027 GMT"
     },
     "movistar.com": {
       "institucion": "Movistar",
@@ -304,7 +304,7 @@
       "institucion": "Nequi",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Nov 25 19:36:28 2026 GMT"
+      "certificado_vence": "Jan 23 20:51:46 2027 GMT"
     },
     "netflix.com": {
       "institucion": "Netflix",
@@ -316,13 +316,13 @@
       "institucion": "Microsoft",
       "estado": "CONFIRMADO",
       "detalle": "Microsoft Corporation",
-      "certificado_vence": "Feb 24 14:46:03 2027 GMT"
+      "certificado_vence": "Jan 21 12:34:51 2027 GMT"
     },
     "outlook.com": {
       "institucion": "Microsoft",
       "estado": "CONFIRMADO",
       "detalle": "Microsoft Corporation",
-      "certificado_vence": "Jan 10 23:59:59 2027 GMT"
+      "certificado_vence": "Apr 29 23:59:59 2027 GMT"
     },
     "paypal.com": {
       "institucion": "PayPal",
@@ -334,19 +334,19 @@
       "institucion": "PayPhone",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Nov 24 02:55:39 2026 GMT"
+      "certificado_vence": "Jan 22 06:58:56 2027 GMT"
     },
     "pichincha.com": {
       "institucion": "Banco Pichincha",
       "estado": "CONFIRMADO",
-      "detalle": "Banco Pichincha C.A.",
-      "certificado_vence": "Oct 26 23:59:59 2026 GMT"
+      "detalle": "Banco Pichincha CA",
+      "certificado_vence": "Apr 18 23:59:59 2027 GMT"
     },
     "policia.gob.ec": {
       "institucion": "Policía Nacional",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Dec 19 10:57:07 2026 GMT"
+      "certificado_vence": "Jan 13 16:11:03 2027 GMT"
     },
     "produbanco.com": {
       "institucion": "Produbanco",
@@ -363,19 +363,19 @@
       "institucion": "Registro Civil",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Nov 13 04:41:35 2026 GMT"
+      "certificado_vence": "Jan 11 08:11:44 2027 GMT"
     },
     "santander.com": {
       "institucion": "Santander",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Dec 14 21:30:09 2026 GMT"
+      "certificado_vence": "Jan 26 21:34:24 2027 GMT"
     },
     "santander.com.mx": {
       "institucion": "Santander",
       "estado": "CONFIRMADO",
       "detalle": "BANCO SANTANDER MEX SA INST BANCA MULTI. GRUPO FINANC. SANTANDER",
-      "certificado_vence": "Nov 28 23:59:59 2026 GMT"
+      "certificado_vence": "May  8 23:59:59 2027 GMT"
     },
     "servientrega.com": {
       "institucion": "Servientrega",
@@ -414,7 +414,7 @@
       "institucion": "UPS",
       "estado": "CONFIRMADO",
       "detalle": "United Parcel Service, Inc.",
-      "certificado_vence": "Nov  4 23:59:59 2026 GMT"
+      "certificado_vence": "May  8 23:59:59 2027 GMT"
     },
     "viabcp.com": {
       "institucion": "BCP",
@@ -425,25 +425,25 @@
       "institucion": "WhatsApp",
       "estado": "CONFIRMADO",
       "detalle": "Meta Platforms, Inc.",
-      "certificado_vence": "Oct  9 23:59:59 2026 GMT"
+      "certificado_vence": "Nov  8 23:59:59 2026 GMT"
     },
     "westernunion.com": {
       "institucion": "Western Union",
       "estado": "CONFIRMADO",
       "detalle": "Western Union Holdings Inc.",
-      "certificado_vence": "Oct  8 23:59:59 2026 GMT"
+      "certificado_vence": "Apr 25 23:59:59 2027 GMT"
     },
     "whatsapp.com": {
       "institucion": "WhatsApp",
       "estado": "CONFIRMADO",
       "detalle": "Meta Platforms, Inc.",
-      "certificado_vence": "Oct  9 23:59:59 2026 GMT"
+      "certificado_vence": "Nov  8 23:59:59 2026 GMT"
     },
     "youtube.com": {
       "institucion": "Google",
       "estado": "REVISAR",
       "detalle": "certificado sin nombre de organización (validación simple)",
-      "certificado_vence": "Dec  3 19:21:52 2026 GMT"
+      "certificado_vence": "Dec 30 19:07:41 2026 GMT"
     }
   }
 }
